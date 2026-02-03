@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { entities } from './entities';
 import { HealthModule } from './health/health.module';
 import { RedisModule } from './shared/redis/redis.module';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { RedisModule } from './shared/redis/redis.module';
     }),
     RedisModule,
     HealthModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
