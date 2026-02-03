@@ -23,7 +23,7 @@ Archivo `.env` (ver `.env.example`):
 - Ping bajo demanda; no bloquea el arranque si falta.
 
 ## Healthcheck
-- Endpoint `GET /v1/health` (versioning URI).
+- Endpoint `GET /v1/health` (se usa versionado URI; sin prefijo adicional).
 - Respuesta:
   ```json
   {

@@ -30,7 +30,7 @@ export class History {
   @Column({ name: 'updated_in', type: 'timestamp', nullable: true })
   updatedIn!: Date | null;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   conversation_id!: string | null;
 
   @ManyToOne(() => Contact, (contact) => contact.history)

@@ -22,6 +22,6 @@ export class PreferenciasUsuario {
   @Column({ default: false, name: 'notificar_patio' })
   notificarPatio!: boolean;
 
-  @Column({ nullable: true, name: 'hora_notificacion' })
+  @Column({ type: 'varchar', nullable: true, name: 'hora_notificacion' })
   horaNotificacion!: string | null;
 }

@@ -1,4 +1,11 @@
-import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity({ name: 'encuesta_presupuesto' })
 export class EncuestaPresupuesto {
@@ -15,13 +22,13 @@ export class EncuestaPresupuesto {
   @Column('jsonb')
   obrasUrgentes!: string[];
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   obrasUrgentesOtro!: string | null;
 
   @Column('jsonb')
   serviciosMejorar!: string[];
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   serviciosMejorarOtro!: string | null;
 
   @Column({ type: 'text', nullable: true })
@@ -33,13 +40,13 @@ export class EncuestaPresupuesto {
   @Column({ default: false })
   quiereContacto!: boolean;
 
-  @Column({ length: 200, nullable: true })
+  @Column({ type: 'varchar', length: 200, nullable: true })
   nombreCompleto!: string | null;
 
-  @Column({ length: 50, nullable: true })
+  @Column({ type: 'varchar', length: 50, nullable: true })
   telefono!: string | null;
 
-  @Column({ length: 200, nullable: true })
+  @Column({ type: 'varchar', length: 200, nullable: true })
   email!: string | null;
 
   @CreateDateColumn({ name: 'fechaCreacion' })

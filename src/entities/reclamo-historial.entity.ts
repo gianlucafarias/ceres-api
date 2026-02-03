@@ -19,15 +19,15 @@ export class ReclamoHistorial {
   @Column()
   tipo!: string;
 
-  @Column({ name: 'valor_anterior', nullable: true })
+  @Column({ name: 'valor_anterior', type: 'varchar', nullable: true })
   valorAnterior!: string | null;
 
-  @Column({ name: 'valor_nuevo', nullable: true })
+  @Column({ name: 'valor_nuevo', type: 'varchar', nullable: true })
   valorNuevo!: string | null;
 
-  @Column({ name: 'usuario_id', nullable: true })
+  @Column({ name: 'usuario_id', type: 'int', nullable: true })
   usuarioId!: number | null;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   comentario!: string | null;
 }

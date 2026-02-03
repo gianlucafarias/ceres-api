@@ -8,7 +8,7 @@ export class Notificaciones {
   @Column({ name: 'usuario_id' })
   usuarioId!: number;
 
-  @Column({ name: 'seccion_id', nullable: true })
+  @Column({ name: 'seccion_id', type: 'int', nullable: true })
   seccionId?: number | null;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })

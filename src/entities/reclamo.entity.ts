@@ -38,6 +38,6 @@ export class Reclamo {
   @Column({ type: 'numeric', nullable: true })
   longitud?: number | null;
 
-  @Column({ nullable: true })
+  @Column({ type: 'int', nullable: true })
   cuadrillaid!: number | null;
 }

@@ -1,4 +1,11 @@
-import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity({ name: 'amelia_turnos' })
 @Index(['telefono'])
@@ -21,7 +28,12 @@ export class AmeliaTurno {
   @Column({ name: 'nombre_completo', type: 'varchar', length: 255 })
   nombreCompleto!: string;
 
-  @Column({ name: 'primer_nombre', type: 'varchar', length: 100, nullable: true })
+  @Column({
+    name: 'primer_nombre',
+    type: 'varchar',
+    length: 100,
+    nullable: true,
+  })
   primerNombre?: string | null;
 
   @Column({ name: 'apellido', type: 'varchar', length: 100, nullable: true })
@@ -95,10 +107,20 @@ export class AmeliaTurno {
   @Column({ type: 'jsonb', nullable: true })
   metadata?: any;
 
-  @Column({ name: 'provider_name', type: 'varchar', length: 255, nullable: true })
+  @Column({
+    name: 'provider_name',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
   providerName?: string | null;
 
-  @Column({ name: 'provider_email', type: 'varchar', length: 255, nullable: true })
+  @Column({
+    name: 'provider_email',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
   providerEmail?: string | null;
 
   @CreateDateColumn({ name: 'fecha_creacion' })

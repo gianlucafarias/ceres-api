@@ -9,10 +9,14 @@ export class Contact {
   @Column()
   phone!: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   contact_name!: string | null;
 
-  @Column({ name: 'created_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({
+    name: 'created_at',
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   createdAt!: Date;
 
   @Column({ name: 'updated_in', type: 'timestamp', nullable: true })
