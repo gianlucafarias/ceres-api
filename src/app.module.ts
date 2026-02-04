@@ -11,6 +11,7 @@ import { InteractionsModule } from './modules/interactions/interactions.module';
 import { ContactsModule } from './modules/contacts/contacts.module';
 import { HistoryModule } from './modules/history/history.module';
 import { VisitsModule } from './modules/visits/visits.module';
+import { ReclamosModule } from './modules/reclamos/reclamos.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { VisitsModule } from './modules/visits/visits.module';
     ContactsModule,
     HistoryModule,
     VisitsModule,
+    ReclamosModule,
   ],
   controllers: [AppController],
   providers: [AppService],
