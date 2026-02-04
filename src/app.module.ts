@@ -18,6 +18,7 @@ import { NotificacionesModule } from './modules/notificaciones/notificaciones.mo
 import { ImpuestosModule } from './modules/impuestos/impuestos.module';
 import { AmeliaModule } from './modules/amelia/amelia.module';
 import { FarmaciasModule } from './modules/farmacias/farmacias.module';
+import { BotConfigModule } from './modules/bot-config/bot-config.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { FarmaciasModule } from './modules/farmacias/farmacias.module';
     ImpuestosModule,
     AmeliaModule,
     FarmaciasModule,
+    BotConfigModule,
   ],
   controllers: [AppController],
   providers: [AppService],

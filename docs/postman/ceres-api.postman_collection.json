@@ -1075,6 +1075,75 @@
                                                   }
                                   }
                               ]
+                 },
+                 {
+                     "name":  "BotConfig",
+                     "item":  [
+                                  {
+                                      "name":  "GET /v1/config",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/v1/config"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "GET /v1/config/:clave",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/v1/config/{{botConfigKey}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "POST /v1/config/:clave",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"valor\": \"{{botConfigValor}}\",\n  \"activo\": true,\n  \"fecha_expiracion\": null\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               },
+                                                      "url":  "{{baseUrl}}/v1/config/{{botConfigKey}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "PUT /v1/config/:clave",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"valor\": \"{{botConfigValor}}\",\n  \"activo\": true,\n  \"fecha_expiracion\": null\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               },
+                                                      "url":  "{{baseUrl}}/v1/config/{{botConfigKey}}"
+                                                  }
+                                  }
+                              ]
                  }
              ],
     "variable":  [
@@ -1160,6 +1229,14 @@
                      },
                      {
                          "key":  "farmaciaDate",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "botConfigKey",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "botConfigValor",
                          "value":  ""
                      }
                  ]
