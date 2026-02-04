@@ -19,6 +19,8 @@ import { ImpuestosModule } from './modules/impuestos/impuestos.module';
 import { AmeliaModule } from './modules/amelia/amelia.module';
 import { FarmaciasModule } from './modules/farmacias/farmacias.module';
 import { BotConfigModule } from './modules/bot-config/bot-config.module';
+import { FeedbackModule } from './modules/feedback/feedback.module';
+import { ConversacionesModule } from './modules/conversaciones/conversaciones.module';
 
 @Module({
   imports: [
@@ -55,6 +57,8 @@ import { BotConfigModule } from './modules/bot-config/bot-config.module';
     AmeliaModule,
     FarmaciasModule,
     BotConfigModule,
+    FeedbackModule,
+    ConversacionesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1158,6 +1158,42 @@
                                                   }
                                   }
                               ]
+                 },
+                 {
+                     "name":  "Feedback",
+                     "item":  [
+                                  {
+                                      "name":  "GET /v1/feedback",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "x-api-key",
+                                                                         "value":  "{{adminApiKey}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/v1/feedback"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Conversaciones",
+                     "item":  [
+                                  {
+                                      "name":  "GET /v1/conversaciones",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "x-api-key",
+                                                                         "value":  "{{adminApiKey}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/v1/conversaciones?from={{conversacionesFrom}}&to={{conversacionesTo}}"
+                                                  }
+                                  }
+                              ]
                  }
              ],
     "variable":  [
@@ -1252,6 +1288,14 @@
                      {
                          "key":  "botConfigValor",
                          "value":  ""
+                     },
+                     {
+                         "key":  "conversacionesFrom",
+                         "value":  "2026-02-01"
+                     },
+                     {
+                         "key":  "conversacionesTo",
+                         "value":  "2026-02-04"
                      }
                  ]
 }
