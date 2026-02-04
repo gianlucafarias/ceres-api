@@ -5,6 +5,7 @@ Migrar los endpoints de impuestos municipales manteniendo compatibilidad con el 
 
 ## Acceso
 - **BOT_API_KEY** (solo bot).
+  - El bot debe enviar header `x-api-key` con el valor de `BOT_API_KEY`.
 
 ## Endpoints
 - `POST /v1/impuestos/consulta`
