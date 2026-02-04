@@ -4,7 +4,7 @@
 Migrar configuraciones dinamicas del bot (claves/valores y expiracion).
 
 ## Acceso
-- **Pendiente de definir** (sin guards hasta confirmar consumidores).
+- **ADMIN_API_KEY** (dashboard).
 
 ## Endpoints
 - `GET /v1/config`
@@ -17,6 +17,7 @@ Migrar configuraciones dinamicas del bot (claves/valores y expiracion).
 ## Notas
 - `fecha_expiracion` acepta ISO o `null`.
 - `fecha_actualizacion` se setea en cada create/update.
+- El dashboard debe consumir estos endpoints desde un API route/server action que incluya `x-api-key` (no desde cliente directo).
 
 ## Postman
 - Nueva carpeta **BotConfig** con ejemplos de endpoints.

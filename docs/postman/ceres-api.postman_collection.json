@@ -1084,7 +1084,10 @@
                                       "request":  {
                                                       "method":  "GET",
                                                       "header":  [
-
+                                                                     {
+                                                                         "key":  "x-api-key",
+                                                                         "value":  "{{adminApiKey}}"
+                                                                     }
                                                                  ],
                                                       "url":  "{{baseUrl}}/v1/config"
                                                   }
@@ -1094,7 +1097,10 @@
                                       "request":  {
                                                       "method":  "GET",
                                                       "header":  [
-
+                                                                     {
+                                                                         "key":  "x-api-key",
+                                                                         "value":  "{{adminApiKey}}"
+                                                                     }
                                                                  ],
                                                       "url":  "{{baseUrl}}/v1/config/{{botConfigKey}}"
                                                   }
@@ -1104,6 +1110,10 @@
                                       "request":  {
                                                       "method":  "POST",
                                                       "header":  [
+                                                                     {
+                                                                         "key":  "x-api-key",
+                                                                         "value":  "{{adminApiKey}}"
+                                                                     },
                                                                      {
                                                                          "key":  "Content-Type",
                                                                          "value":  "application/json"
@@ -1126,6 +1136,10 @@
                                       "request":  {
                                                       "method":  "PUT",
                                                       "header":  [
+                                                                     {
+                                                                         "key":  "x-api-key",
+                                                                         "value":  "{{adminApiKey}}"
+                                                                     },
                                                                      {
                                                                          "key":  "Content-Type",
                                                                          "value":  "application/json"

@@ -1,7 +1,9 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { AdminApiKeyGuard } from '../../common/guards/admin-api-key.guard';
 import { BotConfigService } from './bot-config.service';
 import { BotConfigKeyParamsDto, CreateBotConfigDto, UpdateBotConfigDto } from './dto/bot-config.dto';
 
+@UseGuards(AdminApiKeyGuard)
 @Controller({ path: 'config', version: '1' })
 export class BotConfigController {
   constructor(private readonly service: BotConfigService) {}
