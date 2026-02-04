@@ -9,6 +9,7 @@ import { RedisModule } from './shared/redis/redis.module';
 import { UsersModule } from './modules/users/users.module';
 import { InteractionsModule } from './modules/interactions/interactions.module';
 import { ContactsModule } from './modules/contacts/contacts.module';
+import { HistoryModule } from './modules/history/history.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { ContactsModule } from './modules/contacts/contacts.module';
     UsersModule,
     InteractionsModule,
     ContactsModule,
+    HistoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
