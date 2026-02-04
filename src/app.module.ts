@@ -17,6 +17,7 @@ import { EncuestasModule } from './modules/encuestas/encuestas.module';
 import { NotificacionesModule } from './modules/notificaciones/notificaciones.module';
 import { ImpuestosModule } from './modules/impuestos/impuestos.module';
 import { AmeliaModule } from './modules/amelia/amelia.module';
+import { FarmaciasModule } from './modules/farmacias/farmacias.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { AmeliaModule } from './modules/amelia/amelia.module';
     NotificacionesModule,
     ImpuestosModule,
     AmeliaModule,
+    FarmaciasModule,
   ],
   controllers: [AppController],
   providers: [AppService],

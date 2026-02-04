@@ -958,6 +958,123 @@
                                                   }
                                   }
                               ]
+                 },
+                 {
+                     "name":  "Farmacias",
+                     "item":  [
+                                  {
+                                      "name":  "GET /v1/pharmacy/:code",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/v1/pharmacy/{{farmaciaCode}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "PUT /v1/pharmacy/:code",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "x-api-key",
+                                                                         "value":  "{{adminApiKey}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"name\": \"Farmacia Central\",\n  \"address\": \"Av. Principal 123\",\n  \"phone\": \"3564-123456\",\n  \"lat\": -29.884,\n  \"lng\": -61.945,\n  \"googleMapsAddress\": \"Av. Principal 123, Ceres\"\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               },
+                                                      "url":  "{{baseUrl}}/v1/pharmacy/{{farmaciaCode}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "GET /v1/farmaciadeturno/today",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/v1/farmaciadeturno/today"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "GET /v1/farmaciadeturno/calendar",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/v1/farmaciadeturno/calendar"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "GET /v1/farmaciadeturno (range)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/v1/farmaciadeturno?from={{startDate}}&to={{endDate}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "GET /v1/farmaciadeturno/:date",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/v1/farmaciadeturno/{{farmaciaDate}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "PUT /v1/farmaciadeturno/:date",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "x-api-key",
+                                                                         "value":  "{{adminApiKey}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"pharmacyCode\": \"{{farmaciaCode}}\"\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               },
+                                                      "url":  "{{baseUrl}}/v1/farmaciadeturno/{{farmaciaDate}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "GET /v1/farmacia/:code/duty-schedule",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/v1/farmacia/{{farmaciaCode}}/duty-schedule?from={{startDate}}&limit=20"
+                                                  }
+                                  }
+                              ]
                  }
              ],
     "variable":  [
@@ -1035,6 +1152,14 @@
                      },
                      {
                          "key":  "ameliaTurnoId",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "farmaciaCode",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "farmaciaDate",
                          "value":  ""
                      }
                  ]
