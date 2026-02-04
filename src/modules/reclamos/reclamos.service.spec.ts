@@ -43,6 +43,56 @@ describe('ReclamosService', () => {
     const res = await service.estadoParaBot(1);
     expect((res as any)?.telefono).toBeUndefined();
   });
+
+  it('countByEstado devuelve conteo', async () => {
+    const qb = {
+      select: jest.fn().mockReturnThis(),
+      addSelect: jest.fn().mockReturnThis(),
+      groupBy: jest.fn().mockReturnThis(),
+      getRawMany: jest.fn().mockResolvedValue([{ estado: 'PENDIENTE', count: '2' }]),
+    };
+    reclamoRepo.createQueryBuilder.mockReturnValueOnce(qb);
+
+    const res = await service.countByEstado();
+    expect(res).toEqual([{ estado: 'PENDIENTE', count: '2' }]);
+    expect(reclamoRepo.createQueryBuilder).toHaveBeenCalledWith('reclamo');
+  });
+
+  it('statsAvanzadas arma respuesta con promedios y eficiencia', async () => {
+    const qbMes = {
+      select: jest.fn().mockReturnThis(),
+      addSelect: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      groupBy: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      getRawMany: jest.fn().mockResolvedValue([{ mes: '2026-01-01', cantidad: '4' }]),
+    };
+    const qbTiempo = {
+      select: jest.fn().mockReturnThis(),
+      innerJoin: jest.fn().mockReturnThis(),
+      getRawOne: jest.fn().mockResolvedValue({ promedioDias: '3' }),
+    };
+    const qbEfic = {
+      select: jest.fn().mockReturnThis(),
+      addSelect: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      groupBy: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      getRawMany: jest.fn().mockResolvedValue([{ cuadrillaId: 1, reclamosResueltos: '5' }]),
+    };
+    reclamoRepo.createQueryBuilder
+      .mockReturnValueOnce(qbMes)
+      .mockReturnValueOnce(qbTiempo)
+      .mockReturnValueOnce(qbEfic);
+
+    const res = await service.statsAvanzadas();
+    expect(res).toEqual({
+      reclamosPorMes: [{ mes: '2026-01-01', cantidad: '4' }],
+      tiempoPromedioResolucion: '3',
+      eficienciaCuadrilla: [{ cuadrillaId: 1, reclamosResueltos: '5' }],
+    });
+  });
 });
 
 function mockRepo() {
@@ -60,9 +110,11 @@ function mockRepo() {
       where: jest.fn().mockReturnThis(),
       andWhere: jest.fn().mockReturnThis(),
       orderBy: jest.fn().mockReturnThis(),
+      innerJoin: jest.fn().mockReturnThis(),
       getRawMany: jest.fn().mockResolvedValue([]),
       getMany: jest.fn().mockResolvedValue([]),
       getCount: jest.fn().mockResolvedValue(0),
+      getRawOne: jest.fn().mockResolvedValue({}),
     })),
   };
 }

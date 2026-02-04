@@ -39,7 +39,6 @@
 - Geocoding se intenta al crear o cambiar ubicación; si falla se registra pero no detiene el flujo.
 - Versionado URI `v1`.
 
-## Próxima fase
-- PDFs de reclamo.
-- Estadísticas avanzadas (tiempo de resolución, cuadrillas, barrio).
-- Notificaciones centralizadas.
+## Relacionados
+- Ver `09-reclamos-pdf.md` (PDFs).
+- Ver `10-reclamos-estadisticas.md` (estadísticas avanzadas).
