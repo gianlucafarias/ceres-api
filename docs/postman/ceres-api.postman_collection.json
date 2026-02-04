@@ -1,0 +1,391 @@
+﻿{
+  "info": {
+    "name": "Ceres API v1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET /v1/health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/v1/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "GET /v1/users/count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/v1/users/count"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Interactions (Admin)",
+      "item": [
+        {
+          "name": "GET /v1/interactions/count",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/interactions/count"
+          }
+        },
+        {
+          "name": "GET /v1/interactions/count/:start_date/:end_date",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/interactions/count/{{startDate}}/{{endDate}}"
+          }
+        },
+        {
+          "name": "GET /v1/interactions/last-week/count/:start_date/:end_date/:group_by",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/interactions/last-week/count/{{startDate}}/{{endDate}}/{{groupBy}}"
+          }
+        },
+        {
+          "name": "GET /v1/interactions/today",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/interactions/today"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Contacts (Admin)",
+      "item": [
+        {
+          "name": "GET /v1/contacts",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/contacts"
+          }
+        },
+        {
+          "name": "GET /v1/contacts/:id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/contacts/{{contactId}}"
+          }
+        },
+        {
+          "name": "GET /v1/contacts/:id/conversations",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/contacts/{{contactId}}/conversations"
+          }
+        },
+        {
+          "name": "GET /v1/contacts/last-interactions",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/contacts/last-interactions"
+          }
+        }
+      ]
+    },
+    {
+      "name": "History (Admin)",
+      "item": [
+        {
+          "name": "GET /v1/history?phone=",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/history?phone={{phone}}"
+          }
+        },
+        {
+          "name": "GET /v1/history/last-day-interactions",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/history/last-day-interactions"
+          }
+        },
+        {
+          "name": "GET /v1/history/messages-per-day",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/history/messages-per-day"
+          }
+        },
+        {
+          "name": "GET /v1/history/conversation-details",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/history/conversation-details"
+          }
+        },
+        {
+          "name": "GET /v1/history/conversation/:conversationId",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/history/conversation/{{conversationId}}"
+          }
+        },
+        {
+          "name": "GET /v1/history/range?startDate=&endDate=",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/history/range?startDate={{startDate}}&endDate={{endDate}}"
+          }
+        },
+        {
+          "name": "GET /v1/history/all",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/history/all"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Visits (Admin)",
+      "item": [
+        {
+          "name": "GET /v1/visitas-flujo",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/visitas-flujo"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reclamos (Bot)",
+      "item": [
+        {
+          "name": "POST /v1/reclamos",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "x-api-key", "value": "{{botApiKey}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Juan Perez\",\n  \"telefono\": \"{{phone}}\",\n  \"reclamo\": \"bache\",\n  \"ubicacion\": \"San Martin 123\",\n  \"barrio\": \"centro\",\n  \"detalle\": \"detalle opcional\",\n  \"prioridad\": \"MEDIA\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/v1/reclamos"
+          }
+        },
+        {
+          "name": "GET /v1/reclamos/:id/estado",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-api-key", "value": "{{botApiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/reclamos/{{reclamoId}}/estado"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reclamos (Admin)",
+      "item": [
+        {
+          "name": "GET /v1/reclamos",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/reclamos"
+          }
+        },
+        {
+          "name": "GET /v1/reclamos/:id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/reclamos/{{reclamoId}}"
+          }
+        },
+        {
+          "name": "PATCH /v1/reclamos/:id",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "x-api-key", "value": "{{adminApiKey}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"ASIGNADO\",\n  \"prioridad\": \"ALTA\",\n  \"cuadrillaId\": 1,\n  \"usuarioId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/v1/reclamos/{{reclamoId}}"
+          }
+        },
+        {
+          "name": "GET /v1/reclamos/:id/historial",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/reclamos/{{reclamoId}}/historial"
+          }
+        },
+        {
+          "name": "GET /v1/reclamos/estadisticas/basicas",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/reclamos/estadisticas/basicas"
+          }
+        },
+        {
+          "name": "GET /v1/reclamos/estadisticas",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/reclamos/estadisticas"
+          }
+        },
+        {
+          "name": "GET /v1/reclamos/count-by-status",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/reclamos/count-by-status"
+          }
+        },
+        {
+          "name": "GET /v1/reclamos/count-by-priority",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/reclamos/count-by-priority"
+          }
+        },
+        {
+          "name": "GET /v1/reclamos/count-by-type",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/reclamos/count-by-type"
+          }
+        },
+        {
+          "name": "GET /v1/reclamos/count-by-barrio",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/reclamos/count-by-barrio"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reclamos PDF",
+      "item": [
+        {
+          "name": "GET /v1/reclamos/:id/pdf",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/reclamos/{{reclamoId}}/pdf"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3012" },
+    { "key": "adminApiKey", "value": "" },
+    { "key": "botApiKey", "value": "" },
+    { "key": "contactId", "value": "1" },
+    { "key": "conversationId", "value": "1" },
+    { "key": "reclamoId", "value": "1" },
+    { "key": "phone", "value": "3491000000" },
+    { "key": "startDate", "value": "2026-02-01" },
+    { "key": "endDate", "value": "2026-02-02" },
+    { "key": "groupBy", "value": "day" }
+  ]
+}
