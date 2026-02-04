@@ -1,9 +1,14 @@
-﻿import { Test } from '@nestjs/testing';
+﻿import axios from 'axios';
+import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Contact } from '../../entities/contact.entity';
 import { Notificaciones } from '../../entities/notificaciones.entity';
 import { PreferenciasUsuario } from '../../entities/preferencias-usuario.entity';
 import { NotificacionesService } from './notificaciones.service';
+
+jest.mock('axios', () => ({
+  post: jest.fn(),
+}));
 
 describe('NotificacionesService', () => {
   let service: NotificacionesService;
@@ -52,6 +57,24 @@ describe('NotificacionesService', () => {
 
     const res = await service.actualizarSeccion({ contact_id: 1, seccion_id: 2 });
     expect(res.seccionId).toBe(2);
+  });
+
+  it('enviarTemplate llama al endpoint de whatsapp', async () => {
+    (axios.post as jest.Mock).mockResolvedValue({ data: { ok: true } });
+
+    await service.enviarTemplate({
+      number: '5493410000000',
+      template: 'r_asignado',
+      languageCode: 'es_AR',
+      components: [],
+    });
+
+    expect(axios.post).toHaveBeenCalledWith('https://api.ceres.gob.ar/v1/template', {
+      number: '5493410000000',
+      template: 'r_asignado',
+      languageCode: 'es_AR',
+      components: [],
+    });
   });
 });
 

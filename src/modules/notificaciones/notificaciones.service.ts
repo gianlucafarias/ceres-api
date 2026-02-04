@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import { Contact } from '../../entities/contact.entity';
 import { Notificaciones } from '../../entities/notificaciones.entity';
 import { PreferenciasUsuario } from '../../entities/preferencias-usuario.entity';
-import { ActualizarPreferenciasDto, ActualizarSeccionDto } from './dto/notificaciones.dto';
+import { ActualizarPreferenciasDto, ActualizarSeccionDto, EnviarTemplateDto } from './dto/notificaciones.dto';
 
 @Injectable()
 export class NotificacionesService {
@@ -176,7 +176,7 @@ export class NotificacionesService {
     }
 
     try {
-      await axios.post('https://api.ceres.gob.ar/v1/template', {
+      await this.enviarTemplate({
         number: telefono,
         template: templateName,
         languageCode: 'es_AR',
@@ -196,5 +196,16 @@ export class NotificacionesService {
         data: error?.response?.data,
       });
     }
+  }
+
+  async enviarTemplate(dto: EnviarTemplateDto): Promise<void> {
+    const payload = {
+      number: dto.number,
+      template: dto.template,
+      languageCode: dto.languageCode ?? 'es_AR',
+      components: dto.components ?? [],
+    };
+
+    await axios.post('https://api.ceres.gob.ar/v1/template', payload);
   }
 }

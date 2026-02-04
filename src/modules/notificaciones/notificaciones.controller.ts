@@ -1,8 +1,11 @@
-﻿import { Body, Controller, Get, NotFoundException, Param, Post } from '@nestjs/common';
+﻿import { Body, Controller, Get, NotFoundException, Param, Post, UseGuards } from '@nestjs/common';
+import { AdminApiKeyGuard } from '../../common/guards/admin-api-key.guard';
+import { BotApiKeyGuard } from '../../common/guards/bot-api-key.guard';
 import { NotificacionesService } from './notificaciones.service';
 import {
   ActualizarPreferenciasDto,
   ActualizarSeccionDto,
+  EnviarTemplateDto,
   PreferenciasParamsDto,
 } from './dto/notificaciones.dto';
 
@@ -10,6 +13,7 @@ import {
 export class NotificacionesController {
   constructor(private readonly service: NotificacionesService) {}
 
+  @UseGuards(BotApiKeyGuard)
   @Post('preferencias')
   async actualizarPreferencias(@Body() dto: ActualizarPreferenciasDto) {
     const preferencias = await this.service.actualizarPreferencias(dto);
@@ -20,6 +24,7 @@ export class NotificacionesController {
     };
   }
 
+  @UseGuards(BotApiKeyGuard)
   @Get('preferencias/:contactId')
   async obtenerPreferencias(@Param() params: PreferenciasParamsDto) {
     const preferencias = await this.service.obtenerPreferencias(params.contactId);
@@ -43,10 +48,18 @@ export class NotificacionesController {
     };
   }
 
+  @UseGuards(AdminApiKeyGuard)
   @Post('ejecutar-manual')
   async ejecutarManual() {
     await this.service.procesarNotificacionesDiarias('19:00');
     return { success: true, mensaje: 'Notificaciones ejecutadas correctamente' };
+  }
+
+  @UseGuards(AdminApiKeyGuard)
+  @Post('whatsapp/template')
+  async enviarTemplate(@Body() dto: EnviarTemplateDto) {
+    await this.service.enviarTemplate(dto);
+    return { success: true, mensaje: 'Template enviado correctamente' };
   }
 
   private mapPreferencias(preferencias: any) {

@@ -1,4 +1,4 @@
-﻿import { IsBoolean, IsInt, IsOptional, IsString, Matches, Max, Min } from 'class-validator';
+﻿import {\n  IsArray,\n  IsBoolean,\n  IsInt,\n  IsNotEmpty,\n  IsOptional,\n  IsString,\n  Matches,\n  Max,\n  Min,\n} from 'class-validator';
 
 export class ActualizarPreferenciasDto {
   @IsInt()
@@ -39,3 +39,22 @@ export class ActualizarSeccionDto {
   @Max(4)
   seccion_id!: number;
 }
+
+export class EnviarTemplateDto {
+  @IsString()
+  @IsNotEmpty()
+  number!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  template!: string;
+
+  @IsOptional()
+  @IsString()
+  languageCode?: string;
+
+  @IsOptional()
+  @IsArray()
+  components?: any[];
+}
+
