@@ -10,6 +10,7 @@ import { UsersModule } from './modules/users/users.module';
 import { InteractionsModule } from './modules/interactions/interactions.module';
 import { ContactsModule } from './modules/contacts/contacts.module';
 import { HistoryModule } from './modules/history/history.module';
+import { VisitsModule } from './modules/visits/visits.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { HistoryModule } from './modules/history/history.module';
     InteractionsModule,
     ContactsModule,
     HistoryModule,
+    VisitsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
