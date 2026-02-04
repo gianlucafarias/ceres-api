@@ -8,6 +8,7 @@ import { HealthModule } from './health/health.module';
 import { RedisModule } from './shared/redis/redis.module';
 import { UsersModule } from './modules/users/users.module';
 import { InteractionsModule } from './modules/interactions/interactions.module';
+import { ContactsModule } from './modules/contacts/contacts.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { InteractionsModule } from './modules/interactions/interactions.module';
     HealthModule,
     UsersModule,
     InteractionsModule,
+    ContactsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
