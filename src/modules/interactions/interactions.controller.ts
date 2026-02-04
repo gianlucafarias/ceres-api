@@ -1,11 +1,13 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import {
   InteractionsCountQueryDto,
   InteractionsGroupParamsDto,
   InteractionsRangeParamsDto,
 } from './dto/interactions.dto';
 import { InteractionsService } from './interactions.service';
+import { AdminApiKeyGuard } from '../../common/guards/admin-api-key.guard';
 
+@UseGuards(AdminApiKeyGuard)
 @Controller({ path: 'interactions', version: '1' })
 export class InteractionsController {
   constructor(private readonly service: InteractionsService) {}
