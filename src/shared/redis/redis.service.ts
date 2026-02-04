@@ -24,6 +24,10 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     return !!this.config.get<string>('REDIS_HOST');
   }
 
+  isEnabled(): boolean {
+    return this.shouldInitialize();
+  }
+
   async connect(): Promise<void> {
     if (this.client?.isOpen) return;
 
@@ -49,5 +53,29 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       await this.connect();
     }
     return this.client!.ping();
+  }
+
+  async get(key: string): Promise<string | null> {
+    if (!this.isEnabled()) return null;
+    if (!this.client) {
+      await this.connect();
+    }
+    return this.client!.get(key);
+  }
+
+  async setEx(key: string, ttlSeconds: number, value: string): Promise<void> {
+    if (!this.isEnabled()) return;
+    if (!this.client) {
+      await this.connect();
+    }
+    await this.client!.setEx(key, ttlSeconds, value);
+  }
+
+  async info(section?: string): Promise<string> {
+    if (!this.isEnabled()) return '';
+    if (!this.client) {
+      await this.connect();
+    }
+    return this.client!.info(section);
   }
 }
