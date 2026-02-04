@@ -14,6 +14,7 @@ import { VisitsModule } from './modules/visits/visits.module';
 import { ReclamosModule } from './modules/reclamos/reclamos.module';
 import { ReclamosPdfModule } from './modules/reclamos-pdf/reclamos-pdf.module';
 import { EncuestasModule } from './modules/encuestas/encuestas.module';
+import { NotificacionesModule } from './modules/notificaciones/notificaciones.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { EncuestasModule } from './modules/encuestas/encuestas.module';
     ReclamosModule,
     ReclamosPdfModule,
     EncuestasModule,
+    NotificacionesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

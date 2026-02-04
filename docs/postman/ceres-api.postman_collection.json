@@ -634,6 +634,111 @@
                                                   }
                                   }
                               ]
+                 },
+                 {
+                     "name":  "Notificaciones",
+                     "item":  [
+                                  {
+                                      "name":  "POST /v1/preferencias",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "x-api-key",
+                                                                         "value":  "{{botApiKey}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"contact_id\": {{contactId}},\n  \"notificar_humedo\": true,\n  \"notificar_seco\": false,\n  \"notificar_patio\": false,\n  \"hora_notificacion\": \"19:00\"\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               },
+                                                      "url":  "{{baseUrl}}/v1/preferencias"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "GET /v1/preferencias/:contactId",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "x-api-key",
+                                                                         "value":  "{{botApiKey}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/v1/preferencias/{{contactId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "POST /v1/seccion",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"contact_id\": {{contactId}},\n  \"seccion_id\": 1\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               },
+                                                      "url":  "{{baseUrl}}/v1/seccion"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "POST /v1/ejecutar-manual",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "x-api-key",
+                                                                         "value":  "{{adminApiKey}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/v1/ejecutar-manual"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "POST /v1/whatsapp/template",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "x-api-key",
+                                                                         "value":  "{{adminApiKey}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"number\": \"{{phone}}\",\n  \"template\": \"r_asignado\",\n  \"languageCode\": \"es_AR\",\n  \"components\": [\n    {\n      \"type\": \"BODY\",\n      \"parameters\": [\n        {\n          \"type\": \"text\",\n          \"text\": \"Nombre\"\n        }\n      ]\n    }\n  ]\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               },
+                                                      "url":  "{{baseUrl}}/v1/whatsapp/template"
+                                                  }
+                                  }
+                              ]
                  }
              ],
     "variable":  [
