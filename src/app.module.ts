@@ -13,6 +13,7 @@ import { HistoryModule } from './modules/history/history.module';
 import { VisitsModule } from './modules/visits/visits.module';
 import { ReclamosModule } from './modules/reclamos/reclamos.module';
 import { ReclamosPdfModule } from './modules/reclamos-pdf/reclamos-pdf.module';
+import { EncuestasModule } from './modules/encuestas/encuestas.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { ReclamosPdfModule } from './modules/reclamos-pdf/reclamos-pdf.module';
     VisitsModule,
     ReclamosModule,
     ReclamosPdfModule,
+    EncuestasModule,
   ],
   controllers: [AppController],
   providers: [AppService],
