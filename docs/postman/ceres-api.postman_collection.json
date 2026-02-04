@@ -836,6 +836,128 @@
                                                   }
                                   }
                               ]
+                 },
+                 {
+                     "name":  "Amelia",
+                     "item":  [
+                                  {
+                                      "name":  "POST /v1/webhook/amelia",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{ameliaWebhookSecret}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"appointment\": {\n    \"id\": 100,\n    \"status\": \"approved\",\n    \"serviceId\": 1,\n    \"bookingStart\": \"2026-02-04T10:00:00Z\",\n    \"bookingEnd\": \"2026-02-04T10:30:00Z\",\n    \"service\": {\n      \"id\": 1,\n      \"name\": \"Licencia\",\n      \"description\": \"Licencia de conducir\"\n    },\n    \"provider\": {\n      \"id\": 1,\n      \"firstName\": \"Ana\",\n      \"lastName\": \"Lopez\",\n      \"email\": \"ana@demo.com\"\n    },\n    \"location\": {\n      \"name\": \"Municipalidad de Ceres\"\n    },\n    \"bookings\": {\n      \"1\": {\n        \"id\": 111,\n        \"customerId\": 222,\n        \"status\": \"approved\",\n        \"customer\": {\n          \"id\": 222,\n          \"firstName\": \"Juan\",\n          \"lastName\": \"Perez\",\n          \"email\": \"juan@demo.com\",\n          \"phone\": \"3564123456\"\n        }\n      }\n    }\n  }\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               },
+                                                      "url":  "{{baseUrl}}/v1/webhook/amelia"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "GET /v1/turnos-licencia/telefono/:telefono",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "x-api-key",
+                                                                         "value":  "{{adminApiKey}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/v1/turnos-licencia/telefono/{{ameliaTelefono}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "GET /v1/turnos-licencia/amelia/:ameliaBookingId",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "x-api-key",
+                                                                         "value":  "{{adminApiKey}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/v1/turnos-licencia/amelia/{{ameliaBookingId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "GET /v1/turnos-licencia/:id",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "x-api-key",
+                                                                         "value":  "{{adminApiKey}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/v1/turnos-licencia/{{ameliaTurnoId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "PATCH /v1/turnos-licencia/:id/estado",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "x-api-key",
+                                                                         "value":  "{{adminApiKey}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"estado\": \"CONFIRMADO\",\n  \"usuarioId\": 1\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               },
+                                                      "url":  "{{baseUrl}}/v1/turnos-licencia/{{ameliaTurnoId}}/estado"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "POST /v1/turnos-licencia/reintentar-notificaciones",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "x-api-key",
+                                                                         "value":  "{{adminApiKey}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"maxIntentos\": 3\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               },
+                                                      "url":  "{{baseUrl}}/v1/turnos-licencia/reintentar-notificaciones"
+                                                  }
+                                  }
+                              ]
                  }
              ],
     "variable":  [
@@ -897,6 +1019,22 @@
                      },
                      {
                          "key":  "impuestosRegnro",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "ameliaWebhookSecret",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "ameliaTelefono",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "ameliaBookingId",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "ameliaTurnoId",
                          "value":  ""
                      }
                  ]
