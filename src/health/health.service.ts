@@ -28,8 +28,9 @@ export class HealthService {
       const start = Date.now();
       await this.dataSource.query('SELECT 1');
       checks.database = { status: 'up', latencyMs: Date.now() - start };
-    } catch (err: any) {
-      checks.database = { status: 'down', error: err?.message };
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      checks.database = { status: 'down', error: message };
     }
 
     // Redis check (optional)
@@ -37,8 +38,9 @@ export class HealthService {
       const start = Date.now();
       await this.redisService.ping();
       checks.redis = { status: 'up', latencyMs: Date.now() - start };
-    } catch (err: any) {
-      checks.redis = { status: 'down', error: err?.message };
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      checks.redis = { status: 'down', error: message };
     }
 
     const status: HealthStatus['status'] =

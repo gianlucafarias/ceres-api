@@ -1,6 +1,6 @@
 # 02 - DTOs y contratos iniciales
 
-Objetivo: tipar requests/responses del legacy antes de mover módulos. Los DTOs viven en `src/contracts/`.
+Objetivo: tipar requests/responses del legacy antes de mover módulos. Los DTOs viven dentro de cada módulo en src/modules/<modulo>/dto.
 
 ## Comunes
 - `DateRangeQueryDto` (`from`,`to` ISO opcionales)
@@ -41,3 +41,5 @@ Objetivo: tipar requests/responses del legacy antes de mover módulos. Los DTOs 
 ### Próximos pasos
 - Al migrar cada módulo, reutilizar estos DTOs en controladores Nest.
 - Completar DTOs de respuesta tipada por dominio (cuando movamos servicios).
+
+

@@ -10,6 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AdminApiKeyGuard } from '../../common/guards/admin-api-key.guard';
+import { toErrorMessage } from '../../common/utils/error-message';
 import {
   DutyByPharmacyQueryDto,
   DutyDateParamsDto,
@@ -30,9 +31,10 @@ export class FarmaciasController {
     try {
       const codeUpper = params.code.trim().toUpperCase();
       return await this.service.getPharmacyByCode(codeUpper);
-    } catch (error: any) {
-      if (error?.message?.includes('no encontrada')) {
-        throw new HttpException({ message: error.message }, HttpStatus.NOT_FOUND);
+    } catch (error: unknown) {
+      const message = toErrorMessage(error, '');
+      if (message.includes('no encontrada')) {
+        throw new HttpException({ message }, HttpStatus.NOT_FOUND);
       }
       throw new HttpException({ message: 'Error al obtener la farmacia' }, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -57,9 +59,10 @@ export class FarmaciasController {
       }
 
       return await this.service.updatePharmacy(codeUpper, updates);
-    } catch (error: any) {
-      if (error?.message?.includes('no encontrada')) {
-        throw new HttpException({ message: error.message }, HttpStatus.NOT_FOUND);
+    } catch (error: unknown) {
+      const message = toErrorMessage(error, '');
+      if (message.includes('no encontrada')) {
+        throw new HttpException({ message }, HttpStatus.NOT_FOUND);
       }
       if (error instanceof HttpException) throw error;
       throw new HttpException({ message: 'Error al actualizar la farmacia' }, HttpStatus.INTERNAL_SERVER_ERROR);

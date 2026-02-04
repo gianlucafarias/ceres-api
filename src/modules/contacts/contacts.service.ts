@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsOrder, Repository } from 'typeorm';
 import { Contact } from '../../entities/contact.entity';
 import { History } from '../../entities/history.entity';
 import { Reclamo } from '../../entities/reclamo.entity';
@@ -63,9 +63,13 @@ export class ContactsService {
 
   async getContacts(query: ContactsQueryDto) {
     const { sort = 'createdAt', order = 'DESC' } = query;
+    const sortField: ContactsQueryDto['sort'] = sort ?? 'createdAt';
+    const orderBy: FindOptionsOrder<Contact> = {
+      [sortField]: order ?? 'DESC',
+    };
     const contacts = await this.contactRepo.find({
-      order: { [sort]: order },
-    } as any);
+      order: orderBy,
+    });
     return contacts;
   }
 

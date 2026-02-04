@@ -1,5 +1,6 @@
 import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { AdminApiKeyGuard } from '../../common/guards/admin-api-key.guard';
+import { toErrorMessage } from '../../common/utils/error-message';
 import { BotConfigService } from './bot-config.service';
 import { BotConfigKeyParamsDto, CreateBotConfigDto, UpdateBotConfigDto } from './dto/bot-config.dto';
 
@@ -12,8 +13,9 @@ export class BotConfigController {
   async getAll() {
     try {
       return await this.service.getAll();
-    } catch (error: any) {
-      throw new HttpException({ message: 'Error interno del servidor' }, HttpStatus.INTERNAL_SERVER_ERROR);
+    } catch (error: unknown) {
+      const message = toErrorMessage(error, 'Error interno del servidor');
+      throw new HttpException({ message }, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -33,9 +35,10 @@ export class BotConfigController {
         );
       }
       return config;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof HttpException) throw error;
-      throw new HttpException({ message: 'Error interno del servidor' }, HttpStatus.INTERNAL_SERVER_ERROR);
+      const message = toErrorMessage(error, 'Error interno del servidor');
+      throw new HttpException({ message }, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -52,13 +55,12 @@ export class BotConfigController {
         message: `Configuracion con clave "${clave}" creada correctamente.`,
         config,
       };
-    } catch (error: any) {
-      if (error?.message?.includes('fecha_expiracion')) {
-        throw new HttpException({ message: error.message }, HttpStatus.BAD_REQUEST);
+    } catch (error: unknown) {
+      const message = toErrorMessage(error, 'Error interno del servidor al crear la configuracion.');
+      if (message.includes('fecha_expiracion')) {
+        throw new HttpException({ message }, HttpStatus.BAD_REQUEST);
       }
-      if (error?.status === HttpStatus.CONFLICT) {
-        throw new HttpException({ message: error.message }, HttpStatus.CONFLICT);
-      }
+      if (error instanceof HttpException) throw error;
       throw new HttpException(
         { message: 'Error interno del servidor al crear la configuracion.' },
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -79,13 +81,12 @@ export class BotConfigController {
         message: `Configuracion con clave "${clave}" actualizada correctamente.`,
         config,
       };
-    } catch (error: any) {
-      if (error?.message?.includes('fecha_expiracion')) {
-        throw new HttpException({ message: error.message }, HttpStatus.BAD_REQUEST);
+    } catch (error: unknown) {
+      const message = toErrorMessage(error, 'Error interno del servidor al actualizar la configuracion.');
+      if (message.includes('fecha_expiracion')) {
+        throw new HttpException({ message }, HttpStatus.BAD_REQUEST);
       }
-      if (error?.status === HttpStatus.NOT_FOUND) {
-        throw new HttpException({ message: error.message }, HttpStatus.NOT_FOUND);
-      }
+      if (error instanceof HttpException) throw error;
       throw new HttpException(
         { message: 'Error interno del servidor al actualizar la configuracion.' },
         HttpStatus.INTERNAL_SERVER_ERROR,

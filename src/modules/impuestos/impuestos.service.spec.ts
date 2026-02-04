@@ -1,17 +1,23 @@
-import axios from 'axios';
 import { Test } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
+import { HttpClient } from '../../shared/http/http-client.service';
 import { ImpuestosService } from './impuestos.service';
-
-jest.mock('axios', () => ({
-  post: jest.fn(),
-  head: jest.fn(),
-}));
 
 describe('ImpuestosService', () => {
   let service: ImpuestosService;
+  let httpClient: {
+    post: jest.MockedFunction<
+      (url: string, body?: unknown, config?: { headers?: Record<string, string> }) => Promise<unknown>
+    >;
+    head: jest.MockedFunction<(url: string) => Promise<number>>;
+  };
 
   beforeEach(async () => {
+    httpClient = {
+      post: jest.fn(),
+      head: jest.fn(),
+    };
+
     const module = await Test.createTestingModule({
       providers: [
         ImpuestosService,
@@ -29,6 +35,7 @@ describe('ImpuestosService', () => {
             }),
           },
         },
+        { provide: HttpClient, useValue: httpClient },
       ],
     }).compile();
 
@@ -37,14 +44,12 @@ describe('ImpuestosService', () => {
   });
 
   it('consulta envia payload como JSON string', async () => {
-    (axios.post as jest.Mock).mockResolvedValue({
-      data: { RESU: 'OK', RESPUESTA: { REGLOG: '1' } },
-    });
+    httpClient.post.mockResolvedValue({ RESU: 'OK', RESPUESTA: { REGLOG: '1' } });
 
     const res = await service.consulta({ FNC: 'U2' });
 
     expect(res.RESU).toBe('OK');
-    expect(axios.post).toHaveBeenCalledWith(
+    expect(httpClient.post).toHaveBeenCalledWith(
       'https://impuestos.test/api',
       JSON.stringify({ FNC: 'U2' }),
       expect.objectContaining({
@@ -57,9 +62,7 @@ describe('ImpuestosService', () => {
   });
 
   it('solicitarCedulon agrega urlPDF', async () => {
-    (axios.post as jest.Mock).mockResolvedValue({
-      data: { RESU: 'OK', RESPUESTA: 'folder/archivo.pdf' },
-    });
+    httpClient.post.mockResolvedValue({ RESU: 'OK', RESPUESTA: 'folder/archivo.pdf' });
 
     const res = await service.solicitarCedulon({ REGNRO: 123 });
 
@@ -72,14 +75,10 @@ describe('ImpuestosService', () => {
   });
 
   it('obtenerPdf retorna url cuando head es 200', async () => {
-    (axios.post as jest.Mock)
-      .mockResolvedValueOnce({
-        data: { RESU: 'OK', RESPUESTA: { REGLOG: '99' } },
-      })
-      .mockResolvedValueOnce({
-        data: { RESU: 'OK', RESPUESTA: 'https://remote/dashboard/archivo.pdf' },
-      });
-    (axios.head as jest.Mock).mockResolvedValue({ status: 200 });
+    httpClient.post
+      .mockResolvedValueOnce({ RESU: 'OK', RESPUESTA: { REGLOG: '99' } })
+      .mockResolvedValueOnce({ RESU: 'OK', RESPUESTA: 'https://remote/dashboard/archivo.pdf' });
+    httpClient.head.mockResolvedValue(200);
 
     const res = await service.obtenerPdf('123', '1');
 

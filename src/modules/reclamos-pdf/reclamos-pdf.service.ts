@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import { PDFDocument, PDFFont, PDFPage, StandardFonts, rgb } from 'pdf-lib';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Repository } from 'typeorm';
@@ -46,12 +46,18 @@ export class ReclamosPdfService {
     const margin = 50;
     let y = height - margin;
 
-    const getCenteredX = (text: string, fontSize: number, textFont: any) => {
+    type DrawTextOptions = Omit<NonNullable<Parameters<PDFPage['drawText']>[1]>, 'font' | 'size' | 'color'> & {
+      size?: number;
+      bold?: boolean;
+      color?: ReturnType<typeof rgb>;
+    };
+
+    const getCenteredX = (text: string, fontSize: number, textFont: PDFFont) => {
       const textWidth = textFont.widthOfTextAtSize(text, fontSize);
       return (width - textWidth) / 2;
     };
 
-    const wrapText = (text: string, maxWidth: number, fontSize: number, textFont: any): string[] => {
+    const wrapText = (text: string, maxWidth: number, fontSize: number, textFont: PDFFont): string[] => {
       const cleanedText = this.cleanText(text);
       const words = cleanedText.split(' ');
       const lines: string[] = [];
@@ -72,15 +78,16 @@ export class ReclamosPdfService {
       return lines.length > 0 ? lines : [''];
     };
 
-    const addText = (text: string, x: number, yPos: number, options: any = {}) => {
+    const addText = (text: string, x: number, yPos: number, options: DrawTextOptions = {}) => {
       const cleanedText = this.cleanText(text);
+      const { size, bold, color, ...rest } = options;
       page.drawText(cleanedText, {
         x,
         y: yPos,
-        size: options.size || normalSize,
-        font: options.bold ? boldFont : font,
-        color: options.color || secondaryColor,
-        ...options,
+        size: size ?? normalSize,
+        font: bold ? boldFont : font,
+        color: color ?? secondaryColor,
+        ...rest,
       });
     };
 

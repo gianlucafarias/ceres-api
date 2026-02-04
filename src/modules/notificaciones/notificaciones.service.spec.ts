@@ -1,25 +1,31 @@
-﻿import axios from 'axios';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Contact } from '../../entities/contact.entity';
 import { Notificaciones } from '../../entities/notificaciones.entity';
 import { PreferenciasUsuario } from '../../entities/preferencias-usuario.entity';
+import { WhatsappTemplateService } from '../../shared/whatsapp/whatsapp-template.service';
+import { WhatsappTemplatePayload } from '../../shared/whatsapp/whatsapp.types';
 import { NotificacionesService } from './notificaciones.service';
 
-jest.mock('axios', () => ({
-  post: jest.fn(),
-}));
+interface RepoMock<T> {
+  findOne: jest.Mock<Promise<T | null>, [unknown]>;
+  find: jest.Mock<Promise<T[]>, [unknown?]>;
+  create: jest.Mock<T, [Partial<T>]>;
+  save: jest.Mock<Promise<T>, [T]>;
+}
 
 describe('NotificacionesService', () => {
   let service: NotificacionesService;
-  let contactRepo: any;
-  let prefRepo: any;
-  let notifRepo: any;
+  let contactRepo: RepoMock<Contact>;
+  let prefRepo: RepoMock<PreferenciasUsuario>;
+  let notifRepo: RepoMock<Notificaciones>;
+  let whatsapp: { sendTemplate: jest.Mock<Promise<void>, [WhatsappTemplatePayload]> };
 
   beforeEach(async () => {
-    contactRepo = mockRepo();
-    prefRepo = mockRepo();
-    notifRepo = mockRepo();
+    contactRepo = mockRepo<Contact>();
+    prefRepo = mockRepo<PreferenciasUsuario>();
+    notifRepo = mockRepo<Notificaciones>();
+    whatsapp = { sendTemplate: jest.fn().mockResolvedValue(undefined) };
 
     const module = await Test.createTestingModule({
       providers: [
@@ -27,6 +33,7 @@ describe('NotificacionesService', () => {
         { provide: getRepositoryToken(Contact), useValue: contactRepo },
         { provide: getRepositoryToken(PreferenciasUsuario), useValue: prefRepo },
         { provide: getRepositoryToken(Notificaciones), useValue: notifRepo },
+        { provide: WhatsappTemplateService, useValue: whatsapp },
       ],
     }).compile();
 
@@ -34,10 +41,10 @@ describe('NotificacionesService', () => {
   });
 
   it('actualizarPreferencias crea nuevas preferencias', async () => {
-    contactRepo.findOne.mockResolvedValue({ id: 1 });
+    contactRepo.findOne.mockResolvedValue({ id: 1 } as Contact);
     prefRepo.findOne.mockResolvedValue(null);
-    prefRepo.create.mockImplementation((x: any) => x);
-    prefRepo.save.mockResolvedValue({ id: 10, contactId: 1, notificarHumedo: true });
+    prefRepo.create.mockImplementation((x) => x as PreferenciasUsuario);
+    prefRepo.save.mockResolvedValue({ id: 10, contactId: 1, notificarHumedo: true } as PreferenciasUsuario);
 
     const res = await service.actualizarPreferencias({
       contact_id: 1,
@@ -51,17 +58,15 @@ describe('NotificacionesService', () => {
   });
 
   it('actualizarSeccion guarda notificacion con seccion', async () => {
-    contactRepo.findOne.mockResolvedValue({ id: 1 });
-    notifRepo.create.mockImplementation((x: any) => x);
-    notifRepo.save.mockResolvedValue({ id: 5, usuarioId: 1, seccionId: 2 });
+    contactRepo.findOne.mockResolvedValue({ id: 1 } as Contact);
+    notifRepo.create.mockImplementation((x) => x as Notificaciones);
+    notifRepo.save.mockResolvedValue({ id: 5, usuarioId: 1, seccionId: 2 } as Notificaciones);
 
     const res = await service.actualizarSeccion({ contact_id: 1, seccion_id: 2 });
     expect(res.seccionId).toBe(2);
   });
 
-  it('enviarTemplate llama al endpoint de whatsapp', async () => {
-    (axios.post as jest.Mock).mockResolvedValue({ data: { ok: true } });
-
+  it('enviarTemplate llama al servicio de whatsapp', async () => {
     await service.enviarTemplate({
       number: '5493410000000',
       template: 'r_asignado',
@@ -69,7 +74,7 @@ describe('NotificacionesService', () => {
       components: [],
     });
 
-    expect(axios.post).toHaveBeenCalledWith('https://api.ceres.gob.ar/v1/template', {
+    expect(whatsapp.sendTemplate).toHaveBeenCalledWith({
       number: '5493410000000',
       template: 'r_asignado',
       languageCode: 'es_AR',
@@ -78,7 +83,7 @@ describe('NotificacionesService', () => {
   });
 });
 
-function mockRepo() {
+function mockRepo<T>(): RepoMock<T> {
   return {
     findOne: jest.fn(),
     find: jest.fn(),

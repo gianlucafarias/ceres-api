@@ -5,8 +5,22 @@ import { InteractionsService } from './interactions.service';
 
 describe('InteractionsService', () => {
   let service: InteractionsService;
-  let qbMock: any;
-  let repoMock: any;
+  let qbMock: QueryBuilderMock;
+  let repoMock: {
+    createQueryBuilder: jest.MockedFunction<() => QueryBuilderMock>;
+    count: jest.MockedFunction<() => Promise<number>>;
+  };
+
+  type QueryBuilderMock = {
+    select: jest.MockedFunction<(sql: string, alias?: string) => QueryBuilderMock>;
+    addSelect: jest.MockedFunction<(sql: string, alias?: string) => QueryBuilderMock>;
+    where: jest.MockedFunction<(sql: string, params?: Record<string, unknown>) => QueryBuilderMock>;
+    andWhere: jest.MockedFunction<(sql: string, params?: Record<string, unknown>) => QueryBuilderMock>;
+    groupBy: jest.MockedFunction<(sql: string) => QueryBuilderMock>;
+    orderBy: jest.MockedFunction<(sql: string, order?: 'ASC' | 'DESC') => QueryBuilderMock>;
+    getRawMany: jest.MockedFunction<() => Promise<Array<{ group: string; count: string }>>>;
+    getCount: jest.MockedFunction<() => Promise<number>>;
+  };
 
   beforeEach(async () => {
     qbMock = {

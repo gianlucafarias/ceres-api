@@ -6,7 +6,30 @@ import { EncuestasService } from './encuestas.service';
 
 describe('EncuestasService', () => {
   let service: EncuestasService;
-  let repo: any;
+  let repo: RepoMock;
+
+  type QueryBuilderMock = {
+    select: jest.MockedFunction<(sql: string, alias?: string) => QueryBuilderMock>;
+    addSelect: jest.MockedFunction<(sql: string, alias?: string) => QueryBuilderMock>;
+    groupBy: jest.MockedFunction<(sql: string) => QueryBuilderMock>;
+    orderBy: jest.MockedFunction<(sql: string, order?: 'ASC' | 'DESC') => QueryBuilderMock>;
+    andWhere: jest.MockedFunction<(sql: string, params?: Record<string, unknown>) => QueryBuilderMock>;
+    where: jest.MockedFunction<(sql: string, params?: Record<string, unknown>) => QueryBuilderMock>;
+    skip: jest.MockedFunction<(count: number) => QueryBuilderMock>;
+    take: jest.MockedFunction<(count: number) => QueryBuilderMock>;
+    getRawMany: jest.MockedFunction<() => Promise<Array<Record<string, unknown>>>>;
+    getManyAndCount: jest.MockedFunction<() => Promise<[EncuestaPresupuesto[], number]>>;
+  };
+
+  type RepoMock = {
+    findOne: jest.MockedFunction<(options?: unknown) => Promise<EncuestaPresupuesto | null>>;
+    find: jest.MockedFunction<(options?: unknown) => Promise<EncuestaPresupuesto[]>>;
+    count: jest.MockedFunction<(options?: unknown) => Promise<number>>;
+    create: jest.MockedFunction<(input: Partial<EncuestaPresupuesto>) => Partial<EncuestaPresupuesto>>;
+    save: jest.MockedFunction<(input: Partial<EncuestaPresupuesto>) => Promise<Partial<EncuestaPresupuesto>>>;
+    delete: jest.MockedFunction<(options?: unknown) => Promise<void>>;
+    createQueryBuilder: jest.MockedFunction<() => QueryBuilderMock>;
+  };
 
   beforeEach(async () => {
     repo = mockRepo();
@@ -30,7 +53,7 @@ describe('EncuestasService', () => {
 
   it('guardarEncuesta guarda con estado completada', async () => {
     repo.findOne.mockResolvedValue(null);
-    repo.create.mockImplementation((x: any) => x);
+    repo.create.mockImplementation((x: Partial<EncuestaPresupuesto>) => x);
     repo.save.mockResolvedValue({ id: 1, estado: 'completada', dni: '12345678' });
 
     const res = await service.guardarEncuesta({
@@ -93,7 +116,7 @@ describe('EncuestasService', () => {
   });
 });
 
-function mockRepo() {
+function mockRepo(): RepoMock {
   return {
     findOne: jest.fn(),
     find: jest.fn(),

@@ -6,7 +6,25 @@ import { HistoryService } from './history.service';
 
 describe('HistoryService', () => {
   let service: HistoryService;
-  let historyRepo: any;
+  let historyRepo: RepoMock;
+
+  type QueryBuilderMock = {
+    where: jest.MockedFunction<(sql: string, params?: Record<string, unknown>) => QueryBuilderMock>;
+    andWhere: jest.MockedFunction<(sql: string, params?: Record<string, unknown>) => QueryBuilderMock>;
+    orderBy: jest.MockedFunction<(sql: string, order?: 'ASC' | 'DESC') => QueryBuilderMock>;
+    groupBy: jest.MockedFunction<(sql: string) => QueryBuilderMock>;
+    limit: jest.MockedFunction<(limit: number) => QueryBuilderMock>;
+    getMany: jest.MockedFunction<() => Promise<History[]>>;
+    getRawMany: jest.MockedFunction<() => Promise<Array<Record<string, unknown>>>>;
+    getCount: jest.MockedFunction<() => Promise<number>>;
+  };
+
+  type RepoMock = {
+    createQueryBuilder: jest.MockedFunction<() => QueryBuilderMock>;
+    find: jest.MockedFunction<(options?: unknown) => Promise<History[]>>;
+    findAndCount: jest.MockedFunction<(options?: unknown) => Promise<[History[], number]>>;
+    count: jest.MockedFunction<(options?: unknown) => Promise<number>>;
+  };
 
   beforeEach(async () => {
     historyRepo = mockRepo();
@@ -33,7 +51,7 @@ describe('HistoryService', () => {
   });
 });
 
-function mockRepo() {
+function mockRepo(): RepoMock {
   return {
     createQueryBuilder: jest.fn(() => ({
       where: jest.fn().mockReturnThis(),

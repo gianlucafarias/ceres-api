@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { entities } from './entities';
 import { HealthModule } from './health/health.module';
 import { RedisModule } from './shared/redis/redis.module';
+import { HttpModule } from './shared/http/http.module';
 import { UsersModule } from './modules/users/users.module';
 import { InteractionsModule } from './modules/interactions/interactions.module';
 import { ContactsModule } from './modules/contacts/contacts.module';
@@ -42,6 +43,7 @@ import { ConversacionesModule } from './modules/conversaciones/conversaciones.mo
         entities,
       }),
     }),
+    HttpModule,
     RedisModule,
     HealthModule,
     UsersModule,

@@ -5,7 +5,13 @@ import { UsersService } from './users.service';
 
 describe('UsersService', () => {
   let service: UsersService;
-  let qbMock: any;
+  let qbMock: QueryBuilderMock;
+
+  type QueryBuilderMock = {
+    where: jest.MockedFunction<(sql: string, params?: Record<string, unknown>) => QueryBuilderMock>;
+    andWhere: jest.MockedFunction<(sql: string, params?: Record<string, unknown>) => QueryBuilderMock>;
+    getCount: jest.MockedFunction<() => Promise<number>>;
+  };
 
   beforeEach(async () => {
     qbMock = {

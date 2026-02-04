@@ -9,7 +9,7 @@ export class ImpuestosController {
   constructor(private readonly service: ImpuestosService) {}
 
   @Post('consulta')
-  consulta(@Body() body: Record<string, any>) {
+  consulta(@Body() body: Record<string, unknown>) {
     return this.service.consulta(body);
   }
 
@@ -34,9 +34,18 @@ export class ImpuestosController {
   @Post('solicitar-cedulon')
   async solicitarCedulon(@Body() dto: SolicitarCedulonDto) {
     const resultado = await this.service.solicitarCedulon(dto);
-    if (!resultado || (resultado as any).RESU !== 'OK') {
+    if (!resultado || !this.hasResu(resultado) || resultado.RESU !== 'OK') {
       throw new HttpException(resultado || { error: 'Error en la solicitud de cedulon' }, HttpStatus.BAD_REQUEST);
     }
     return resultado;
+  }
+
+  private hasResu(value: unknown): value is { RESU: string } {
+    return (
+      typeof value === 'object' &&
+      value !== null &&
+      'RESU' in value &&
+      typeof (value as Record<string, unknown>).RESU === 'string'
+    );
   }
 }

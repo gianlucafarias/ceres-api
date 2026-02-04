@@ -26,7 +26,7 @@ export class Contact {
   lastInteraction!: Date | null;
 
   @Column({ type: 'jsonb' })
-  values!: Record<string, any>;
+  values!: Record<string, unknown>;
 
   @OneToMany(() => History, (history) => history.contact)
   history!: History[];

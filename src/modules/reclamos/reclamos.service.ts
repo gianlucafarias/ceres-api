@@ -1,162 +1,123 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Between, Like, Repository } from 'typeorm';
+import { Injectable, Logger } from '@nestjs/common';
 import { Reclamo } from '../../entities/reclamo.entity';
-import { ReclamoHistorial } from '../../entities/reclamo-historial.entity';
 import { CrearReclamoBotDto } from './dto/reclamos-bot.dto';
 import { ActualizarReclamoAdminDto, ReclamosFiltroAdminDto } from './dto/reclamos-admin.dto';
-import { geocodeAddress } from '../../services/geocodeAdress';
+import { GeocodeService } from '../../shared/geocode/geocode.service';
+import { ReclamosHistorialService } from './reclamos-historial.service';
+import { ReclamosRepository } from './reclamos.repository';
+import { ReclamosStatsService } from './reclamos-stats.service';
 
 type ReclamoSafe = Omit<Reclamo, 'telefono'> & { telefono?: string };
 
 @Injectable()
 export class ReclamosService {
+  private readonly logger = new Logger(ReclamosService.name);
+
   constructor(
-    @InjectRepository(Reclamo)
-    private readonly reclamoRepo: Repository<Reclamo>,
-    @InjectRepository(ReclamoHistorial)
-    private readonly historialRepo: Repository<ReclamoHistorial>,
+    private readonly reclamosRepo: ReclamosRepository,
+    private readonly historialService: ReclamosHistorialService,
+    private readonly statsService: ReclamosStatsService,
+    private readonly geocodeService: GeocodeService,
   ) {}
 
   // --- Bot ---
   async crearDesdeBot(dto: CrearReclamoBotDto): Promise<ReclamoSafe> {
     let coords = { latitud: 0, longitud: 0 };
     try {
-      coords = await geocodeAddress(dto.ubicacion);
-    } catch (err) {
-      // log but continue
-      // eslint-disable-next-line no-console
-      console.error('Geocode error', err);
+      coords = await this.geocodeService.geocodeAddress(dto.ubicacion);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error desconocido';
+      this.logger.warn(`Geocode error: ${message}`);
     }
 
-    const entity = this.reclamoRepo.create({
+    const entity = this.reclamosRepo.create({
       ...dto,
       estado: 'PENDIENTE',
       fecha: new Date(),
       latitud: coords.latitud,
       longitud: coords.longitud,
     });
-    const saved = await this.reclamoRepo.save(entity);
+    const saved = await this.reclamosRepo.save(entity);
 
-    await this.historialRepo.save(
-      this.historialRepo.create({
-        reclamoId: saved.id,
-        tipo: 'CREACION',
-        valorNuevo: 'PENDIENTE',
-        comentario: 'Reclamo creado via bot',
-      }),
-    );
+    await this.historialService.registrarCreacion(saved.id);
 
     return this.toBotDto(saved);
   }
 
   async estadoParaBot(id: number): Promise<ReclamoSafe | null> {
-    const rec = await this.reclamoRepo.findOne({ where: { id } });
+    const rec = await this.reclamosRepo.findById(id);
     return rec ? this.toBotDto(rec) : null;
   }
 
   // --- Admin ---
   async listarAdmin(filters: ReclamosFiltroAdminDto) {
-    const {
-      page = 1,
-      per_page = 10,
-      estado,
-      prioridad,
-      barrio,
-      search,
-      from,
-      to,
-      sort = 'id',
-      order = 'DESC',
-    } = filters;
+    const page = filters.page ?? 1;
+    const perPage = filters.per_page ?? 10;
 
-    const skip = (page - 1) * per_page;
-    const where: any = {};
-    if (estado) where.estado = estado;
-    if (prioridad) where.prioridad = prioridad;
-    if (barrio) where.barrio = barrio;
-    if (search) where.reclamo = Like(`%${search}%`);
-    if (from && to) where.fecha = Between(new Date(from), endOfDay(to));
-    else if (from) where.fecha = Between(new Date(from), new Date());
-    else if (to) where.fecha = Between(new Date(0), endOfDay(to));
-
-    const [data, total] = await this.reclamoRepo.findAndCount({
-      where,
-      skip,
-      take: per_page,
-      order: { [sort]: order as 'ASC' | 'DESC' },
-    });
+    const [data, total] = await this.reclamosRepo.findAndCountForAdmin(filters);
 
     return {
       data,
       total,
-      pageCount: Math.ceil(total / per_page),
+      pageCount: Math.ceil(total / perPage),
       currentPage: page,
     };
   }
 
   async detalleAdmin(id: number) {
-    return this.reclamoRepo.findOne({ where: { id } });
+    return this.reclamosRepo.findById(id);
   }
 
   async actualizarAdmin(id: number, dto: ActualizarReclamoAdminDto) {
-    const rec = await this.reclamoRepo.findOne({ where: { id } });
+    const rec = await this.reclamosRepo.findById(id);
     if (!rec) return null;
 
     const prevEstado = rec.estado;
     const prevPrioridad = rec.prioridad;
     const prevCuadrilla = rec.cuadrillaid;
-    const ubicacionCambiada = dto.ubicacion && dto.ubicacion !== rec.ubicacion;
+    const ubicacionCambiada = dto.ubicacion !== undefined && dto.ubicacion !== rec.ubicacion;
 
-    Object.assign(rec, dto);
+    if (dto.nombre !== undefined) rec.nombre = dto.nombre;
+    if (dto.telefono !== undefined) rec.telefono = dto.telefono;
+    if (dto.reclamo !== undefined) rec.reclamo = dto.reclamo;
+    if (dto.ubicacion !== undefined) rec.ubicacion = dto.ubicacion;
+    if (dto.barrio !== undefined) rec.barrio = dto.barrio;
+    if (dto.detalle !== undefined) rec.detalle = dto.detalle;
+    if (dto.estado !== undefined) rec.estado = dto.estado;
+    if (dto.prioridad !== undefined) rec.prioridad = dto.prioridad;
+    if (dto.cuadrillaId !== undefined) rec.cuadrillaid = dto.cuadrillaId;
 
     if (ubicacionCambiada) {
       try {
-        const coords = await geocodeAddress(dto.ubicacion!);
+        const coords = await this.geocodeService.geocodeAddress(dto.ubicacion ?? rec.ubicacion);
         rec.latitud = coords.latitud;
         rec.longitud = coords.longitud;
-      } catch (err) {
-        console.error('Geocode error', err);
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Error desconocido';
+        this.logger.warn(`Geocode error: ${message}`);
       }
     }
 
-    const saved = await this.reclamoRepo.save(rec);
+    const saved = await this.reclamosRepo.save(rec);
 
     // Historial
-    if (dto.estado && dto.estado !== prevEstado) {
-      await this.historialRepo.save(
-        this.historialRepo.create({
-          reclamoId: id,
-          tipo: 'ESTADO',
-          valorAnterior: prevEstado,
-          valorNuevo: dto.estado,
-          usuarioId: dto.usuarioId ?? null,
-          comentario: 'Cambio de estado',
-        }),
-      );
+    if (dto.estado !== undefined && dto.estado !== prevEstado) {
+      await this.historialService.registrarCambioEstado(id, prevEstado ?? null, dto.estado, dto.usuarioId);
     }
-    if (dto.prioridad && dto.prioridad !== prevPrioridad) {
-      await this.historialRepo.save(
-        this.historialRepo.create({
-          reclamoId: id,
-          tipo: 'PRIORIDAD',
-          valorAnterior: prevPrioridad,
-          valorNuevo: dto.prioridad,
-          usuarioId: dto.usuarioId ?? null,
-          comentario: 'Cambio de prioridad',
-        }),
+    if (dto.prioridad !== undefined && dto.prioridad !== prevPrioridad) {
+      await this.historialService.registrarCambioPrioridad(
+        id,
+        prevPrioridad ?? null,
+        dto.prioridad,
+        dto.usuarioId,
       );
     }
     if (dto.cuadrillaId !== undefined && dto.cuadrillaId !== prevCuadrilla) {
-      await this.historialRepo.save(
-        this.historialRepo.create({
-          reclamoId: id,
-          tipo: 'CUADRILLA',
-          valorAnterior: prevCuadrilla?.toString() ?? 'Sin cuadrilla',
-          valorNuevo: dto.cuadrillaId?.toString() ?? 'Sin cuadrilla',
-          usuarioId: dto.usuarioId ?? null,
-          comentario: 'Cambio de cuadrilla',
-        }),
+      await this.historialService.registrarCambioCuadrilla(
+        id,
+        prevCuadrilla ?? null,
+        dto.cuadrillaId,
+        dto.usuarioId,
       );
     }
 
@@ -164,111 +125,35 @@ export class ReclamosService {
   }
 
   async historialAdmin(id: number) {
-    return this.historialRepo
-      .createQueryBuilder('historial')
-      .where('historial.reclamo_id = :id', { id })
-      .orderBy('historial.fecha', 'ASC')
-      .getMany();
+    return this.historialService.listarPorReclamo(id);
   }
 
   async countByEstado() {
-    return this.reclamoRepo
-      .createQueryBuilder('reclamo')
-      .select('reclamo.estado', 'estado')
-      .addSelect('COUNT(reclamo.id)', 'count')
-      .groupBy('reclamo.estado')
-      .getRawMany();
+    return this.statsService.countByEstado();
   }
 
   async countByPrioridad() {
-    return this.reclamoRepo
-      .createQueryBuilder('reclamo')
-      .select('reclamo.prioridad', 'prioridad')
-      .addSelect('COUNT(reclamo.id)', 'count')
-      .groupBy('reclamo.prioridad')
-      .getRawMany();
+    return this.statsService.countByPrioridad();
   }
 
   async countByTipo() {
-    return this.reclamoRepo
-      .createQueryBuilder('reclamo')
-      .select('reclamo.reclamo', 'tipo')
-      .addSelect('COUNT(reclamo.id)', 'count')
-      .groupBy('reclamo.reclamo')
-      .getRawMany();
+    return this.statsService.countByTipo();
   }
 
   async countByBarrio() {
-    const normalizedBarrio = "TRIM(REPLACE(LOWER(reclamo.barrio), 'barrio ', ''))";
-    return this.reclamoRepo
-      .createQueryBuilder('reclamo')
-      .select(normalizedBarrio, 'barrio')
-      .addSelect('COUNT(reclamo.id)', 'count')
-      .groupBy(normalizedBarrio)
-      .orderBy('count', 'DESC')
-      .getRawMany();
+    return this.statsService.countByBarrio();
   }
 
   async statsBasicas() {
-    const [countsByEstado, countsByPrioridad, countsByTipo] = await Promise.all([
-      this.countByEstado(),
-      this.countByPrioridad(),
-      this.countByTipo(),
-    ]);
-
-    return {
-      countsByEstado,
-      countsByPrioridad,
-      countsByTipo,
-    };
+    return this.statsService.statsBasicas();
   }
 
   async statsAvanzadas() {
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-
-    const reclamosPorMes = await this.reclamoRepo
-      .createQueryBuilder('reclamo')
-      .select("DATE_TRUNC('month', reclamo.fecha)", 'mes')
-      .addSelect('COUNT(reclamo.id)', 'cantidad')
-      .where('reclamo.fecha >= :sixMonthsAgo', { sixMonthsAgo })
-      .groupBy('mes')
-      .orderBy('mes', 'ASC')
-      .getRawMany();
-
-    const tiempoResolucion = await this.reclamoRepo
-      .createQueryBuilder('reclamo')
-      .select("AVG(EXTRACT(EPOCH FROM (h2.fecha - h1.fecha)) / 86400)", 'promedioDias')
-      .innerJoin(ReclamoHistorial, 'h1', "h1.reclamo_id = reclamo.id AND h1.tipo = 'CREACION'")
-      .innerJoin(
-        ReclamoHistorial,
-        'h2',
-        "h2.reclamo_id = reclamo.id AND h2.tipo = 'ESTADO' AND h2.valor_nuevo = 'COMPLETADO'",
-      )
-      .getRawOne();
-
-    const eficienciaCuadrilla = await this.reclamoRepo
-      .createQueryBuilder('reclamo')
-      .select('reclamo.cuadrillaid', 'cuadrillaId')
-      .addSelect('COUNT(reclamo.id)', 'reclamosResueltos')
-      .where("reclamo.estado = 'COMPLETADO'")
-      .andWhere('reclamo.cuadrillaid IS NOT NULL')
-      .groupBy('reclamo.cuadrillaid')
-      .orderBy('reclamosResueltos', 'DESC')
-      .getRawMany();
-
-    return {
-      reclamosPorMes,
-      tiempoPromedioResolucion: tiempoResolucion?.promedioDias || 0,
-      eficienciaCuadrilla,
-    };
+    return this.statsService.statsAvanzadas();
   }
 
   async reclamosPorTelefono(telefono: string) {
-    return this.reclamoRepo.find({
-      where: { telefono },
-      order: { fecha: 'DESC' },
-    });
+    return this.reclamosRepo.findByTelefono(telefono);
   }
 
   // --- helpers ---
@@ -276,10 +161,4 @@ export class ReclamosService {
     const { telefono, ...rest } = rec;
     return rest;
   }
-}
-
-function endOfDay(dateStr: string) {
-  const d = new Date(dateStr);
-  d.setHours(23, 59, 59, 999);
-  return d;
 }

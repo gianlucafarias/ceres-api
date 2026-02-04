@@ -1,4 +1,36 @@
-﻿import {\n  IsArray,\n  IsBoolean,\n  IsInt,\n  IsNotEmpty,\n  IsOptional,\n  IsString,\n  Matches,\n  Max,\n  Min,\n} from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsArray,
+  IsBoolean,
+  IsIn,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Matches,
+  Max,
+  Min,
+  ValidateNested,
+} from 'class-validator';
+
+class WhatsappComponentParameterDto {
+  @IsIn(['text'])
+  type!: 'text';
+
+  @IsString()
+  text!: string;
+}
+
+class WhatsappComponentDto {
+  @IsIn(['BODY', 'body'])
+  type!: 'BODY' | 'body';
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => WhatsappComponentParameterDto)
+  parameters?: WhatsappComponentParameterDto[];
+}
 
 export class ActualizarPreferenciasDto {
   @IsInt()
@@ -55,6 +87,7 @@ export class EnviarTemplateDto {
 
   @IsOptional()
   @IsArray()
-  components?: any[];
+  @ValidateNested({ each: true })
+  @Type(() => WhatsappComponentDto)
+  components?: WhatsappComponentDto[];
 }
-

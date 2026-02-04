@@ -1,5 +1,6 @@
 import { Controller, Get, HttpException, HttpStatus, UseGuards } from '@nestjs/common';
 import { AdminApiKeyGuard } from '../../common/guards/admin-api-key.guard';
+import { toErrorMessage } from '../../common/utils/error-message';
 import { FeedbackService } from './feedback.service';
 
 @UseGuards(AdminApiKeyGuard)
@@ -12,8 +13,9 @@ export class FeedbackController {
     try {
       const feedback = await this.service.getAll();
       return feedback;
-    } catch (error: any) {
-      throw new HttpException({ error: 'Error al obtener feedback' }, HttpStatus.INTERNAL_SERVER_ERROR);
+    } catch (error: unknown) {
+      const message = toErrorMessage(error, 'Error al obtener feedback');
+      throw new HttpException({ error: message }, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }
