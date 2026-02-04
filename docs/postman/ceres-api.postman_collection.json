@@ -750,6 +750,10 @@
                                                       "method":  "POST",
                                                       "header":  [
                                                                      {
+                                                                         "key":  "x-api-key",
+                                                                         "value":  "{{botApiKey}}"
+                                                                     },
+                                                                     {
                                                                          "key":  "Content-Type",
                                                                          "value":  "application/json"
                                                                      }
@@ -771,7 +775,10 @@
                                       "request":  {
                                                       "method":  "GET",
                                                       "header":  [
-
+                                                                     {
+                                                                         "key":  "x-api-key",
+                                                                         "value":  "{{botApiKey}}"
+                                                                     }
                                                                  ],
                                                       "url":  "{{baseUrl}}/v1/impuestos/pdf/{{impuestosTipo}}/{{impuestosPartida}}"
                                                   }
@@ -781,6 +788,10 @@
                                       "request":  {
                                                       "method":  "POST",
                                                       "header":  [
+                                                                     {
+                                                                         "key":  "x-api-key",
+                                                                         "value":  "{{botApiKey}}"
+                                                                     },
                                                                      {
                                                                          "key":  "Content-Type",
                                                                          "value":  "application/json"
@@ -803,6 +814,10 @@
                                       "request":  {
                                                       "method":  "POST",
                                                       "header":  [
+                                                                     {
+                                                                         "key":  "x-api-key",
+                                                                         "value":  "{{botApiKey}}"
+                                                                     },
                                                                      {
                                                                          "key":  "Content-Type",
                                                                          "value":  "application/json"

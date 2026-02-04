@@ -4,7 +4,7 @@
 Migrar los endpoints de impuestos municipales manteniendo compatibilidad con el legacy.
 
 ## Acceso
-- Por ahora **sin proteccion** (no se agregan guards hasta definir consumidores).
+- **BOT_API_KEY** (solo bot).
 
 ## Endpoints
 - `POST /v1/impuestos/consulta`

@@ -1,7 +1,9 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
+import { BotApiKeyGuard } from '../../common/guards/bot-api-key.guard';
 import { ConsultarDeudaDto, PdfParamsDto, SolicitarCedulonDto } from './dto/impuestos.dto';
 import { ImpuestosService } from './impuestos.service';
 
+@UseGuards(BotApiKeyGuard)
 @Controller({ path: 'impuestos', version: '1' })
 export class ImpuestosController {
   constructor(private readonly service: ImpuestosService) {}
