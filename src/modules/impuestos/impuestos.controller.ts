@@ -1,0 +1,40 @@
+import { Body, Controller, Get, HttpException, HttpStatus, Param, Post } from '@nestjs/common';
+import { ConsultarDeudaDto, PdfParamsDto, SolicitarCedulonDto } from './dto/impuestos.dto';
+import { ImpuestosService } from './impuestos.service';
+
+@Controller({ path: 'impuestos', version: '1' })
+export class ImpuestosController {
+  constructor(private readonly service: ImpuestosService) {}
+
+  @Post('consulta')
+  consulta(@Body() body: Record<string, any>) {
+    return this.service.consulta(body);
+  }
+
+  @Get('pdf/:tipo/:partida')
+  async getPdf(@Param() params: PdfParamsDto) {
+    const resultado = await this.service.obtenerPdf(params.partida, params.tipo);
+    if (resultado.error) {
+      throw new HttpException(resultado, HttpStatus.BAD_REQUEST);
+    }
+    return resultado;
+  }
+
+  @Post('consultar-deuda')
+  async consultarDeuda(@Body() dto: ConsultarDeudaDto) {
+    const resultado = await this.service.consultarDeuda(dto);
+    if (!resultado || resultado.RESU !== 'OK') {
+      throw new HttpException(resultado || { error: 'Error en la consulta de deuda' }, HttpStatus.BAD_REQUEST);
+    }
+    return resultado;
+  }
+
+  @Post('solicitar-cedulon')
+  async solicitarCedulon(@Body() dto: SolicitarCedulonDto) {
+    const resultado = await this.service.solicitarCedulon(dto);
+    if (!resultado || (resultado as any).RESU !== 'OK') {
+      throw new HttpException(resultado || { error: 'Error en la solicitud de cedulon' }, HttpStatus.BAD_REQUEST);
+    }
+    return resultado;
+  }
+}

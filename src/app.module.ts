@@ -15,6 +15,7 @@ import { ReclamosModule } from './modules/reclamos/reclamos.module';
 import { ReclamosPdfModule } from './modules/reclamos-pdf/reclamos-pdf.module';
 import { EncuestasModule } from './modules/encuestas/encuestas.module';
 import { NotificacionesModule } from './modules/notificaciones/notificaciones.module';
+import { ImpuestosModule } from './modules/impuestos/impuestos.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { NotificacionesModule } from './modules/notificaciones/notificaciones.mo
     ReclamosPdfModule,
     EncuestasModule,
     NotificacionesModule,
+    ImpuestosModule,
   ],
   controllers: [AppController],
   providers: [AppService],

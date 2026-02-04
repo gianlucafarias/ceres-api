@@ -740,6 +740,88 @@
                                   }
                               ]
                  }
+                 ,
+                 {
+                     "name":  "Impuestos",
+                     "item":  [
+                                  {
+                                      "name":  "POST /v1/impuestos/consulta",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"OPE_NOM\": \"PS\",\n  \"OPE_PAS\": \"123456\",\n  \"FNC\": \"U2\",\n  \"TIPO\": \"{{impuestosTipo}}\",\n  \"PARTIDA\": \"{{impuestosPartida}}\"\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               },
+                                                      "url":  "{{baseUrl}}/v1/impuestos/consulta"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "GET /v1/impuestos/pdf/:tipo/:partida",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/v1/impuestos/pdf/{{impuestosTipo}}/{{impuestosPartida}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "POST /v1/impuestos/consultar-deuda",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"REGLOG\": \"{{impuestosReglog}}\",\n  \"ESTADO\": \"{{impuestosEstado}}\"\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               },
+                                                      "url":  "{{baseUrl}}/v1/impuestos/consultar-deuda"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "POST /v1/impuestos/solicitar-cedulon",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"REGNRO\": \"{{impuestosRegnro}}\"\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               },
+                                                      "url":  "{{baseUrl}}/v1/impuestos/solicitar-cedulon"
+                                                  }
+                                  }
+                              ]
+                 }
              ],
     "variable":  [
                      {
@@ -781,6 +863,26 @@
                      {
                          "key":  "groupBy",
                          "value":  "day"
+                     },
+                     {
+                         "key":  "impuestosTipo",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "impuestosPartida",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "impuestosReglog",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "impuestosEstado",
+                         "value":  "A"
+                     },
+                     {
+                         "key":  "impuestosRegnro",
+                         "value":  ""
                      }
                  ]
 }
