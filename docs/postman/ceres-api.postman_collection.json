@@ -634,6 +634,75 @@
                                                   }
                                   }
                               ]
+                 },
+                 {
+                     "name":  "Notificaciones",
+                     "item":  [
+                                  {
+                                      "name":  "POST /v1/preferencias",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"contact_id\": {{contactId}},\n  \"notificar_humedo\": true,\n  \"notificar_seco\": false,\n  \"notificar_patio\": false,\n  \"hora_notificacion\": \"19:00\"\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               },
+                                                      "url":  "{{baseUrl}}/v1/preferencias"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "GET /v1/preferencias/:contactId",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/v1/preferencias/{{contactId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "POST /v1/seccion",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"contact_id\": {{contactId}},\n  \"seccion_id\": 1\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               },
+                                                      "url":  "{{baseUrl}}/v1/seccion"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "POST /v1/ejecutar-manual",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/v1/ejecutar-manual"
+                                                  }
+                                  }
+                              ]
                  }
              ],
     "variable":  [
