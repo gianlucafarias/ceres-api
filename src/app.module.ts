@@ -12,6 +12,7 @@ import { ContactsModule } from './modules/contacts/contacts.module';
 import { HistoryModule } from './modules/history/history.module';
 import { VisitsModule } from './modules/visits/visits.module';
 import { ReclamosModule } from './modules/reclamos/reclamos.module';
+import { ReclamosPdfModule } from './modules/reclamos-pdf/reclamos-pdf.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { ReclamosModule } from './modules/reclamos/reclamos.module';
     HistoryModule,
     VisitsModule,
     ReclamosModule,
+    ReclamosPdfModule,
   ],
   controllers: [AppController],
   providers: [AppService],
