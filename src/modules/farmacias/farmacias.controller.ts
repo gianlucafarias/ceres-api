@@ -132,7 +132,7 @@ export class FarmaciasController {
     if (body.name !== undefined) updates.name = body.name.trim();
     if (body.address !== undefined) updates.address = body.address.trim();
     if (body.phone !== undefined) updates.phone = body.phone.trim();
-    if (body.googleMapsAddress !== undefined) {
+    if (body.googleMapsAddress !== undefined && body.googleMapsAddress !== null) {
       updates.googleMapsAddress = body.googleMapsAddress.trim();
     }
     if (body.lat !== undefined) updates.lat = body.lat;

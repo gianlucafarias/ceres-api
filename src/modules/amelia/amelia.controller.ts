@@ -12,7 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { AdminApiKeyGuard } from '../../common/guards/admin-api-key.guard';
 import {
   ActualizarEstadoDto,

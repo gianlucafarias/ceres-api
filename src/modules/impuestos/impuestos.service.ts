@@ -3,12 +3,14 @@ import { ConfigService } from '@nestjs/config';
 import { HttpClient } from '../../shared/http/http-client.service';
 import { ConsultarDeudaDto, SolicitarCedulonDto } from './dto/impuestos.dto';
 
-interface ConsultaResponse {
+export interface ConsultaResponse {
   RESU: string;
   MENS?: string;
   RESPUESTA: unknown;
   error?: string;
 }
+
+export type SolicitarCedulonResponse = ConsultaResponse | { error: string; urlPDF?: string };
 
 type ConsultaPayload = Record<string, unknown> | string;
 
