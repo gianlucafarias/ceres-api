@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { ActivityLog } from '../../entities/activity-log.entity';
 import { ActivityQueryDto } from './dto/activity.dto';
 
-interface ActivityResponse {
+export interface ActivityResponse {
   id: number;
   type: string;
   action: string;
