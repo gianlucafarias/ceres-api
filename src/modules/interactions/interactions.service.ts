@@ -17,17 +17,18 @@ export class InteractionsService {
 
   async getInteractionsLastWeek(params: InteractionsGroupParamsDto) {
     const { start_date, end_date, group_by } = params;
+    const groupExpr = this.groupSelect(group_by);
     const qb = this.historyRepo
       .createQueryBuilder('history')
-      .select(this.groupSelect(group_by), 'group')
+      .select(groupExpr, 'group_key')
       .addSelect('COUNT(*)', 'count')
       .where('history.created_at >= :startDate', { startDate: start_date })
       .andWhere('history.created_at <= :endDate', { endDate: end_date })
-      .groupBy('group')
-      .orderBy('group', 'ASC');
+      .groupBy(groupExpr)
+      .orderBy(groupExpr, 'ASC');
 
     const rows = await qb.getRawMany();
-    return rows.map((r) => ({ group: r.group, count: Number(r.count) }));
+    return rows.map((r) => ({ group: r.group_key, count: Number(r.count) }));
   }
 
   async getInteractionsToday() {
