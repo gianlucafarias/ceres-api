@@ -6,9 +6,25 @@ import { FarmaciasService } from './farmacias.service';
 
 describe('FarmaciasService', () => {
   let service: FarmaciasService;
-  let pharmacyRepo: any;
-  let dutyRepo: any;
-  let qb: any;
+  let pharmacyRepo: {
+    findOne: jest.MockedFunction<(options?: unknown) => Promise<Pharmacy | null>>;
+    save: jest.MockedFunction<(input: Partial<Pharmacy>) => Promise<Partial<Pharmacy>>>;
+  };
+  let dutyRepo: {
+    findOne: jest.MockedFunction<(options?: unknown) => Promise<DutySchedule | null>>;
+    create: jest.MockedFunction<(input: Partial<DutySchedule>) => Partial<DutySchedule>>;
+    save: jest.MockedFunction<(input: Partial<DutySchedule>) => Promise<Partial<DutySchedule>>>;
+    createQueryBuilder: jest.MockedFunction<() => QueryBuilderMock>;
+  };
+  let qb: QueryBuilderMock;
+
+  type QueryBuilderMock = {
+    where: jest.MockedFunction<(sql: string, params?: Record<string, unknown>) => QueryBuilderMock>;
+    andWhere: jest.MockedFunction<(sql: string, params?: Record<string, unknown>) => QueryBuilderMock>;
+    orderBy: jest.MockedFunction<(sql: string, order?: 'ASC' | 'DESC') => QueryBuilderMock>;
+    limit: jest.MockedFunction<(limit: number) => QueryBuilderMock>;
+    getMany: jest.MockedFunction<() => Promise<Array<{ date: string; pharmacyCode: string }>>>;
+  };
 
   beforeEach(async () => {
     qb = {
@@ -21,13 +37,13 @@ describe('FarmaciasService', () => {
 
     pharmacyRepo = {
       findOne: jest.fn(),
-      save: jest.fn(async (x: any) => x),
+      save: jest.fn(async (x: Partial<Pharmacy>) => x),
     };
 
     dutyRepo = {
       findOne: jest.fn(),
-      create: jest.fn((x: any) => x),
-      save: jest.fn(async (x: any) => x),
+      create: jest.fn((x: Partial<DutySchedule>) => x),
+      save: jest.fn(async (x: Partial<DutySchedule>) => x),
       createQueryBuilder: jest.fn(() => qb),
     };
 

@@ -1,10 +1,11 @@
-﻿import axios from 'axios';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Contact } from '../../entities/contact.entity';
 import { Notificaciones } from '../../entities/notificaciones.entity';
 import { PreferenciasUsuario } from '../../entities/preferencias-usuario.entity';
+import { WhatsappTemplateService } from '../../shared/whatsapp/whatsapp-template.service';
+import { WhatsappComponent } from '../../shared/whatsapp/whatsapp.types';
 import { ActualizarPreferenciasDto, ActualizarSeccionDto, EnviarTemplateDto } from './dto/notificaciones.dto';
 
 @Injectable()
@@ -16,6 +17,7 @@ export class NotificacionesService {
     private readonly prefRepo: Repository<PreferenciasUsuario>,
     @InjectRepository(Notificaciones)
     private readonly notifRepo: Repository<Notificaciones>,
+    private readonly whatsapp: WhatsappTemplateService,
   ) {}
 
   async actualizarPreferencias(dto: ActualizarPreferenciasDto) {
@@ -170,7 +172,7 @@ export class NotificacionesService {
         break;
     }
 
-    const parameters = [] as Array<{ type: string; text: string }>;
+    const parameters: Array<{ type: 'text'; text: string }> = [];
     if (tipoResiduo === 'patio' && seccion) {
       parameters.push({ type: 'text', text: seccion });
     }
@@ -187,25 +189,29 @@ export class NotificacionesService {
           },
         ],
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error desconocido';
       console.error('[notificaciones] error enviando whatsapp', {
         usuarioId,
         telefono,
-        message: error?.message,
-        status: error?.response?.status,
-        data: error?.response?.data,
+        message,
       });
     }
   }
 
   async enviarTemplate(dto: EnviarTemplateDto): Promise<void> {
+    const components: WhatsappComponent[] | undefined = dto.components?.map((component) => ({
+      type: component.type,
+      parameters: component.parameters?.map((param) => ({ type: 'text', text: param.text })) ?? [],
+    }));
+
     const payload = {
       number: dto.number,
       template: dto.template,
       languageCode: dto.languageCode ?? 'es_AR',
-      components: dto.components ?? [],
+      components,
     };
 
-    await axios.post('https://api.ceres.gob.ar/v1/template', payload);
+    await this.whatsapp.sendTemplate(payload);
   }
 }

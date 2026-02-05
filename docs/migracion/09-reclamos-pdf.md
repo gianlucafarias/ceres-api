@@ -5,7 +5,7 @@
 - Endpoint único protegido por API key (admin o bot).
 
 ## Endpoint (v1)
-- `GET /v1/reclamos/:id/pdf`
+- `GET /api/v1/reclamos/:id/pdf`
 
 ## Seguridad
 - Header `x-api-key: <ADMIN_API_KEY>` o `x-api-key: <BOT_API_KEY>`  
@@ -26,3 +26,4 @@
 ## Pruebas
 - Unit test de servicio (reclamo inexistente).
 - Ejecutar: `npm test -- --runInBand`.
+

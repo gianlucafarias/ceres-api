@@ -1,55 +1,24 @@
-import axios from 'axios';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { InjectRepository } from '@nestjs/typeorm';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Repository } from 'typeorm';
-import { ActivityLog } from '../../entities/activity-log.entity';
+import { ActivityLogService } from '../../shared/activity-log/activity-log.service';
+import { WhatsappTemplateService } from '../../shared/whatsapp/whatsapp-template.service';
+import { WhatsappComponent } from '../../shared/whatsapp/whatsapp.types';
 import { AmeliaTurno } from '../../entities/amelia-turno.entity';
-import {
-  isValidArgentinePhone,
-  normalizeArgentinePhone,
-} from './phone-normalizer';
-
-interface AmeliaWebhookPayload {
-  appointment: {
-    id: number;
-    status: string;
-    serviceId: number;
-    bookingStart: string;
-    bookingEnd: string;
-    service: {
-      id: number;
-      name: string;
-      description?: string;
-    };
-    provider?: {
-      id: number;
-      firstName: string;
-      lastName: string;
-      email: string;
-    };
-    location?: {
-      name: string;
-      address?: string;
-    };
-    bookings: Record<string, any>;
-  };
-  bookings: Record<string, any>;
-}
+import { AmeliaWebhookParser, NormalizedAmeliaPayload } from './amelia-webhook.parser';
+import { AmeliaTurnoService, EstadoTurno } from './amelia-turno.service';
 
 @Injectable()
 export class AmeliaService {
-  private readonly whatsappApiUrl = 'https://api.ceres.gob.ar/v1/template';
   private readonly templateConfirmado: string;
   private readonly templateCancelado: string;
 
   constructor(
-    @InjectRepository(AmeliaTurno)
-    private readonly turnoRepo: Repository<AmeliaTurno>,
-    @InjectRepository(ActivityLog)
-    private readonly activityRepo: Repository<ActivityLog>,
+    private readonly parser: AmeliaWebhookParser,
+    private readonly turnoService: AmeliaTurnoService,
+    private readonly activityLog: ActivityLogService,
+    private readonly whatsapp: WhatsappTemplateService,
     private readonly config: ConfigService,
   ) {
     this.templateConfirmado = this.config.get<string>(
@@ -62,241 +31,111 @@ export class AmeliaService {
     );
   }
 
-  async procesarWebhook(rawPayload: any): Promise<AmeliaTurno> {
-    const { appointment, bookings } = this.normalizePayload(rawPayload);
-    const sanitizedPayload = this.sanitizePayload(rawPayload);
+  async procesarWebhook(rawPayload: unknown): Promise<AmeliaTurno> {
+    const normalized = this.parser.normalize(rawPayload);
+    const result = await this.turnoService.upsertFromWebhook(normalized);
 
-    const firstBookingKey = Object.keys(bookings)[0];
-    const booking = bookings[firstBookingKey];
+    if (result.wasCreated) {
+      await this.activityLog.logActivity({
+        type: 'TURNO_LICENCIA',
+        action: 'TURNO_CREADO',
+        description: `Nuevo turno de licencia registrado - ${normalized.appointment.service.name}`,
+        entityId: result.turno.id,
+        metadata: {
+          ameliaBookingId: result.turno.ameliaBookingId,
+          telefono: result.turno.telefono,
+          fechaTurno: format(result.turno.fechaTurno, 'dd/MM/yyyy HH:mm'),
+          tipoLicencia: result.turno.tipoLicencia,
+        },
+      });
 
-    if (!booking) {
-      throw new Error('No se encontro informacion de booking en el payload');
+      await this.enviarNotificacionConfirmacion(result.turno, normalized);
+      return result.turno;
     }
 
-    const existente = await this.buscarPorAmeliaBookingId(Number(booking.id));
-    if (existente) {
-      return this.actualizarTurno(existente, appointment, sanitizedPayload);
-    }
+    if (result.estadoAnterior && result.estadoNuevo && result.estadoAnterior !== result.estadoNuevo) {
+      await this.activityLog.logActivity({
+        type: 'TURNO_LICENCIA',
+        action: 'ESTADO_CAMBIADO',
+        description: `Turno ${result.turno.ameliaBookingId} cambio de estado: ${result.estadoAnterior} -> ${result.estadoNuevo}`,
+        entityId: result.turno.id,
+        metadata: {
+          estadoAnterior: result.estadoAnterior,
+          estadoNuevo: result.estadoNuevo,
+          ameliaStatus: normalized.appointment.status,
+        },
+      });
 
-    const telefonoOriginal = booking.customer?.phone || booking.infoArray?.phone || '';
-    const phoneResult = normalizeArgentinePhone(telefonoOriginal, '3564');
-
-    let dni: string | undefined;
-    let ciudad: string | undefined;
-
-    if (booking.customFields) {
-      for (const key of Object.keys(booking.customFields)) {
-        const field = booking.customFields[key];
-        if (field?.label?.toLowerCase().includes('dni')) {
-          dni = field.value;
-        }
-        if (field?.label?.toLowerCase().includes('ciudad')) {
-          ciudad = field.value;
-        }
+      if (result.estadoNuevo === 'CANCELADO') {
+        await this.enviarNotificacionCancelacion(result.turno, normalized);
       }
     }
 
-    const customerFirstName = booking.customer?.firstName || '';
-    const customerLastName = booking.customer?.lastName || '';
-    let nombreCompleto = `${customerFirstName} ${customerLastName}`.trim();
-    if (booking.infoArray?.firstName) {
-      nombreCompleto = `${booking.infoArray.firstName} ${booking.infoArray.lastName || ''}`.trim();
-    }
-
-    if (!appointment?.service?.name) {
-      throw new Error('Payload invalido: falta servicio');
-    }
-
-    const fechaTurno = new Date(appointment.bookingStart);
-    const fechaFin = new Date(appointment.bookingEnd);
-    const horaInicio = format(fechaTurno, 'HH:mm');
-    const horaFin = format(fechaFin, 'HH:mm');
-    const duracionMinutos = Math.round((fechaFin.getTime() - fechaTurno.getTime()) / 60000);
-
-    const nuevoTurno = this.turnoRepo.create({
-      ameliaAppointmentId: appointment.id,
-      ameliaBookingId: booking.id,
-      ameliaCustomerId: booking.customerId,
-      nombreCompleto,
-      primerNombre: booking.customer?.firstName,
-      apellido: booking.customer?.lastName,
-      telefono: phoneResult.normalized,
-      telefonoOriginal,
-      email: booking.customer?.email,
-      dni,
-      ciudad,
-      tipoLicencia: appointment.service.name,
-      descripcionServicio: appointment.service.description,
-      fechaTurno,
-      horaInicio,
-      horaFin,
-      duracionMinutos,
-      ubicacion: appointment.location?.name || 'Municipalidad de Ceres',
-      estado: this.mapearEstadoAmelia(appointment.status),
-      ameliaStatus: appointment.status,
-      notificacionEnviada: false,
-      intentosNotificacion: 0,
-      cancelUrl: booking.cancelUrl,
-      customerPanelUrl: booking.customerPanelUrl,
-      providerName: appointment.provider
-        ? `${appointment.provider.firstName} ${appointment.provider.lastName}`
-        : undefined,
-      providerEmail: appointment.provider?.email,
-      metadata: sanitizedPayload,
-    });
-
-    const turnoGuardado = await this.turnoRepo.save(nuevoTurno);
-
-    await this.logActivity({
-      type: 'TURNO_LICENCIA',
-      action: 'TURNO_CREADO',
-      description: `Nuevo turno de licencia registrado - ${appointment.service.name}`,
-      entityId: turnoGuardado.id,
-      metadata: {
-        ameliaBookingId: booking.id,
-        telefono: phoneResult.normalized,
-        fechaTurno: format(fechaTurno, 'dd/MM/yyyy HH:mm'),
-        tipoLicencia: appointment.service.name,
-      },
-    });
-
-    await this.enviarNotificacionTurno(turnoGuardado);
-
-    return turnoGuardado;
+    return result.turno;
   }
 
   async obtenerTurnosPorTelefono(telefono: string): Promise<AmeliaTurno[]> {
-    const phoneResult = normalizeArgentinePhone(telefono, '3564');
-    const telefonoNormalizado = phoneResult.isValid ? phoneResult.normalized : telefono;
-
-    return this.turnoRepo.find({
-      where: { telefono: telefonoNormalizado },
-      order: { fechaTurno: 'DESC' },
-    });
+    return this.turnoService.obtenerTurnosPorTelefono(telefono);
   }
 
   async buscarPorAmeliaBookingId(ameliaBookingId: number): Promise<AmeliaTurno | null> {
-    return this.turnoRepo.findOne({ where: { ameliaBookingId } });
+    return this.turnoService.buscarPorAmeliaBookingId(ameliaBookingId);
   }
 
   async obtenerTurnoPorId(id: number): Promise<AmeliaTurno | null> {
-    return this.turnoRepo.findOne({ where: { id } });
+    return this.turnoService.obtenerTurnoPorId(id);
   }
 
   async actualizarEstado(
     id: number,
-    nuevoEstado: 'PENDIENTE' | 'CONFIRMADO' | 'CANCELADO' | 'COMPLETADO' | 'NO_ASISTIO',
+    nuevoEstado: EstadoTurno,
     usuarioId?: number,
   ): Promise<AmeliaTurno> {
-    const turno = await this.obtenerTurnoPorId(id);
-    if (!turno) {
+    const result = await this.turnoService.actualizarEstado(id, nuevoEstado);
+    if (!result) {
       throw new Error('Turno no encontrado');
     }
 
-    const estadoAnterior = turno.estado;
-    turno.estado = nuevoEstado;
-
-    const turnoActualizado = await this.turnoRepo.save(turno);
-
-    await this.logActivity({
+    await this.activityLog.logActivity({
       type: 'TURNO_LICENCIA',
       action: 'ESTADO_ACTUALIZADO',
-      description: `Estado de turno actualizado: ${estadoAnterior} -> ${nuevoEstado}`,
-      entityId: turno.id,
+      description: `Estado de turno actualizado: ${result.estadoAnterior} -> ${nuevoEstado}`,
+      entityId: result.turno.id,
       userId: usuarioId,
       metadata: {
-        estadoAnterior,
+        estadoAnterior: result.estadoAnterior,
         estadoNuevo: nuevoEstado,
-        ameliaBookingId: turno.ameliaBookingId,
+        ameliaBookingId: result.turno.ameliaBookingId,
       },
     });
 
-    return turnoActualizado;
+    return result.turno;
   }
 
   async reintentarNotificacionesFallidas(maxIntentos: number = 3): Promise<void> {
-    const turnosSinNotificar = await this.turnoRepo
-      .createQueryBuilder('turno')
-      .where('turno.notificacion_enviada = false')
-      .andWhere('turno.intentos_notificacion < :maxIntentos', { maxIntentos })
-      .andWhere('turno.estado != :cancelado', { cancelado: 'CANCELADO' })
-      .getMany();
+    const turnosSinNotificar = await this.turnoService.listarSinNotificar(maxIntentos);
 
     for (const turno of turnosSinNotificar) {
-      await this.enviarNotificacionTurno(turno);
+      await this.enviarNotificacionConfirmacion(turno);
       await this.sleep(2000);
     }
   }
 
-  private async actualizarTurno(
+  private async enviarNotificacionConfirmacion(
     turno: AmeliaTurno,
-    appointment: AmeliaWebhookPayload['appointment'],
-    metadata: any,
-  ): Promise<AmeliaTurno> {
-    const estadoAnterior = turno.estado;
-    const nuevoEstado = this.mapearEstadoAmelia(appointment.status);
-
-    turno.ameliaStatus = appointment.status;
-    turno.estado = nuevoEstado;
-    turno.metadata = metadata;
-
-    const turnoActualizado = await this.turnoRepo.save(turno);
-
-    if (estadoAnterior !== nuevoEstado) {
-      await this.logActivity({
-        type: 'TURNO_LICENCIA',
-        action: 'ESTADO_CAMBIADO',
-        description: `Turno ${turno.ameliaBookingId} cambio de estado: ${estadoAnterior} -> ${nuevoEstado}`,
-        entityId: turno.id,
-        metadata: {
-          estadoAnterior,
-          estadoNuevo: nuevoEstado,
-          ameliaStatus: appointment.status,
-        },
-      });
-
-      if (nuevoEstado === 'CANCELADO') {
-        await this.enviarNotificacionCancelacion(turnoActualizado);
-      }
+    normalized?: NormalizedAmeliaPayload,
+  ): Promise<void> {
+    if (!this.turnoService.isTelefonoValido(turno.telefono)) {
+      await this.turnoService.registrarErrorNotificacion(turno, `Telefono invalido: ${turno.telefono}`);
+      return;
     }
 
-    return turnoActualizado;
-  }
-
-  private mapearEstadoAmelia(
-    ameliaStatus: string,
-  ): 'PENDIENTE' | 'CONFIRMADO' | 'CANCELADO' | 'COMPLETADO' | 'NO_ASISTIO' {
-    switch (ameliaStatus.toLowerCase()) {
-      case 'approved':
-        return 'CONFIRMADO';
-      case 'pending':
-        return 'PENDIENTE';
-      case 'canceled':
-      case 'rejected':
-        return 'CANCELADO';
-      case 'completed':
-        return 'COMPLETADO';
-      case 'no-show':
-        return 'NO_ASISTIO';
-      default:
-        return 'PENDIENTE';
-    }
-  }
-
-  private async enviarNotificacionTurno(turno: AmeliaTurno): Promise<void> {
     try {
-      if (!isValidArgentinePhone(turno.telefono)) {
-        turno.notificacionError = `Telefono invalido: ${turno.telefono}`;
-        turno.intentosNotificacion += 1;
-        await this.turnoRepo.save(turno);
-        return;
-      }
-
       const fechaFormateada = format(turno.fechaTurno, "EEEE d 'de' MMMM", { locale: es });
 
-      const components = [
+      const components: WhatsappComponent[] = [
         {
-          type: 'body',
+          type: 'BODY',
           parameters: [
             { type: 'text', text: turno.nombreCompleto },
             { type: 'text', text: fechaFormateada },
@@ -307,30 +146,34 @@ export class AmeliaService {
         },
       ];
 
-      await this.enviarTemplate(turno.telefono, this.templateConfirmado, 'es_AR', components);
+      await this.whatsapp.sendTemplate({
+        number: turno.telefono,
+        template: this.templateConfirmado,
+        languageCode: 'es_AR',
+        components,
+      });
 
-      turno.notificacionEnviada = true;
-      turno.fechaNotificacion = new Date();
-      turno.intentosNotificacion += 1;
-      await this.turnoRepo.save(turno);
-    } catch (error: any) {
-      turno.notificacionError = error?.message || 'Error desconocido';
-      turno.intentosNotificacion += 1;
-      await this.turnoRepo.save(turno);
+      await this.turnoService.marcarNotificacionEnviada(turno);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error desconocido';
+      await this.turnoService.registrarErrorNotificacion(turno, message);
     }
   }
 
-  private async enviarNotificacionCancelacion(turno: AmeliaTurno): Promise<void> {
-    try {
-      if (!isValidArgentinePhone(turno.telefono)) {
-        return;
-      }
+  private async enviarNotificacionCancelacion(
+    turno: AmeliaTurno,
+    normalized?: NormalizedAmeliaPayload,
+  ): Promise<void> {
+    if (!this.turnoService.isTelefonoValido(turno.telefono)) {
+      return;
+    }
 
+    try {
       const fechaFormateada = format(turno.fechaTurno, "EEEE d 'de' MMMM", { locale: es });
 
-      const components = [
+      const components: WhatsappComponent[] = [
         {
-          type: 'body',
+          type: 'BODY',
           parameters: [
             { type: 'text', text: turno.nombreCompleto },
             { type: 'text', text: fechaFormateada },
@@ -339,95 +182,15 @@ export class AmeliaService {
         },
       ];
 
-      await this.enviarTemplate(turno.telefono, this.templateCancelado, 'es_AR', components);
-    } catch (error: any) {
+      await this.whatsapp.sendTemplate({
+        number: turno.telefono,
+        template: this.templateCancelado,
+        languageCode: 'es_AR',
+        components,
+      });
+    } catch (error: unknown) {
       // swallow
     }
-  }
-
-  private async enviarTemplate(
-    number: string,
-    template: string,
-    languageCode: string,
-    components: Array<{ type: string; parameters: Array<{ type: string; text: string }> }>,
-  ): Promise<void> {
-    await axios.post(this.whatsappApiUrl, {
-      number,
-      template,
-      languageCode,
-      components,
-    });
-  }
-
-  private async logActivity(params: {
-    type: string;
-    action: string;
-    description: string;
-    entityId?: number;
-    userId?: number;
-    metadata?: Record<string, any>;
-  }) {
-    const activity = this.activityRepo.create({
-      type: params.type,
-      action: params.action,
-      description: params.description,
-      entityId: params.entityId,
-      userId: params.userId,
-      metadata: params.metadata,
-    });
-
-    await this.activityRepo.save(activity);
-  }
-
-  private normalizePayload(rawPayload: any): AmeliaWebhookPayload {
-    if (!rawPayload) {
-      throw new Error('Payload invalido: el body esta vacio');
-    }
-
-    let appointment = rawPayload.appointment;
-    if (!appointment && rawPayload.appointments && Array.isArray(rawPayload.appointments)) {
-      appointment = rawPayload.appointments[0];
-    }
-
-    if (!appointment && rawPayload.id && rawPayload.bookings) {
-      appointment = rawPayload;
-    }
-
-    if (!appointment) {
-      throw new Error('Payload invalido: falta informacion del appointment');
-    }
-
-    let bookings = appointment.bookings || rawPayload.bookings;
-
-    if (Array.isArray(bookings)) {
-      const map: Record<string, any> = {};
-      bookings.forEach((item: any, index: number) => {
-        const key = item?.id ? String(item.id) : String(index);
-        map[key] = item;
-      });
-      bookings = map;
-    }
-
-    if (!bookings || (typeof bookings === 'object' && Object.keys(bookings).length === 0)) {
-      throw new Error('Payload invalido: falta informacion de bookings');
-    }
-
-    return {
-      appointment: {
-        ...appointment,
-        bookings,
-      },
-      bookings,
-    };
-  }
-
-  private sanitizePayload(payload: any): any {
-    if (!payload || typeof payload !== 'object') return payload;
-    const clone = { ...payload };
-    if ('token' in clone) {
-      delete clone.token;
-    }
-    return clone;
   }
 
   private async sleep(ms: number): Promise<void> {

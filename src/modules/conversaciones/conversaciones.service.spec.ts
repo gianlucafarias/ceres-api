@@ -5,8 +5,14 @@ import { ConversacionesService } from './conversaciones.service';
 
 describe('ConversacionesService', () => {
   let service: ConversacionesService;
-  let repo: any;
-  let qb: any;
+  let repo: { createQueryBuilder: jest.MockedFunction<() => QueryBuilderMock> };
+  let qb: QueryBuilderMock;
+
+  type QueryBuilderMock = {
+    where: jest.MockedFunction<(sql: string, params?: Record<string, unknown>) => QueryBuilderMock>;
+    andWhere: jest.MockedFunction<(sql: string, params?: Record<string, unknown>) => QueryBuilderMock>;
+    getMany: jest.MockedFunction<() => Promise<Array<{ id: number }>>>;
+  };
 
   beforeEach(async () => {
     qb = {

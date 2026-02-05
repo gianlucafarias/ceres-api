@@ -6,14 +6,19 @@ import { BotConfigService } from './bot-config.service';
 
 describe('BotConfigService', () => {
   let service: BotConfigService;
-  let repo: any;
+  let repo: {
+    find: jest.MockedFunction<() => Promise<BotConfig[]>>;
+    findOne: jest.MockedFunction<(options?: unknown) => Promise<BotConfig | null>>;
+    create: jest.MockedFunction<(x: Partial<BotConfig>) => Partial<BotConfig>>;
+    save: jest.MockedFunction<(x: Partial<BotConfig>) => Promise<Partial<BotConfig>>>;
+  };
 
   beforeEach(async () => {
     repo = {
       find: jest.fn().mockResolvedValue([]),
       findOne: jest.fn(),
-      create: jest.fn((x: any) => x),
-      save: jest.fn(async (x: any) => x),
+      create: jest.fn((x: Partial<BotConfig>) => x),
+      save: jest.fn(async (x: Partial<BotConfig>) => x),
     };
 
     const module = await Test.createTestingModule({

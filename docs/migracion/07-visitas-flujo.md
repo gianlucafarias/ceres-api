@@ -6,7 +6,7 @@
 - Protegido con `ADMIN_API_KEY`.
 
 ## Endpoint (v1)
-- `GET /v1/visitas-flujo?from&to`
+- `GET /api/v1/visitas-flujo?from&to`
   - Si se envían `from` y `to` (ISO `YYYY-MM-DD`), cuenta conversaciones en ese rango por `ultimo_flujo`.
   - Si no se envían, devuelve los contadores existentes en `visitas_flujo`.
   - Respuesta: `{ visitasFlujo: [{ id, nombre_flujo, contador }], totalVisitas }`
@@ -30,3 +30,4 @@
 ## Pruebas
 - Unit tests con repositorios mock (`visits.service.spec.ts`).
 - Ejecutar: `npm test -- --runInBand`.
+

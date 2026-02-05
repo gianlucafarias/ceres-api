@@ -8,17 +8,17 @@ Migrar los endpoints de impuestos municipales manteniendo compatibilidad con el 
   - El bot debe enviar header `x-api-key` con el valor de `BOT_API_KEY`.
 
 ## Endpoints
-- `POST /v1/impuestos/consulta`
+- `POST /api/v1/impuestos/consulta`
   - Body libre (se envia tal cual a la API municipal).
   - Respuesta: `{ RESU, RESPUESTA, MENS? }`.
-- `GET /v1/impuestos/pdf/:tipo/:partida`
+- `GET /api/v1/impuestos/pdf/:tipo/:partida`
   - Genera URL de PDF, valida existencia con HEAD.
   - Respuesta OK: `{ success: true, url }`.
   - Error: `400` con `{ error }`.
-- `POST /v1/impuestos/consultar-deuda`
+- `POST /api/v1/impuestos/consultar-deuda`
   - Body: `{ REGLOG, ESTADO }`.
   - Error: `400` si RESU != OK.
-- `POST /v1/impuestos/solicitar-cedulon`
+- `POST /api/v1/impuestos/solicitar-cedulon`
   - Body: `{ REGNRO }`.
   - Respuesta OK agrega `urlPDF`.
   - Error: `400` si RESU != OK.
@@ -37,3 +37,4 @@ Agregar en `.env` o `.env.local`:
 
 ## Postman
 - Nueva carpeta **Impuestos** con ejemplos de cada endpoint.
+

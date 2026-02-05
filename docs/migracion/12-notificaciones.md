@@ -1,4 +1,4 @@
-﻿# 12 - Modulo Notificaciones
+# 12 - Modulo Notificaciones
 
 ## Alcance
 - Preferencias de recordatorios de residuos (humedos, secos, patio).
@@ -7,20 +7,20 @@
 
 ## Seguridad
 - `BOT_API_KEY`:
-  - `POST /v1/preferencias`
-  - `GET /v1/preferencias/:contactId`
+  - `POST /api/v1/preferencias`
+  - `GET /api/v1/preferencias/:contactId`
 - Publico:
-  - `POST /v1/seccion`
+  - `POST /api/v1/seccion`
 - `ADMIN_API_KEY`:
-  - `POST /v1/ejecutar-manual`
-  - `POST /v1/whatsapp/template`
+  - `POST /api/v1/ejecutar-manual`
+  - `POST /api/v1/whatsapp/template`
 
 ## Endpoints (v1)
-- `POST /v1/preferencias`
-- `GET /v1/preferencias/:contactId`
-- `POST /v1/seccion`
-- `POST /v1/ejecutar-manual`
-- `POST /v1/whatsapp/template`
+- `POST /api/v1/preferencias`
+- `GET /api/v1/preferencias/:contactId`
+- `POST /api/v1/seccion`
+- `POST /api/v1/ejecutar-manual`
+- `POST /api/v1/whatsapp/template`
 
 ## Respuestas
 - Se incluye `success: true` para compatibilidad con el bot.
@@ -28,7 +28,7 @@
 
 ## Notas
 - No se ejecutan cron/jobs automaticos en este servicio.
-- El envio de WhatsApp se centraliza en `POST /v1/whatsapp/template`.
+- El envio de WhatsApp se centraliza en `POST /api/v1/whatsapp/template`.
 - `contact_id` refiere al `contact.id`.
 
 ## Cambios pendientes (bot)
@@ -38,7 +38,7 @@
 
 ## Cambios pendientes (dashboard)
 - Reemplazar envio directo a `https://api.ceres.gob.ar/v1/template` por:
-  - `POST {API_URL}/v1/whatsapp/template`
+  - `POST {API_URL}/api/v1/whatsapp/template`
   - Header `x-api-key: ADMIN_API_KEY`
   - Mantener el mismo payload `{ number, template, languageCode, components }`.
 
@@ -52,3 +52,4 @@
 
 ## Pruebas
 - `npm test -- notificaciones`
+

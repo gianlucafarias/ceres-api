@@ -3,9 +3,9 @@
 Backend público de referencia para la ciudad de Ceres. Migramos paso a paso el servidor Express legacy a NestJS 11, manteniendo la base de datos PostgreSQL y compatibilidad de endpoints mientras modernizamos arquitectura, seguridad y DX.
 
 ## Estado actual
-- Infra básica lista: ConfigModule global, TypeORM con `synchronize: false`, Redis opcional, healthcheck `GET /v1/health`.
+- Infra básica lista: ConfigModule global, TypeORM con `synchronize: false`, Redis opcional, healthcheck `GET /api/v1/health`.
 - Modelo de datos portado a TypeORM (ver `src/entities/`).
-- DTOs iniciales alineados con el backend legacy (ver `src/contracts/`).
+- DTOs alineados con el backend legacy por módulo (ver `src/modules/*/dto`).
 - Documentación de fases en `docs/migracion/`.
 
 ## Cómo correr
@@ -14,12 +14,12 @@ npm install
 cp .env.example .env    # completar credenciales reales
 npm run start:dev
 # healthcheck
-curl http://localhost:${PORT:-3000}/v1/health
+curl http://localhost:${PORT:-3000}/api/v1/health
 ```
 
 ## Estructura clave
 - `src/entities`: entidades TypeORM mapeadas 1:1 a tablas existentes.
-- `src/contracts`: DTOs y contratos de validación (`class-validator`).
+- `src/modules/*/dto`: DTOs y contratos de validación (`class-validator`) por módulo.
 - `src/shared/redis`: servicio Redis global (opcional).
 - `docs/migracion`: guías por fase (infra, entidades, DTOs, próximos módulos).
 
@@ -36,3 +36,4 @@ curl http://localhost:${PORT:-3000}/v1/health
 
 ## Licencia
 UNLICENSED (se definirá al hacer público el repo).
+

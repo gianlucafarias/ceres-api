@@ -105,7 +105,7 @@ export class AmeliaTurno {
   customerPanelUrl?: string | null;
 
   @Column({ type: 'jsonb', nullable: true })
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 
   @Column({
     name: 'provider_name',

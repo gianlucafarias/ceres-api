@@ -1,5 +1,6 @@
 import { Controller, Get, HttpException, HttpStatus, Query, UseGuards } from '@nestjs/common';
 import { AdminApiKeyGuard } from '../../common/guards/admin-api-key.guard';
+import { toErrorMessage } from '../../common/utils/error-message';
 import { ConversacionesQueryDto } from './dto/conversaciones.dto';
 import { ConversacionesService } from './conversaciones.service';
 
@@ -13,9 +14,10 @@ export class ConversacionesController {
     try {
       const conversaciones = await this.service.getAll(query.from, query.to);
       return conversaciones;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = toErrorMessage(error, 'Error al obtener las conversaciones');
       throw new HttpException(
-        { error: 'Error al obtener las conversaciones' },
+        { error: message },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

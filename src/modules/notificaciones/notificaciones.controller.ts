@@ -1,6 +1,7 @@
 ﻿import { Body, Controller, Get, NotFoundException, Param, Post, UseGuards } from '@nestjs/common';
 import { AdminApiKeyGuard } from '../../common/guards/admin-api-key.guard';
 import { BotApiKeyGuard } from '../../common/guards/bot-api-key.guard';
+import { PreferenciasUsuario } from '../../entities/preferencias-usuario.entity';
 import { NotificacionesService } from './notificaciones.service';
 import {
   ActualizarPreferenciasDto,
@@ -62,7 +63,7 @@ export class NotificacionesController {
     return { success: true, mensaje: 'Template enviado correctamente' };
   }
 
-  private mapPreferencias(preferencias: any) {
+  private mapPreferencias(preferencias: PreferenciasUsuario) {
     return {
       ...preferencias,
       notificar_humedo: preferencias.notificarHumedo,

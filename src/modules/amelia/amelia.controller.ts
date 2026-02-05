@@ -12,7 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { AdminApiKeyGuard } from '../../common/guards/admin-api-key.guard';
 import {
   ActualizarEstadoDto,
@@ -35,7 +35,7 @@ export class AmeliaController {
   }
 
   @Post('webhook/amelia')
-  async webhookAmelia(@Req() req: Request, @Body() body: any, @Query('token') token?: string) {
+  async webhookAmelia(@Req() req: Request, @Body() body: unknown, @Query('token') token?: string) {
     const receivedToken = this.getWebhookToken(req, body, token);
     if (this.webhookSecret && receivedToken !== this.webhookSecret) {
       throw new HttpException(
@@ -61,8 +61,8 @@ export class AmeliaController {
           notificacionEnviada: turno.notificacionEnviada,
         },
       };
-    } catch (error: any) {
-      const message = error?.message || 'Error interno al procesar el turno';
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error interno al procesar el turno';
       const isBadRequest = message.toLowerCase().includes('payload') || message.toLowerCase().includes('booking');
       throw new HttpException(
         { success: false, error: message },
@@ -77,9 +77,10 @@ export class AmeliaController {
     try {
       const turnos = await this.service.obtenerTurnosPorTelefono(params.telefono);
       return { success: true, count: turnos.length, data: turnos };
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error al obtener turnos';
       throw new HttpException(
-        { success: false, error: 'Error al obtener turnos', message: error?.message },
+        { success: false, error: 'Error al obtener turnos', message },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -98,10 +99,11 @@ export class AmeliaController {
       }
 
       return { success: true, data: turno };
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof HttpException) throw error;
+      const message = error instanceof Error ? error.message : 'Error al obtener turno';
       throw new HttpException(
-        { success: false, error: 'Error al obtener turno', message: error?.message },
+        { success: false, error: 'Error al obtener turno', message },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -120,10 +122,11 @@ export class AmeliaController {
       }
 
       return { success: true, data: turno };
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof HttpException) throw error;
+      const message = error instanceof Error ? error.message : 'Error al obtener turno';
       throw new HttpException(
-        { success: false, error: 'Error al obtener turno', message: error?.message },
+        { success: false, error: 'Error al obtener turno', message },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -146,8 +149,8 @@ export class AmeliaController {
         message: 'Estado actualizado exitosamente',
         data: turnoActualizado,
       };
-    } catch (error: any) {
-      const message = error?.message || 'Error al actualizar estado';
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error al actualizar estado';
       const status = message.toLowerCase().includes('no encontrado')
         ? HttpStatus.NOT_FOUND
         : HttpStatus.INTERNAL_SERVER_ERROR;
@@ -161,30 +164,35 @@ export class AmeliaController {
     try {
       await this.service.reintentarNotificacionesFallidas(dto.maxIntentos || 3);
       return { success: true, message: 'Proceso de reintento iniciado' };
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error al reintentar notificaciones';
       throw new HttpException(
-        { success: false, error: 'Error al reintentar notificaciones', message: error?.message },
+        { success: false, error: 'Error al reintentar notificaciones', message },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
 
-  private getWebhookToken(req: Request, body: any, queryToken?: string): string | undefined {
+  private getWebhookToken(req: Request, body: unknown, queryToken?: string): string | undefined {
     const authHeader = req.headers['authorization'];
     const tokenFromHeader = typeof authHeader === 'string'
       ? authHeader.replace(/^Bearer\s+/i, '')
       : undefined;
-    const tokenFromBody = body && typeof body === 'object' ? body.token : undefined;
+    const tokenFromBody = this.isRecord(body) ? (body.token as string | undefined) : undefined;
 
     return tokenFromHeader || queryToken || tokenFromBody;
   }
 
-  private removeTokenFromBody(body: any) {
-    if (!body || typeof body !== 'object') return body;
-    const clone = { ...body };
+  private removeTokenFromBody(body: unknown): Record<string, unknown> | unknown {
+    if (!this.isRecord(body)) return body;
+    const clone: Record<string, unknown> = { ...body };
     if ('token' in clone) {
       delete clone.token;
     }
     return clone;
+  }
+
+  private isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null;
   }
 }

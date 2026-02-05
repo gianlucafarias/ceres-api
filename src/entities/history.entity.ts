@@ -22,7 +22,7 @@ export class History {
   phone!: string;
 
   @Column({ type: 'jsonb' })
-  options!: Record<string, any>;
+  options!: Record<string, unknown>;
 
   @Column({ name: 'created_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt!: Date;

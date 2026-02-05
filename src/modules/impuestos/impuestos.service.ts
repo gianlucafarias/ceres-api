@@ -1,14 +1,18 @@
-import axios from 'axios';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { HttpClient } from '../../shared/http/http-client.service';
 import { ConsultarDeudaDto, SolicitarCedulonDto } from './dto/impuestos.dto';
 
-interface ConsultaResponse {
+export interface ConsultaResponse {
   RESU: string;
   MENS?: string;
-  RESPUESTA: any;
+  RESPUESTA: unknown;
   error?: string;
 }
+
+export type SolicitarCedulonResponse = ConsultaResponse | { error: string; urlPDF?: string };
+
+type ConsultaPayload = Record<string, unknown> | string;
 
 @Injectable()
 export class ImpuestosService {
@@ -17,14 +21,17 @@ export class ImpuestosService {
   private readonly opeNom: string;
   private readonly opePas: string;
 
-  constructor(private readonly config: ConfigService) {
+  constructor(
+    private readonly config: ConfigService,
+    private readonly http: HttpClient,
+  ) {
     this.apiUrl = this.config.get<string>('IMPUESTOS_API_URL', 'https://mceres-server.dyndns.org/unire_api.php');
     this.muniUrl = this.config.get<string>('IMPUESTOS_MUNI_URL', 'https://mceres-server.dyndns.org/');
     this.opeNom = this.config.get<string>('IMPUESTOS_OPE_NOM', 'PS');
     this.opePas = this.config.get<string>('IMPUESTOS_OPE_PAS', '123456');
   }
 
-  async consulta(payload: any): Promise<ConsultaResponse> {
+  async consulta(payload: ConsultaPayload): Promise<ConsultaResponse> {
     return this.consultaPost(payload);
   }
 
@@ -42,12 +49,17 @@ export class ImpuestosService {
       return { error: resultado1?.MENS || 'Error en la primera consulta' };
     }
 
+    const reglog = this.extractReglog(resultado1.RESPUESTA);
+    if (!reglog) {
+      return { error: 'No se recibio REGLOG en la respuesta' };
+    }
+
     const segundaConsulta = {
       OPE_NOM: this.opeNom,
       OPE_PAS: this.opePas,
       FNC: 'UW',
       REPORTE: 'RWEB_IU2',
-      REGLOG: resultado1.RESPUESTA?.REGLOG,
+      REGLOG: reglog,
     };
 
     const resultado2 = await this.consultaPost(segundaConsulta);
@@ -55,7 +67,7 @@ export class ImpuestosService {
       return { error: resultado2?.MENS || 'Error en la segunda consulta' };
     }
 
-    const camino: string = resultado2.RESPUESTA;
+    const camino = typeof resultado2.RESPUESTA === 'string' ? resultado2.RESPUESTA : '';
     if (!camino) {
       return { error: 'No se recibio respuesta con la ruta del PDF' };
     }
@@ -70,11 +82,11 @@ export class ImpuestosService {
 
     for (let intento = 0; intento < 5; intento += 1) {
       try {
-        const headResponse = await axios.head(urlPdf);
-        if (headResponse.status === 200) {
+        const status = await this.http.head(urlPdf);
+        if (status === 200) {
           return { success: true, url: urlPdf };
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         // continue retry
       }
 
@@ -111,7 +123,7 @@ export class ImpuestosService {
       return resultado;
     }
 
-    const rutaPDF = resultado.RESPUESTA;
+    const rutaPDF = typeof resultado.RESPUESTA === 'string' ? resultado.RESPUESTA : '';
     if (!rutaPDF) {
       return { error: 'No se recibio respuesta con la ruta del PDF' };
     }
@@ -129,26 +141,35 @@ export class ImpuestosService {
     };
   }
 
-  private async consultaPost(urlData: any): Promise<ConsultaResponse> {
+  private async consultaPost(urlData: ConsultaPayload): Promise<ConsultaResponse> {
     try {
       const jsonData = typeof urlData === 'string' ? urlData : JSON.stringify(urlData);
 
-      const response = await axios.post(this.apiUrl, jsonData, {
+      return await this.http.post<ConsultaResponse, string>(this.apiUrl, jsonData, {
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
         },
         timeout: 30000,
       });
-
-      return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error en consultaPost';
       return {
         RESU: 'ERROR',
         RESPUESTA: null,
-        error: error?.message ?? 'Error en consultaPost',
+        error: message,
       };
     }
+  }
+
+  private extractReglog(respuesta: unknown): string | null {
+    if (!this.isRecord(respuesta)) return null;
+    const reglog = respuesta.REGLOG;
+    return typeof reglog === 'string' ? reglog : null;
+  }
+
+  private isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null;
   }
 
   private toMuniUrl(path: string): string {

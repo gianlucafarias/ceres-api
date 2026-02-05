@@ -5,7 +5,7 @@ import { FeedbackService } from './feedback.service';
 
 describe('FeedbackService', () => {
   let service: FeedbackService;
-  let repo: any;
+  let repo: { find: jest.MockedFunction<() => Promise<Array<{ id: number }>>> };
 
   beforeEach(async () => {
     repo = {

@@ -1,4 +1,4 @@
-﻿# 10 - Estadisticas de Reclamos
+# 10 - Estadisticas de Reclamos
 
 ## Alcance
 - Estadisticas avanzadas para dashboard.
@@ -9,14 +9,14 @@
 - Dashboard: `ADMIN_API_KEY` (header `x-api-key` o `?api_key=`).
 
 ## Endpoints (v1)
-- `GET /v1/reclamos/estadisticas`
-- `GET /v1/reclamos/count-by-status`
-- `GET /v1/reclamos/count-by-priority`
-- `GET /v1/reclamos/count-by-type`
-- `GET /v1/reclamos/count-by-barrio`
+- `GET /api/v1/reclamos/estadisticas`
+- `GET /api/v1/reclamos/count-by-status`
+- `GET /api/v1/reclamos/count-by-priority`
+- `GET /api/v1/reclamos/count-by-type`
+- `GET /api/v1/reclamos/count-by-barrio`
 
 ## Respuestas
-### `GET /v1/reclamos/estadisticas`
+### `GET /api/v1/reclamos/estadisticas`
 ```json
 {
   "reclamosPorMes": [{ "mes": "2026-01-01T00:00:00.000Z", "cantidad": "12" }],
@@ -25,22 +25,22 @@
 }
 ```
 
-### `GET /v1/reclamos/count-by-status`
+### `GET /api/v1/reclamos/count-by-status`
 ```json
 [{ "estado": "PENDIENTE", "count": "10" }]
 ```
 
-### `GET /v1/reclamos/count-by-priority`
+### `GET /api/v1/reclamos/count-by-priority`
 ```json
 [{ "prioridad": "ALTA", "count": "7" }]
 ```
 
-### `GET /v1/reclamos/count-by-type`
+### `GET /api/v1/reclamos/count-by-type`
 ```json
 [{ "tipo": "bache", "count": "3" }]
 ```
 
-### `GET /v1/reclamos/count-by-barrio`
+### `GET /api/v1/reclamos/count-by-barrio`
 ```json
 [{ "barrio": "centro", "count": "6" }]
 ```
@@ -53,3 +53,4 @@
 ## Notas
 - `count-by-barrio` normaliza el texto (`LOWER`, quita prefijo `barrio `).
 - `estadisticas` calcula ultimos 6 meses, tiempo promedio de resolucion y eficiencia por cuadrilla.
+

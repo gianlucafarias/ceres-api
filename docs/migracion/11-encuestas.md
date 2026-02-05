@@ -1,4 +1,4 @@
-﻿# 11 - Modulo Encuestas (Presupuesto/Obras)
+# 11 - Modulo Encuestas (Presupuesto/Obras)
 
 ## Alcance
 - Formulario publico: validar DNI y guardar encuesta.
@@ -7,26 +7,26 @@
 
 ## Seguridad
 - Publico (sin API key):
-  - `POST /v1/validar-dni`
-  - `POST /v1/guardar`
-  - `GET /v1/encuestaobras/estado/:id`
+  - `POST /api/v1/validar-dni`
+  - `POST /api/v1/guardar`
+  - `GET /api/v1/encuestaobras/estado/:id`
 - Dashboard: `ADMIN_API_KEY`.
 
 ## Endpoints (v1)
 ### Publico
-- `POST /v1/validar-dni`
-- `POST /v1/guardar`
-- `GET /v1/encuestaobras/estado/:id`
+- `POST /api/v1/validar-dni`
+- `POST /api/v1/guardar`
+- `GET /api/v1/encuestaobras/estado/:id`
 
 ### Dashboard (ADMIN_API_KEY)
-- `GET /v1/encuestaobras/estadisticas` (opcional `?barrio=`)
-- `GET /v1/encuestaobras/estadisticas-redis`
-- `GET /v1/encuestaobras/todas` (query: `page`, `per_page`, `sort`, `order`, `barrio`, `estado`, `desde`, `hasta`, `search`)
-- `GET /v1/encuestaobras/por-barrio/:barrio`
-- `GET /v1/encuestaobras/respuesta/:id`
-- `PUT /v1/encuestaobras/editar/:id`
-- `DELETE /v1/encuestaobras/eliminar/:id`
-- `GET /v1/encuestaobras/:id` (alias de respuesta)
+- `GET /api/v1/encuestaobras/estadisticas` (opcional `?barrio=`)
+- `GET /api/v1/encuestaobras/estadisticas-redis`
+- `GET /api/v1/encuestaobras/todas` (query: `page`, `per_page`, `sort`, `order`, `barrio`, `estado`, `desde`, `hasta`, `search`)
+- `GET /api/v1/encuestaobras/por-barrio/:barrio`
+- `GET /api/v1/encuestaobras/respuesta/:id`
+- `PUT /api/v1/encuestaobras/editar/:id`
+- `DELETE /api/v1/encuestaobras/eliminar/:id`
+- `GET /api/v1/encuestaobras/:id` (alias de respuesta)
 
 ## Respuestas
 - Se mantiene el formato `{ success: true, data: ... }` para el dashboard.
@@ -54,3 +54,4 @@
 - Se reutiliza la entidad `EncuestaPresupuesto`.
 - Se valida DNI (7-8 digitos) y limites de arrays (`obrasUrgentes` max 3, `serviciosMejorar` max 2).
 - `obrasUrgentes`, `serviciosMejorar` se guardan en `jsonb`.
+

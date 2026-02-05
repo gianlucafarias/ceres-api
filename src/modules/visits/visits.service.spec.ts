@@ -6,8 +6,14 @@ import { VisitsService } from './visits.service';
 
 describe('VisitsService', () => {
   let service: VisitsService;
-  let flowRepo: any;
-  let convRepo: any;
+  let flowRepo: { find: jest.MockedFunction<() => Promise<Array<{ id: number; nombre_flujo: string; contador: number }>>> };
+  let convRepo: { createQueryBuilder: jest.MockedFunction<() => QueryBuilderMock> };
+
+  type QueryBuilderMock = {
+    where: jest.MockedFunction<(sql: string, params?: Record<string, unknown>) => QueryBuilderMock>;
+    andWhere: jest.MockedFunction<(sql: string, params?: Record<string, unknown>) => QueryBuilderMock>;
+    getCount: jest.MockedFunction<() => Promise<number>>;
+  };
 
   beforeEach(async () => {
     flowRepo = {

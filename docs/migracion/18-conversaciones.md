@@ -7,7 +7,7 @@ Migrar listado de conversaciones (resumen) con filtro de fechas.
 - **ADMIN_API_KEY** (dashboard).
 
 ## Endpoints
-- `GET /v1/conversaciones?from=YYYY-MM-DD&to=YYYY-MM-DD`
+- `GET /api/v1/conversaciones?from=YYYY-MM-DD&to=YYYY-MM-DD`
   - Si `from` y `to` no se envian, devuelve todo.
 
 ## Notas
@@ -15,3 +15,4 @@ Migrar listado de conversaciones (resumen) con filtro de fechas.
 
 ## Postman
 - Nueva carpeta **Conversaciones** con ejemplo.
+

@@ -5,7 +5,7 @@
 - Filtra por rango de fechas opcional (`from`, `to`) sobre `contact.created_at`.
 
 ## Endpoint (v1)
-- `GET /v1/users/count?from&to`
+- `GET /api/v1/users/count?from&to`
   - Params opcionales `from`, `to` en ISO 8601.
   - Respuesta: `{ "count": number }`.
 
@@ -24,3 +24,4 @@
 
 ## Pruebas
 - Unit test con repositorio mock (`users.service.spec.ts`), se ejecuta con `npm test -- --runInBand`.
+

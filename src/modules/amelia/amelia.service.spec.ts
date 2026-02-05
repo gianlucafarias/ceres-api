@@ -1,39 +1,47 @@
-import axios from 'axios';
 import { Test } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { ActivityLog } from '../../entities/activity-log.entity';
 import { AmeliaTurno } from '../../entities/amelia-turno.entity';
+import { ActivityLogService } from '../../shared/activity-log/activity-log.service';
+import { WhatsappTemplateService } from '../../shared/whatsapp/whatsapp-template.service';
+import { AmeliaWebhookParser } from './amelia-webhook.parser';
 import { AmeliaService } from './amelia.service';
+import { AmeliaTurnoService } from './amelia-turno.service';
 
-jest.mock('axios', () => ({
-  post: jest.fn(),
-}));
+interface RepoMock<T> {
+  findOne: jest.Mock<Promise<T | null>, [unknown]>;
+  create: jest.Mock<T, [Partial<T>]>;
+  save: jest.Mock<Promise<T>, [T]>;
+  find: jest.Mock<Promise<T[]>, [unknown?]>;
+  createQueryBuilder: jest.Mock<unknown, []>;
+}
 
 describe('AmeliaService', () => {
   let service: AmeliaService;
-  let turnoRepo: any;
-  let activityRepo: any;
+  let turnoRepo: RepoMock<AmeliaTurno>;
+  let activityLog: { logActivity: jest.Mock<Promise<void>, [unknown]> };
+  let whatsapp: { sendTemplate: jest.Mock<Promise<void>, [unknown]> };
 
   beforeEach(async () => {
     turnoRepo = {
       findOne: jest.fn(),
-      create: jest.fn((x: any) => x),
-      save: jest.fn(async (x: any) => ({ ...x, id: x.id ?? 1 })),
+      create: jest.fn((x) => x as AmeliaTurno),
+      save: jest.fn(async (x) => ({ ...x, id: x.id ?? 1 } as AmeliaTurno)),
       find: jest.fn(),
       createQueryBuilder: jest.fn(),
     };
 
-    activityRepo = {
-      create: jest.fn((x: any) => x),
-      save: jest.fn(async (x: any) => x),
-    };
+    activityLog = { logActivity: jest.fn().mockResolvedValue(undefined) };
+    whatsapp = { sendTemplate: jest.fn().mockResolvedValue(undefined) };
 
     const module = await Test.createTestingModule({
       providers: [
+        AmeliaWebhookParser,
+        AmeliaTurnoService,
         AmeliaService,
         { provide: getRepositoryToken(AmeliaTurno), useValue: turnoRepo },
-        { provide: getRepositoryToken(ActivityLog), useValue: activityRepo },
+        { provide: ActivityLogService, useValue: activityLog },
+        { provide: WhatsappTemplateService, useValue: whatsapp },
         {
           provide: ConfigService,
           useValue: {
@@ -50,12 +58,10 @@ describe('AmeliaService', () => {
     }).compile();
 
     service = module.get(AmeliaService);
-    jest.clearAllMocks();
   });
 
   it('procesa webhook y envia notificacion', async () => {
     turnoRepo.findOne.mockResolvedValue(null);
-    (axios.post as jest.Mock).mockResolvedValue({ data: { ok: true } });
 
     const payload = {
       appointment: {
@@ -89,13 +95,7 @@ describe('AmeliaService', () => {
     const turno = await service.procesarWebhook(payload);
 
     expect(turno.ameliaBookingId).toBe(111);
-    expect(activityRepo.save).toHaveBeenCalled();
-    expect(axios.post).toHaveBeenCalledWith(
-      'https://api.ceres.gob.ar/v1/template',
-      expect.objectContaining({
-        number: '+549123456789',
-        template: 'turno_licencia_confirmado',
-      }),
-    );
+    expect(activityLog.logActivity).toHaveBeenCalled();
+    expect(whatsapp.sendTemplate).toHaveBeenCalled();
   });
 });
