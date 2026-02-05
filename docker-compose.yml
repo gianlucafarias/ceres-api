@@ -1,0 +1,13 @@
+﻿version: "3.9"
+
+services:
+  api:
+    image: ghcr.io/gianlucafarias/ceres-api:main
+    container_name: ceres-api
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      PORT: 3022
+    ports:
+      - "3022:3022"
+    restart: unless-stopped

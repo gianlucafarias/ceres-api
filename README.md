@@ -1,4 +1,4 @@
-# Ceres API (NestJS 11) — Migración incremental desde Express
+﻿# Ceres API (NestJS 11) — Migración incremental desde Express
 
 Backend público de referencia para la ciudad de Ceres. Migramos paso a paso el servidor Express legacy a NestJS 11, manteniendo la base de datos PostgreSQL y compatibilidad de endpoints mientras modernizamos arquitectura, seguridad y DX.
 
@@ -16,6 +16,21 @@ npm run start:dev
 # healthcheck
 curl http://localhost:${PORT:-3000}/api/v1/health
 ```
+
+## Docker (local)
+```bash
+docker build -t ceres-api:local .
+docker run --rm -p 3022:3022 \
+  -e PORT=3022 \
+  -e NODE_ENV=production \
+  -e DB_HOST=... -e DB_PORT=5432 -e DB_USERNAME=... -e DB_PASSWORD=... -e DB_DATABASE=... \
+  -e REDIS_HOST=... -e REDIS_PORT=6379 -e REDIS_PASSWORD=... \
+  -e ADMIN_API_KEY=... -e BOT_API_KEY=... \
+  ceres-api:local
+```
+
+## CI/CD (Docker + GHCR)
+Ver `docs/migracion/21-ci-cd.md` para pasos de configuración completos.
 
 ## Estructura clave
 - `src/entities`: entidades TypeORM mapeadas 1:1 a tablas existentes.
@@ -36,4 +51,3 @@ curl http://localhost:${PORT:-3000}/api/v1/health
 
 ## Licencia
 UNLICENSED (se definirá al hacer público el repo).
-
