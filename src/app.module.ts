@@ -11,6 +11,7 @@ import { UsersModule } from './modules/users/users.module';
 import { InteractionsModule } from './modules/interactions/interactions.module';
 import { ContactsModule } from './modules/contacts/contacts.module';
 import { HistoryModule } from './modules/history/history.module';
+import { ActivityModule } from './modules/activity/activity.module';
 import { VisitsModule } from './modules/visits/visits.module';
 import { ReclamosModule } from './modules/reclamos/reclamos.module';
 import { ReclamosPdfModule } from './modules/reclamos-pdf/reclamos-pdf.module';
@@ -50,6 +51,7 @@ import { ConversacionesModule } from './modules/conversaciones/conversaciones.mo
     InteractionsModule,
     ContactsModule,
     HistoryModule,
+    ActivityModule,
     VisitsModule,
     ReclamosModule,
     ReclamosPdfModule,

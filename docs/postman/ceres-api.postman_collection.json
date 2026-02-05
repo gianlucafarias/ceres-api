@@ -1193,6 +1193,24 @@
                                                   }
                                   }
                               ]
+                 },
+                 {
+                     "name":  "Activity",
+                     "item":  [
+                                  {
+                                      "name":  "GET /v1/activity/recent",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "x-api-key",
+                                                                         "value":  "{{adminApiKey}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/v1/activity/recent?limit={{activityLimit}}\u0026type={{activityType}}"
+                                                  }
+                                  }
+                              ]
                  }
              ],
     "variable":  [
@@ -1295,6 +1313,14 @@
                      {
                          "key":  "conversacionesTo",
                          "value":  "2026-02-04"
+                     },
+                     {
+                         "key":  "activityLimit",
+                         "value":  "10"
+                     },
+                     {
+                         "key":  "activityType",
+                         "value":  ""
                      }
                  ]
 }
