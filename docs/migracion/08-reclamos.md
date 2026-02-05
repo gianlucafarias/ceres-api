@@ -1,4 +1,4 @@
-# 08 - Módulo Reclamos (sin PDF)
+﻿# 08 - Módulo Reclamos (sin PDF)
 
 ## Alcance
 - Crea/consulta reclamos desde bot/ciudadano.
@@ -36,6 +36,7 @@
 - Se conserva la entidad `Reclamo` y `ReclamoHistorial`.
 - Paginación obligatoria en listados admin.
 - Historial registra cambios de estado, prioridad y cuadrilla; usa `usuarioId` si se envía.
+- Se registra activity_log para creacion y cambios de estado (dashboard) con entityType = reclamo.
 - Geocoding se intenta al crear o cambiar ubicación; si falla se registra pero no detiene el flujo.
 - Versionado URI `v1`.
 

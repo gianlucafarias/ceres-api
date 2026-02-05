@@ -1,5 +1,6 @@
 import { Test } from '@nestjs/testing';
 import { Reclamo } from '../../entities/reclamo.entity';
+import { ActivityLogService } from '../../shared/activity-log/activity-log.service';
 import { GeocodeService } from '../../shared/geocode/geocode.service';
 import { ReclamosHistorialService } from './reclamos-historial.service';
 import { ReclamosRepository } from './reclamos.repository';
@@ -33,6 +34,9 @@ describe('ReclamosService', () => {
   let geocodeService: {
     geocodeAddress: jest.MockedFunction<(address: string) => Promise<{ latitud: number; longitud: number }>>;
   };
+  let activityLog: {
+    logActivity: jest.MockedFunction<(params: unknown) => Promise<unknown>>;
+  };
 
   beforeEach(async () => {
     reclamosRepo = {
@@ -60,6 +64,9 @@ describe('ReclamosService', () => {
     geocodeService = {
       geocodeAddress: jest.fn().mockResolvedValue({ latitud: 1, longitud: 2 }),
     };
+    activityLog = {
+      logActivity: jest.fn(),
+    };
 
     const module = await Test.createTestingModule({
       providers: [
@@ -68,6 +75,7 @@ describe('ReclamosService', () => {
         { provide: ReclamosHistorialService, useValue: historialService },
         { provide: ReclamosStatsService, useValue: statsService },
         { provide: GeocodeService, useValue: geocodeService },
+        { provide: ActivityLogService, useValue: activityLog },
       ],
     }).compile();
 
@@ -96,6 +104,7 @@ describe('ReclamosService', () => {
 
     expect('telefono' in res).toBe(false);
     expect(historialService.registrarCreacion).toHaveBeenCalled();
+    expect(activityLog.logActivity).toHaveBeenCalled();
   });
 
   it('estadoParaBot omite telefono', async () => {
