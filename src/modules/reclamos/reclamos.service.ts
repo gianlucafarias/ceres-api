@@ -3,6 +3,7 @@ import { Reclamo } from '../../entities/reclamo.entity';
 import { CrearReclamoBotDto } from './dto/reclamos-bot.dto';
 import { ActualizarReclamoAdminDto, ReclamosFiltroAdminDto } from './dto/reclamos-admin.dto';
 import { GeocodeService } from '../../shared/geocode/geocode.service';
+import { ActivityLogService } from '../../shared/activity-log/activity-log.service';
 import { ReclamosHistorialService } from './reclamos-historial.service';
 import { ReclamosRepository } from './reclamos.repository';
 import { ReclamosStatsService } from './reclamos-stats.service';
@@ -18,6 +19,7 @@ export class ReclamosService {
     private readonly historialService: ReclamosHistorialService,
     private readonly statsService: ReclamosStatsService,
     private readonly geocodeService: GeocodeService,
+    private readonly activityLog: ActivityLogService,
   ) {}
 
   // --- Bot ---
@@ -40,6 +42,7 @@ export class ReclamosService {
     const saved = await this.reclamosRepo.save(entity);
 
     await this.historialService.registrarCreacion(saved.id);
+    await this.logCreacion(saved);
 
     return this.toBotDto(saved);
   }
@@ -103,6 +106,7 @@ export class ReclamosService {
     // Historial
     if (dto.estado !== undefined && dto.estado !== prevEstado) {
       await this.historialService.registrarCambioEstado(id, prevEstado ?? null, dto.estado, dto.usuarioId);
+      await this.logCambioEstado(saved, prevEstado ?? null, dto.estado, dto.usuarioId);
     }
     if (dto.prioridad !== undefined && dto.prioridad !== prevPrioridad) {
       await this.historialService.registrarCambioPrioridad(
@@ -160,5 +164,49 @@ export class ReclamosService {
   private toBotDto(rec: Reclamo): ReclamoSafe {
     const { telefono, ...rest } = rec;
     return rest;
+  }
+
+  private async logCreacion(reclamo: Reclamo): Promise<void> {
+    try {
+      await this.activityLog.logActivity({
+        type: 'RECLAMO',
+        action: 'CREACION',
+        description: `Nuevo reclamo registrado - ${reclamo.reclamo}`,
+        entityId: reclamo.id,
+        metadata: {
+          ubicacion: reclamo.ubicacion,
+          barrio: reclamo.barrio,
+          prioridad: reclamo.prioridad,
+        },
+      });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error desconocido';
+      this.logger.warn(`Activity log error: ${message}`);
+    }
+  }
+
+  private async logCambioEstado(
+    reclamo: Reclamo,
+    estadoAnterior: string | null,
+    estadoNuevo: string,
+    usuarioId?: number | null,
+  ): Promise<void> {
+    try {
+      await this.activityLog.logActivity({
+        type: 'RECLAMO',
+        action: 'ESTADO_CAMBIADO',
+        description: `Reclamo #${reclamo.id} - Cambio de estado: ${estadoAnterior ?? 'N/A'} -> ${estadoNuevo}`,
+        entityId: reclamo.id,
+        userId: usuarioId ?? undefined,
+        metadata: {
+          estadoAnterior: estadoAnterior ?? null,
+          estadoNuevo,
+          ubicacion: reclamo.ubicacion,
+        },
+      });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error desconocido';
+      this.logger.warn(`Activity log error: ${message}`);
+    }
   }
 }
