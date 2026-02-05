@@ -12,15 +12,15 @@
 
 ## Endpoints (v1)
 ### Bot (`BOT_API_KEY`)
-- `POST /v1/reclamos` (crear) → id, estado, fecha, reclamo, barrio, ubicacion (sin teléfono).
-- `GET /v1/reclamos/:id/estado` → estado y datos básicos (sin teléfono).
+- `POST /api/v1/reclamos` (crear) → id, estado, fecha, reclamo, barrio, ubicacion (sin teléfono).
+- `GET /api/v1/reclamos/:id/estado` → estado y datos básicos (sin teléfono).
 
 ### Dashboard (`ADMIN_API_KEY`)
-- `GET /v1/reclamos` (paginado, filtros estado/prioridad/barrio/fecha/search, sort/order).
-- `GET /v1/reclamos/:id` (detalle completo, incluye teléfono).
-- `PATCH /v1/reclamos/:id` (estado, prioridad, cuadrilla, detalle, ubicacion).
-- `GET /v1/reclamos/:id/historial`
-- `GET /v1/reclamos/estadisticas/basicas` (por estado, prioridad y tipo).
+- `GET /api/v1/reclamos` (paginado, filtros estado/prioridad/barrio/fecha/search, sort/order).
+- `GET /api/v1/reclamos/:id` (detalle completo, incluye teléfono).
+- `PATCH /api/v1/reclamos/:id` (estado, prioridad, cuadrilla, detalle, ubicacion).
+- `GET /api/v1/reclamos/:id/historial`
+- `GET /api/v1/reclamos/estadisticas/basicas` (por estado, prioridad y tipo).
 
 ## Estructura
 - `src/modules/reclamos/`
@@ -42,3 +42,4 @@
 ## Relacionados
 - Ver `09-reclamos-pdf.md` (PDFs).
 - Ver `10-reclamos-estadisticas.md` (estadísticas avanzadas).
+

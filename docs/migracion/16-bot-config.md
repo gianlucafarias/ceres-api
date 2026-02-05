@@ -7,11 +7,11 @@ Migrar configuraciones dinamicas del bot (claves/valores y expiracion).
 - **ADMIN_API_KEY** (dashboard).
 
 ## Endpoints
-- `GET /v1/config`
-- `GET /v1/config/:clave`
-- `POST /v1/config/:clave`
+- `GET /api/v1/config`
+- `GET /api/v1/config/:clave`
+- `POST /api/v1/config/:clave`
   - Body: `{ valor: string, activo: boolean, fecha_expiracion?: string | null }`
-- `PUT /v1/config/:clave`
+- `PUT /api/v1/config/:clave`
   - Body: `{ valor: string, activo: boolean, fecha_expiracion?: string | null }`
 
 ## Notas
@@ -21,3 +21,4 @@ Migrar configuraciones dinamicas del bot (claves/valores y expiracion).
 
 ## Postman
 - Nueva carpeta **BotConfig** con ejemplos de endpoints.
+

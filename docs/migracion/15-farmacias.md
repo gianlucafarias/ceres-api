@@ -9,20 +9,20 @@ Migrar endpoints de farmacias y turnos de farmacia (duty schedule).
 
 ## Endpoints
 ### Farmacias
-- `GET /v1/pharmacy/:code` (publico)
-- `PUT /v1/pharmacy/:code` (admin)
+- `GET /api/v1/pharmacy/:code` (publico)
+- `PUT /api/v1/pharmacy/:code` (admin)
   - Body: campos parciales `name`, `address`, `phone`, `lat`, `lng`, `googleMapsAddress`.
 
 ### Farmacia de turno
-- `GET /v1/farmaciadeturno/today` (publico)
-- `GET /v1/farmaciadeturno/calendar` (publico)
-- `GET /v1/farmaciadeturno?from=YYYY-MM-DD&to=YYYY-MM-DD` (publico)
-- `GET /v1/farmaciadeturno/:date` (publico)
-- `PUT /v1/farmaciadeturno/:date` (admin)
+- `GET /api/v1/farmaciadeturno/today` (publico)
+- `GET /api/v1/farmaciadeturno/calendar` (publico)
+- `GET /api/v1/farmaciadeturno?from=YYYY-MM-DD&to=YYYY-MM-DD` (publico)
+- `GET /api/v1/farmaciadeturno/:date` (publico)
+- `PUT /api/v1/farmaciadeturno/:date` (admin)
   - Body: `{ pharmacyCode }`
 
 ### Por farmacia
-- `GET /v1/farmacia/:code/duty-schedule?from=YYYY-MM-DD&limit=20` (publico)
+- `GET /api/v1/farmacia/:code/duty-schedule?from=YYYY-MM-DD&limit=20` (publico)
 
 ## Notas
 - `limit` se limita entre 1 y 366.
@@ -31,3 +31,4 @@ Migrar endpoints de farmacias y turnos de farmacia (duty schedule).
 
 ## Postman
 - Nueva carpeta **Farmacias** con ejemplos de endpoints publicos y admin.
+

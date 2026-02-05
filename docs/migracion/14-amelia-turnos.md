@@ -4,7 +4,7 @@
 Migrar el webhook de Amelia Booking y la gestion de turnos/licencias.
 
 ## Acceso
-- `POST /v1/webhook/amelia`: publico, **protegido por AMELIA_WEBHOOK_SECRET**.
+- `POST /api/v1/webhook/amelia`: publico, **protegido por AMELIA_WEBHOOK_SECRET**.
   - Token aceptado en:
     - Header `Authorization: Bearer <token>`
     - Query `?token=<token>`
@@ -12,14 +12,14 @@ Migrar el webhook de Amelia Booking y la gestion de turnos/licencias.
 - Endpoints administrativos: **ADMIN_API_KEY**.
 
 ## Endpoints
-- `POST /v1/webhook/amelia`
+- `POST /api/v1/webhook/amelia`
   - Procesa payload, crea/actualiza turno, loggea actividad y envia WhatsApp.
-- `GET /v1/turnos-licencia/telefono/:telefono`
-- `GET /v1/turnos-licencia/amelia/:ameliaBookingId`
-- `GET /v1/turnos-licencia/:id`
-- `PATCH /v1/turnos-licencia/:id/estado`
+- `GET /api/v1/turnos-licencia/telefono/:telefono`
+- `GET /api/v1/turnos-licencia/amelia/:ameliaBookingId`
+- `GET /api/v1/turnos-licencia/:id`
+- `PATCH /api/v1/turnos-licencia/:id/estado`
   - Body: `{ estado, usuarioId? }`
-- `POST /v1/turnos-licencia/reintentar-notificaciones`
+- `POST /api/v1/turnos-licencia/reintentar-notificaciones`
   - Body: `{ maxIntentos? }`
 
 ## WhatsApp
@@ -33,3 +33,4 @@ Migrar el webhook de Amelia Booking y la gestion de turnos/licencias.
 
 ## Postman
 - Nueva carpeta **Amelia** con ejemplos de cada endpoint.
+

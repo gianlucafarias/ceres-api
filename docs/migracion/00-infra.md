@@ -23,7 +23,7 @@ Archivo `.env` (ver `.env.example`):
 - Ping bajo demanda; no bloquea el arranque si falta.
 
 ## Healthcheck
-- Endpoint `GET /v1/health` (se usa versionado URI; sin prefijo adicional).
+- Endpoint `GET /api/v1/health` (versionado URI + prefijo global `api`).
 - Respuesta:
   ```json
   {
@@ -36,10 +36,11 @@ Archivo `.env` (ver `.env.example`):
   ```
 - `status:error` si la DB está caída.
 
-## Puertos y prefix
+## Puertos y prefijo
 - `PORT` por defecto 3000.
-- Prefijo global `v1` para nuevas rutas.
+- Prefijo global `api` + versionado URI (`/api/v1`).
 
 ## Próximos pasos
-- Validar conexión: `npm run start:dev` y abrir `GET http://localhost:3000/v1/health`.
-- Ajustar nginx para rutear `/v1/*` al nuevo servicio (legacy sigue sirviendo `/api/*`).
+- Validar conexión: `npm run start:dev` y abrir `GET http://localhost:3000/api/v1/health`.
+- Ajustar nginx para rutear `/api/v1/*` al nuevo servicio (el bot legacy sigue sirviendo `/v1/*`).
+

@@ -1,4 +1,4 @@
-﻿{
+{
     "info":  {
                  "name":  "Ceres API v1",
                  "schema":  "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -739,8 +739,7 @@
                                                   }
                                   }
                               ]
-                 }
-                 ,
+                 },
                  {
                      "name":  "Impuestos",
                      "item":  [
@@ -1025,7 +1024,7 @@
                                                       "header":  [
 
                                                                  ],
-                                                      "url":  "{{baseUrl}}/v1/farmaciadeturno?from={{startDate}}&to={{endDate}}"
+                                                      "url":  "{{baseUrl}}/v1/farmaciadeturno?from={{startDate}}\u0026to={{endDate}}"
                                                   }
                                   },
                                   {
@@ -1071,7 +1070,7 @@
                                                       "header":  [
 
                                                                  ],
-                                                      "url":  "{{baseUrl}}/v1/farmacia/{{farmaciaCode}}/duty-schedule?from={{startDate}}&limit=20"
+                                                      "url":  "{{baseUrl}}/v1/farmacia/{{farmaciaCode}}/duty-schedule?from={{startDate}}\u0026limit=20"
                                                   }
                                   }
                               ]
@@ -1190,7 +1189,7 @@
                                                                          "value":  "{{adminApiKey}}"
                                                                      }
                                                                  ],
-                                                      "url":  "{{baseUrl}}/v1/conversaciones?from={{conversacionesFrom}}&to={{conversacionesTo}}"
+                                                      "url":  "{{baseUrl}}/v1/conversaciones?from={{conversacionesFrom}}\u0026to={{conversacionesTo}}"
                                                   }
                                   }
                               ]
@@ -1199,7 +1198,7 @@
     "variable":  [
                      {
                          "key":  "baseUrl",
-                         "value":  "http://localhost:3012"
+                         "value":  "http://localhost:3012/api"
                      },
                      {
                          "key":  "adminApiKey",

@@ -5,13 +5,13 @@
 - Protegido con `ADMIN_API_KEY`.
 
 ## Endpoints (v1)
-- `GET /v1/history/last-day-interactions`
-- `GET /v1/history/messages-per-day`
-- `GET /v1/history/conversation-details?contactId|conversationId&page&limit`
-- `GET /v1/history?phone=&page=&limit=`
-- `GET /v1/history/conversation/:conversationId`
-- `GET /v1/history/range?startDate=&endDate=`
-- `GET /v1/history/all`
+- `GET /api/v1/history/last-day-interactions`
+- `GET /api/v1/history/messages-per-day`
+- `GET /api/v1/history/conversation-details?contactId|conversationId&page&limit`
+- `GET /api/v1/history?phone=&page=&limit=`
+- `GET /api/v1/history/conversation/:conversationId`
+- `GET /api/v1/history/range?startDate=&endDate=`
+- `GET /api/v1/history/all`
 
 ## Autenticación
 - Header `x-api-key: <ADMIN_API_KEY>` o `?api_key=`.
@@ -32,3 +32,4 @@
 ## Pruebas
 - Unit tests con repositorios mock (`history.service.spec.ts`).
 - Ejecutar: `npm test -- --runInBand`.
+

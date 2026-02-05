@@ -5,11 +5,11 @@
 
 ## Endpoints (v1)
 - Autenticación: encabezado `x-api-key: <ADMIN_API_KEY>` (o `?api_key=`). Solo dashboard.
-- `GET /v1/interactions/last-week/count/:start_date/:end_date/:group_by`  
+- `GET /api/v1/interactions/last-week/count/:start_date/:end_date/:group_by`  
   - `group_by`: `day | hour | keyword`
-- `GET /v1/interactions/today`
-- `GET /v1/interactions/count/:start_date/:end_date`
-- `GET /v1/interactions/count?from&to`
+- `GET /api/v1/interactions/today`
+- `GET /api/v1/interactions/count/:start_date/:end_date`
+- `GET /api/v1/interactions/count?from&to`
 
 ## Estructura
 - `src/modules/interactions/`
@@ -26,3 +26,4 @@
 
 ## Pruebas
 - Unit tests con repositorio mock (`interactions.service.spec.ts`), ejecutar con `npm test -- --runInBand`.
+

@@ -1,6 +1,6 @@
 # 02 - DTOs y contratos iniciales
 
-Objetivo: tipar requests/responses del legacy antes de mover módulos. Los DTOs viven dentro de cada módulo en src/modules/<modulo>/dto.
+Objetivo: tipar requests/responses del legacy antes de mover módulos. Los DTOs viven dentro de cada módulo en `src/modules/<modulo>/dto`.
 
 ## Comunes
 - `DateRangeQueryDto` (`from`,`to` ISO opcionales)
