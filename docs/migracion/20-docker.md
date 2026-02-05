@@ -15,8 +15,8 @@ docker build -t ceres-api:local .
 
 ## Run (local)
 ```bash
-docker run --rm -p 3012:3000 \
-  -e PORT=3000 \
+docker run --rm -p 3022:3022 \
+  -e PORT=3022 \
   -e NODE_ENV=production \
   -e DB_HOST=... -e DB_PORT=5432 -e DB_USERNAME=... -e DB_PASSWORD=... -e DB_DATABASE=... \
   -e REDIS_HOST=... -e REDIS_PORT=6379 -e REDIS_PASSWORD=... \
@@ -25,7 +25,7 @@ docker run --rm -p 3012:3000 \
 ```
 
 ## Healthcheck
-- `GET http://localhost:3012/api/v1/health`
+- `GET http://localhost:3022/api/v1/health`
 
 ## Notas
 - Si hay nginx/proxy, setear `TRUST_PROXY=1`.
