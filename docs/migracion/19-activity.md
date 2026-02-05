@@ -1,4 +1,4 @@
-# 19 - Activity (log de actividad)
+﻿# 19 - Activity (log de actividad)
 
 ## Alcance
 - Migrar el endpoint legacy `/api/recent` a Nest.
@@ -29,7 +29,7 @@
     ```
 
 ## Postman
-ColecciÃ³n: `Activity > GET /v1/activity/recent`.
+Coleccion: `Activity > GET /v1/activity/recent`.
 
 ## Notas
 - `timeAgo` se calcula en el backend para mantener compatibilidad con el dashboard actual.
