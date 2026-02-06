@@ -11,6 +11,8 @@ services:
       PORT: 3022
     ports:
       - "3022:3022"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     healthcheck:
       test:
         [
