@@ -1,6 +1,9 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { BotApiKeyGuard } from '../../common/guards/bot-api-key.guard';
-import { EstadoReclamoBotParamsDto, CrearReclamoBotDto } from './dto/reclamos-bot.dto';
+import {
+  EstadoReclamoBotParamsDto,
+  CrearReclamoBotDto,
+} from './dto/reclamos-bot.dto';
 import { ReclamosService } from './reclamos.service';
 
 @UseGuards(BotApiKeyGuard)

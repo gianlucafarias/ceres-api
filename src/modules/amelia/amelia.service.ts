@@ -6,7 +6,7 @@ import { ActivityLogService } from '../../shared/activity-log/activity-log.servi
 import { WhatsappTemplateService } from '../../shared/whatsapp/whatsapp-template.service';
 import { WhatsappComponent } from '../../shared/whatsapp/whatsapp.types';
 import { AmeliaTurno } from '../../entities/amelia-turno.entity';
-import { AmeliaWebhookParser, NormalizedAmeliaPayload } from './amelia-webhook.parser';
+import { AmeliaWebhookParser } from './amelia-webhook.parser';
 import { AmeliaTurnoService, EstadoTurno } from './amelia-turno.service';
 
 @Injectable()
@@ -49,11 +49,15 @@ export class AmeliaService {
         },
       });
 
-      await this.enviarNotificacionConfirmacion(result.turno, normalized);
+      await this.enviarNotificacionConfirmacion(result.turno);
       return result.turno;
     }
 
-    if (result.estadoAnterior && result.estadoNuevo && result.estadoAnterior !== result.estadoNuevo) {
+    if (
+      result.estadoAnterior &&
+      result.estadoNuevo &&
+      result.estadoAnterior !== result.estadoNuevo
+    ) {
       await this.activityLog.logActivity({
         type: 'TURNO_LICENCIA',
         action: 'ESTADO_CAMBIADO',
@@ -67,7 +71,7 @@ export class AmeliaService {
       });
 
       if (result.estadoNuevo === 'CANCELADO') {
-        await this.enviarNotificacionCancelacion(result.turno, normalized);
+        await this.enviarNotificacionCancelacion(result.turno);
       }
     }
 
@@ -78,7 +82,9 @@ export class AmeliaService {
     return this.turnoService.obtenerTurnosPorTelefono(telefono);
   }
 
-  async buscarPorAmeliaBookingId(ameliaBookingId: number): Promise<AmeliaTurno | null> {
+  async buscarPorAmeliaBookingId(
+    ameliaBookingId: number,
+  ): Promise<AmeliaTurno | null> {
     return this.turnoService.buscarPorAmeliaBookingId(ameliaBookingId);
   }
 
@@ -112,8 +118,11 @@ export class AmeliaService {
     return result.turno;
   }
 
-  async reintentarNotificacionesFallidas(maxIntentos: number = 3): Promise<void> {
-    const turnosSinNotificar = await this.turnoService.listarSinNotificar(maxIntentos);
+  async reintentarNotificacionesFallidas(
+    maxIntentos: number = 3,
+  ): Promise<void> {
+    const turnosSinNotificar =
+      await this.turnoService.listarSinNotificar(maxIntentos);
 
     for (const turno of turnosSinNotificar) {
       await this.enviarNotificacionConfirmacion(turno);
@@ -123,15 +132,19 @@ export class AmeliaService {
 
   private async enviarNotificacionConfirmacion(
     turno: AmeliaTurno,
-    normalized?: NormalizedAmeliaPayload,
   ): Promise<void> {
     if (!this.turnoService.isTelefonoValido(turno.telefono)) {
-      await this.turnoService.registrarErrorNotificacion(turno, `Telefono invalido: ${turno.telefono}`);
+      await this.turnoService.registrarErrorNotificacion(
+        turno,
+        `Telefono invalido: ${turno.telefono}`,
+      );
       return;
     }
 
     try {
-      const fechaFormateada = format(turno.fechaTurno, "EEEE d 'de' MMMM", { locale: es });
+      const fechaFormateada = format(turno.fechaTurno, "EEEE d 'de' MMMM", {
+        locale: es,
+      });
 
       const components: WhatsappComponent[] = [
         {
@@ -155,21 +168,23 @@ export class AmeliaService {
 
       await this.turnoService.marcarNotificacionEnviada(turno);
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Error desconocido';
+      const message =
+        error instanceof Error ? error.message : 'Error desconocido';
       await this.turnoService.registrarErrorNotificacion(turno, message);
     }
   }
 
   private async enviarNotificacionCancelacion(
     turno: AmeliaTurno,
-    normalized?: NormalizedAmeliaPayload,
   ): Promise<void> {
     if (!this.turnoService.isTelefonoValido(turno.telefono)) {
       return;
     }
 
     try {
-      const fechaFormateada = format(turno.fechaTurno, "EEEE d 'de' MMMM", { locale: es });
+      const fechaFormateada = format(turno.fechaTurno, "EEEE d 'de' MMMM", {
+        locale: es,
+      });
 
       const components: WhatsappComponent[] = [
         {
@@ -188,7 +203,7 @@ export class AmeliaService {
         languageCode: 'es_AR',
         components,
       });
-    } catch (error: unknown) {
+    } catch {
       // swallow
     }
   }

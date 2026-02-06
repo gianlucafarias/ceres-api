@@ -8,9 +8,13 @@ describe('BotConfigService', () => {
   let service: BotConfigService;
   let repo: {
     find: jest.MockedFunction<() => Promise<BotConfig[]>>;
-    findOne: jest.MockedFunction<(options?: unknown) => Promise<BotConfig | null>>;
+    findOne: jest.MockedFunction<
+      (options?: unknown) => Promise<BotConfig | null>
+    >;
     create: jest.MockedFunction<(x: Partial<BotConfig>) => Partial<BotConfig>>;
-    save: jest.MockedFunction<(x: Partial<BotConfig>) => Promise<Partial<BotConfig>>>;
+    save: jest.MockedFunction<
+      (x: Partial<BotConfig>) => Promise<Partial<BotConfig>>
+    >;
   };
 
   beforeEach(async () => {
@@ -18,7 +22,7 @@ describe('BotConfigService', () => {
       find: jest.fn().mockResolvedValue([]),
       findOne: jest.fn(),
       create: jest.fn((x: Partial<BotConfig>) => x),
-      save: jest.fn(async (x: Partial<BotConfig>) => x),
+      save: jest.fn((x: Partial<BotConfig>) => Promise.resolve(x)),
     };
 
     const module = await Test.createTestingModule({
@@ -48,7 +52,11 @@ describe('BotConfigService', () => {
     repo.findOne.mockResolvedValue({ id: 1, clave: 'clave' });
 
     await expect(
-      service.create('clave', { valor: 'x', activo: true, fecha_expiracion: null }),
+      service.create('clave', {
+        valor: 'x',
+        activo: true,
+        fecha_expiracion: null,
+      }),
     ).rejects.toBeInstanceOf(ConflictException);
   });
 
@@ -56,7 +64,11 @@ describe('BotConfigService', () => {
     repo.findOne.mockResolvedValue(null);
 
     await expect(
-      service.update('clave', { valor: 'x', activo: true, fecha_expiracion: null }),
+      service.update('clave', {
+        valor: 'x',
+        activo: true,
+        fecha_expiracion: null,
+      }),
     ).rejects.toBeInstanceOf(NotFoundException);
   });
 });

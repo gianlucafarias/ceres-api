@@ -8,31 +8,52 @@ describe('EncuestasService', () => {
   let service: EncuestasService;
   let repo: RepoMock;
 
-  type QueryBuilderMock = {
-    select: jest.MockedFunction<(sql: string, alias?: string) => QueryBuilderMock>;
-    addSelect: jest.MockedFunction<(sql: string, alias?: string) => QueryBuilderMock>;
-    groupBy: jest.MockedFunction<(sql: string) => QueryBuilderMock>;
-    orderBy: jest.MockedFunction<(sql: string, order?: 'ASC' | 'DESC') => QueryBuilderMock>;
-    andWhere: jest.MockedFunction<(sql: string, params?: Record<string, unknown>) => QueryBuilderMock>;
-    where: jest.MockedFunction<(sql: string, params?: Record<string, unknown>) => QueryBuilderMock>;
-    skip: jest.MockedFunction<(count: number) => QueryBuilderMock>;
-    take: jest.MockedFunction<(count: number) => QueryBuilderMock>;
-    getRawMany: jest.MockedFunction<() => Promise<Array<Record<string, unknown>>>>;
-    getManyAndCount: jest.MockedFunction<() => Promise<[EncuestaPresupuesto[], number]>>;
-  };
-
   type RepoMock = {
-    findOne: jest.MockedFunction<(options?: unknown) => Promise<EncuestaPresupuesto | null>>;
-    find: jest.MockedFunction<(options?: unknown) => Promise<EncuestaPresupuesto[]>>;
-    count: jest.MockedFunction<(options?: unknown) => Promise<number>>;
-    create: jest.MockedFunction<(input: Partial<EncuestaPresupuesto>) => Partial<EncuestaPresupuesto>>;
-    save: jest.MockedFunction<(input: Partial<EncuestaPresupuesto>) => Promise<Partial<EncuestaPresupuesto>>>;
-    delete: jest.MockedFunction<(options?: unknown) => Promise<void>>;
-    createQueryBuilder: jest.MockedFunction<() => QueryBuilderMock>;
+    findOne: jest.Mock<Promise<EncuestaPresupuesto | null>, [unknown?]>;
+    find: jest.Mock<Promise<EncuestaPresupuesto[]>, [unknown?]>;
+    count: jest.Mock<Promise<number>, [unknown?]>;
+    create: jest.Mock<
+      Partial<EncuestaPresupuesto>,
+      [Partial<EncuestaPresupuesto>]
+    >;
+    save: jest.Mock<
+      Promise<Partial<EncuestaPresupuesto>>,
+      [Partial<EncuestaPresupuesto>]
+    >;
+    delete: jest.Mock<Promise<void>, [unknown?]>;
+    createQueryBuilder: jest.Mock<unknown, []>;
   };
 
   beforeEach(async () => {
-    repo = mockRepo();
+    const qb = {
+      select: () => qb,
+      addSelect: () => qb,
+      groupBy: () => qb,
+      orderBy: () => qb,
+      andWhere: () => qb,
+      where: () => qb,
+      skip: () => qb,
+      take: () => qb,
+      getRawMany: () => Promise.resolve([] as Array<Record<string, unknown>>),
+      getManyAndCount: () =>
+        Promise.resolve([[], 0] as [EncuestaPresupuesto[], number]),
+    };
+
+    repo = {
+      findOne: jest.fn<Promise<EncuestaPresupuesto | null>, [unknown?]>(),
+      find: jest.fn<Promise<EncuestaPresupuesto[]>, [unknown?]>(),
+      count: jest.fn<Promise<number>, [unknown?]>(),
+      create: jest.fn<
+        Partial<EncuestaPresupuesto>,
+        [Partial<EncuestaPresupuesto>]
+      >(),
+      save: jest.fn<
+        Promise<Partial<EncuestaPresupuesto>>,
+        [Partial<EncuestaPresupuesto>]
+      >(),
+      delete: jest.fn<Promise<void>, [unknown?]>(),
+      createQueryBuilder: jest.fn<unknown, []>().mockReturnValue(qb),
+    };
 
     const module = await Test.createTestingModule({
       providers: [
@@ -46,7 +67,10 @@ describe('EncuestasService', () => {
   });
 
   it('validarDni devuelve false si ya existe', async () => {
-    repo.findOne.mockResolvedValue({ id: 1, dni: '12345678' });
+    repo.findOne.mockResolvedValue({
+      id: 1,
+      dni: '12345678',
+    } as EncuestaPresupuesto);
     const res = await service.validarDni('12.345.678');
     expect(res.puedeContinuar).toBe(false);
   });
@@ -54,7 +78,11 @@ describe('EncuestasService', () => {
   it('guardarEncuesta guarda con estado completada', async () => {
     repo.findOne.mockResolvedValue(null);
     repo.create.mockImplementation((x: Partial<EncuestaPresupuesto>) => x);
-    repo.save.mockResolvedValue({ id: 1, estado: 'completada', dni: '12345678' });
+    repo.save.mockResolvedValue({
+      id: 1,
+      estado: 'completada',
+      dni: '12345678',
+    } as Partial<EncuestaPresupuesto>);
 
     const res = await service.guardarEncuesta({
       dni: '12345678',
@@ -81,7 +109,9 @@ describe('EncuestasService', () => {
       addSelect: jest.fn().mockReturnThis(),
       groupBy: jest.fn().mockReturnThis(),
       orderBy: jest.fn().mockReturnThis(),
-      getRawMany: jest.fn().mockResolvedValue([{ barrio: 'Centro', cantidad: '2' }]),
+      getRawMany: jest
+        .fn()
+        .mockResolvedValue([{ barrio: 'Centro', cantidad: '2' }]),
     });
     repo.find.mockResolvedValue([
       {
@@ -115,29 +145,6 @@ describe('EncuestasService', () => {
     expect(res.contacto.personasDejaronContacto).toBe(1);
   });
 });
-
-function mockRepo(): RepoMock {
-  return {
-    findOne: jest.fn(),
-    find: jest.fn(),
-    count: jest.fn(),
-    create: jest.fn(),
-    save: jest.fn(),
-    delete: jest.fn(),
-    createQueryBuilder: jest.fn(() => ({
-      select: jest.fn().mockReturnThis(),
-      addSelect: jest.fn().mockReturnThis(),
-      groupBy: jest.fn().mockReturnThis(),
-      orderBy: jest.fn().mockReturnThis(),
-      andWhere: jest.fn().mockReturnThis(),
-      where: jest.fn().mockReturnThis(),
-      skip: jest.fn().mockReturnThis(),
-      take: jest.fn().mockReturnThis(),
-      getRawMany: jest.fn().mockResolvedValue([]),
-      getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
-    })),
-  };
-}
 
 function mockRedis() {
   return {

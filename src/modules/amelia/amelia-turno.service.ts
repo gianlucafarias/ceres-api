@@ -3,10 +3,21 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { format } from 'date-fns';
 import { Repository } from 'typeorm';
 import { AmeliaTurno } from '../../entities/amelia-turno.entity';
-import { isValidArgentinePhone, normalizeArgentinePhone } from './phone-normalizer';
-import { AmeliaCustomField, NormalizedAmeliaPayload } from './amelia-webhook.parser';
+import {
+  isValidArgentinePhone,
+  normalizeArgentinePhone,
+} from './phone-normalizer';
+import {
+  AmeliaCustomField,
+  NormalizedAmeliaPayload,
+} from './amelia-webhook.parser';
 
-export type EstadoTurno = 'PENDIENTE' | 'CONFIRMADO' | 'CANCELADO' | 'COMPLETADO' | 'NO_ASISTIO';
+export type EstadoTurno =
+  | 'PENDIENTE'
+  | 'CONFIRMADO'
+  | 'CANCELADO'
+  | 'COMPLETADO'
+  | 'NO_ASISTIO';
 
 export interface UpsertTurnoResult {
   turno: AmeliaTurno;
@@ -22,7 +33,9 @@ export class AmeliaTurnoService {
     private readonly turnoRepo: Repository<AmeliaTurno>,
   ) {}
 
-  async upsertFromWebhook(payload: NormalizedAmeliaPayload): Promise<UpsertTurnoResult> {
+  async upsertFromWebhook(
+    payload: NormalizedAmeliaPayload,
+  ): Promise<UpsertTurnoResult> {
     const booking = this.getFirstBooking(payload);
     const existente = await this.buscarPorAmeliaBookingId(booking.id);
 
@@ -37,7 +50,9 @@ export class AmeliaTurnoService {
 
   async obtenerTurnosPorTelefono(telefono: string): Promise<AmeliaTurno[]> {
     const phoneResult = normalizeArgentinePhone(telefono, '3564');
-    const telefonoNormalizado = phoneResult.isValid ? phoneResult.normalized : telefono;
+    const telefonoNormalizado = phoneResult.isValid
+      ? phoneResult.normalized
+      : telefono;
 
     return this.turnoRepo.find({
       where: { telefono: telefonoNormalizado },
@@ -45,7 +60,9 @@ export class AmeliaTurnoService {
     });
   }
 
-  async buscarPorAmeliaBookingId(ameliaBookingId: number): Promise<AmeliaTurno | null> {
+  async buscarPorAmeliaBookingId(
+    ameliaBookingId: number,
+  ): Promise<AmeliaTurno | null> {
     return this.turnoRepo.findOne({ where: { ameliaBookingId } });
   }
 
@@ -74,7 +91,10 @@ export class AmeliaTurnoService {
     await this.turnoRepo.save(turno);
   }
 
-  async registrarErrorNotificacion(turno: AmeliaTurno, mensaje: string): Promise<void> {
+  async registrarErrorNotificacion(
+    turno: AmeliaTurno,
+    mensaje: string,
+  ): Promise<void> {
     turno.notificacionError = mensaje;
     turno.intentosNotificacion += 1;
     await this.turnoRepo.save(turno);
@@ -114,7 +134,8 @@ export class AmeliaTurnoService {
     const booking = this.getFirstBooking(payload);
     const appointment = payload.appointment;
 
-    const telefonoOriginal = booking.customer.phone || booking.infoArray?.phone || '';
+    const telefonoOriginal =
+      booking.customer.phone || booking.infoArray?.phone || '';
     const phoneResult = normalizeArgentinePhone(telefonoOriginal, '3564');
 
     const nombreCompleto = this.getNombreCompleto(booking);
@@ -124,7 +145,9 @@ export class AmeliaTurnoService {
     const fechaFin = new Date(appointment.bookingEnd);
     const horaInicio = format(fechaTurno, 'HH:mm');
     const horaFin = format(fechaFin, 'HH:mm');
-    const duracionMinutos = Math.round((fechaFin.getTime() - fechaTurno.getTime()) / 60000);
+    const duracionMinutos = Math.round(
+      (fechaFin.getTime() - fechaTurno.getTime()) / 60000,
+    );
 
     return this.turnoRepo.create({
       ameliaAppointmentId: appointment.id,
@@ -170,7 +193,9 @@ export class AmeliaTurnoService {
     return booking;
   }
 
-  private extractCustomFields(customFields?: Record<string, AmeliaCustomField>) {
+  private extractCustomFields(
+    customFields?: Record<string, AmeliaCustomField>,
+  ) {
     let dni: string | undefined;
     let ciudad: string | undefined;
 
@@ -188,10 +213,14 @@ export class AmeliaTurnoService {
     return { dni, ciudad };
   }
 
-  private getNombreCompleto(booking: NormalizedAmeliaPayload['bookings'][string]): string {
-    let nombreCompleto = `${booking.customer.firstName} ${booking.customer.lastName}`.trim();
+  private getNombreCompleto(
+    booking: NormalizedAmeliaPayload['bookings'][string],
+  ): string {
+    let nombreCompleto =
+      `${booking.customer.firstName} ${booking.customer.lastName}`.trim();
     if (booking.infoArray?.firstName) {
-      nombreCompleto = `${booking.infoArray.firstName} ${booking.infoArray.lastName || ''}`.trim();
+      nombreCompleto =
+        `${booking.infoArray.firstName} ${booking.infoArray.lastName || ''}`.trim();
     }
     return nombreCompleto;
   }

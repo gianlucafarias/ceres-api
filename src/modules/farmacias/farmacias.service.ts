@@ -97,14 +97,17 @@ export class FarmaciasService {
     const tomorrowISO = this.toISODateOnly(tomorrow);
     const dayAfterTomorrowISO = this.toISODateOnly(dayAfterTomorrow);
 
-    const [todaySchedule, tomorrowSchedule, dayAfterTomorrowSchedule] = await Promise.all([
-      this.getDutyByDate(todayISO),
-      this.getDutyByDate(tomorrowISO),
-      this.getDutyByDate(dayAfterTomorrowISO),
-    ]);
+    const [todaySchedule, tomorrowSchedule, dayAfterTomorrowSchedule] =
+      await Promise.all([
+        this.getDutyByDate(todayISO),
+        this.getDutyByDate(tomorrowISO),
+        this.getDutyByDate(dayAfterTomorrowISO),
+      ]);
 
     return {
-      today: todaySchedule ? { date: todayISO, schedule: todaySchedule } : { date: todayISO, schedule: null },
+      today: todaySchedule
+        ? { date: todayISO, schedule: todaySchedule }
+        : { date: todayISO, schedule: null },
       tomorrow: tomorrowSchedule
         ? { date: tomorrowISO, schedule: tomorrowSchedule }
         : { date: tomorrowISO, schedule: null },

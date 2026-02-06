@@ -9,12 +9,20 @@ describe('ReclamosPdfService', () => {
     const module = await Test.createTestingModule({
       providers: [
         ReclamosPdfService,
-        { provide: getRepositoryToken(Reclamo), useValue: { findOne: jest.fn().mockResolvedValue(null) } },
-        { provide: getRepositoryToken(ReclamoHistorial), useValue: { find: jest.fn() } },
+        {
+          provide: getRepositoryToken(Reclamo),
+          useValue: { findOne: jest.fn().mockResolvedValue(null) },
+        },
+        {
+          provide: getRepositoryToken(ReclamoHistorial),
+          useValue: { find: jest.fn() },
+        },
       ],
     }).compile();
 
     const service = module.get(ReclamosPdfService);
-    await expect(service.generatePdfBuffer(999)).rejects.toThrow('Reclamo no encontrado');
+    await expect(service.generatePdfBuffer(999)).rejects.toThrow(
+      'Reclamo no encontrado',
+    );
   });
 });

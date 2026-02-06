@@ -17,7 +17,9 @@ export class ReclamosPdfService {
   ) {}
 
   async generatePdfBuffer(reclamoId: number): Promise<Buffer> {
-    const reclamo = await this.reclamoRepo.findOne({ where: { id: reclamoId } });
+    const reclamo = await this.reclamoRepo.findOne({
+      where: { id: reclamoId },
+    });
     if (!reclamo) {
       throw new NotFoundException('Reclamo no encontrado');
     }
@@ -46,18 +48,30 @@ export class ReclamosPdfService {
     const margin = 50;
     let y = height - margin;
 
-    type DrawTextOptions = Omit<NonNullable<Parameters<PDFPage['drawText']>[1]>, 'font' | 'size' | 'color'> & {
+    type DrawTextOptions = Omit<
+      NonNullable<Parameters<PDFPage['drawText']>[1]>,
+      'font' | 'size' | 'color'
+    > & {
       size?: number;
       bold?: boolean;
       color?: ReturnType<typeof rgb>;
     };
 
-    const getCenteredX = (text: string, fontSize: number, textFont: PDFFont) => {
+    const getCenteredX = (
+      text: string,
+      fontSize: number,
+      textFont: PDFFont,
+    ) => {
       const textWidth = textFont.widthOfTextAtSize(text, fontSize);
       return (width - textWidth) / 2;
     };
 
-    const wrapText = (text: string, maxWidth: number, fontSize: number, textFont: PDFFont): string[] => {
+    const wrapText = (
+      text: string,
+      maxWidth: number,
+      fontSize: number,
+      textFont: PDFFont,
+    ): string[] => {
       const cleanedText = this.cleanText(text);
       const words = cleanedText.split(' ');
       const lines: string[] = [];
@@ -78,7 +92,12 @@ export class ReclamosPdfService {
       return lines.length > 0 ? lines : [''];
     };
 
-    const addText = (text: string, x: number, yPos: number, options: DrawTextOptions = {}) => {
+    const addText = (
+      text: string,
+      x: number,
+      yPos: number,
+      options: DrawTextOptions = {},
+    ) => {
       const cleanedText = this.cleanText(text);
       const { size, bold, color, ...rest } = options;
       page.drawText(cleanedText, {
@@ -92,7 +111,11 @@ export class ReclamosPdfService {
     };
 
     const drawSection = (title: string, content: string[], startY: number) => {
-      addText(title, margin, startY, { size: subtitleSize, bold: true, color: primaryColor });
+      addText(title, margin, startY, {
+        size: subtitleSize,
+        bold: true,
+        color: primaryColor,
+      });
       startY -= lineHeight * 1.5;
 
       const maxContentWidth = width - margin - (margin + 20);
@@ -102,7 +125,12 @@ export class ReclamosPdfService {
           const linesOfItem = item.split('\n');
           linesOfItem.forEach((singleLine) => {
             if (singleLine) {
-              const wrappedLines = wrapText(singleLine, maxContentWidth, normalSize, font);
+              const wrappedLines = wrapText(
+                singleLine,
+                maxContentWidth,
+                normalSize,
+                font,
+              );
               wrappedLines.forEach((wrappedLine) => {
                 addText(wrappedLine, margin + 20, startY);
                 startY -= lineHeight;
@@ -139,10 +167,15 @@ export class ReclamosPdfService {
     y -= lineHeight * 2;
 
     const reclamoTitle = `Reclamo #${reclamo.id}`;
-    addText(reclamoTitle, getCenteredX(reclamoTitle, subtitleSize, boldFont), y, {
-      size: subtitleSize,
-      bold: true,
-    });
+    addText(
+      reclamoTitle,
+      getCenteredX(reclamoTitle, subtitleSize, boldFont),
+      y,
+      {
+        size: subtitleSize,
+        bold: true,
+      },
+    );
     y -= lineHeight;
 
     const fechaGeneracion = `Comprobante generado el ${format(
@@ -150,10 +183,15 @@ export class ReclamosPdfService {
       "d 'de' MMMM 'de' yyyy 'a las' HH:mm",
       { locale: es },
     )}`;
-    addText(fechaGeneracion, getCenteredX(fechaGeneracion, smallSize, font), y, {
-      size: smallSize,
-      color: secondaryColor,
-    });
+    addText(
+      fechaGeneracion,
+      getCenteredX(fechaGeneracion, smallSize, font),
+      y,
+      {
+        size: smallSize,
+        color: secondaryColor,
+      },
+    );
     y -= sectionSpacing;
 
     y = drawSection(
@@ -181,12 +219,20 @@ export class ReclamosPdfService {
       y,
     );
 
-    const historialFiltrado = historial.filter((item) => item.tipo === 'ESTADO');
+    const historialFiltrado = historial.filter(
+      (item) => item.tipo === 'ESTADO',
+    );
     if (historialFiltrado.length > 0) {
       const historialContent = historialFiltrado.map((item) => {
-        const fechaFormateada = format(item.fecha, 'd/MM/yyyy HH:mm', { locale: es });
+        const fechaFormateada = format(item.fecha, 'd/MM/yyyy HH:mm', {
+          locale: es,
+        });
         const lines = [`${fechaFormateada} - ${item.tipo}`];
-        if (item.valorAnterior && item.valorNuevo && item.valorAnterior !== item.valorNuevo) {
+        if (
+          item.valorAnterior &&
+          item.valorNuevo &&
+          item.valorAnterior !== item.valorNuevo
+        ) {
           lines.push(`De: ${item.valorAnterior}`);
           lines.push(`A: ${item.valorNuevo}`);
         } else if (item.valorAnterior) {
@@ -199,7 +245,8 @@ export class ReclamosPdfService {
       y = drawSection('Historial de Cambios', historialContent, y);
     }
 
-    const footerText1 = 'Este documento es un comprobante de reclamo generado por Ceresito.';
+    const footerText1 =
+      'Este documento es un comprobante de reclamo generado por Ceresito.';
     addText(footerText1, getCenteredX(footerText1, smallSize, font), 50, {
       size: smallSize,
       color: secondaryColor,
@@ -220,7 +267,8 @@ export class ReclamosPdfService {
       .split('')
       .map((char) => {
         const code = char.charCodeAt(0);
-        if ((code >= 32 && code <= 126) || (code >= 160 && code <= 255)) return char;
+        if ((code >= 32 && code <= 126) || (code >= 160 && code <= 255))
+          return char;
         if (code === 10 || code === 13) return '\n';
         if (code === 9) return ' ';
         return '';

@@ -1,0 +1,25 @@
+﻿version: "3.9"
+
+services:
+  api:
+    image: ghcr.io/gianlucafarias/ceres-api:${API_IMAGE_TAG:-main}
+    container_name: ceres-api
+    init: true
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      PORT: 3022
+    ports:
+      - "3022:3022"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "node -e \"fetch('http://127.0.0.1:' + (process.env.PORT || 3022) + '/api/v1/health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1));\"",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    stop_grace_period: 40s
+    restart: unless-stopped

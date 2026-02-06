@@ -12,13 +12,25 @@ describe('InteractionsService', () => {
   };
 
   type QueryBuilderMock = {
-    select: jest.MockedFunction<(sql: string, alias?: string) => QueryBuilderMock>;
-    addSelect: jest.MockedFunction<(sql: string, alias?: string) => QueryBuilderMock>;
-    where: jest.MockedFunction<(sql: string, params?: Record<string, unknown>) => QueryBuilderMock>;
-    andWhere: jest.MockedFunction<(sql: string, params?: Record<string, unknown>) => QueryBuilderMock>;
+    select: jest.MockedFunction<
+      (sql: string, alias?: string) => QueryBuilderMock
+    >;
+    addSelect: jest.MockedFunction<
+      (sql: string, alias?: string) => QueryBuilderMock
+    >;
+    where: jest.MockedFunction<
+      (sql: string, params?: Record<string, unknown>) => QueryBuilderMock
+    >;
+    andWhere: jest.MockedFunction<
+      (sql: string, params?: Record<string, unknown>) => QueryBuilderMock
+    >;
     groupBy: jest.MockedFunction<(sql: string) => QueryBuilderMock>;
-    orderBy: jest.MockedFunction<(sql: string, order?: 'ASC' | 'DESC') => QueryBuilderMock>;
-    getRawMany: jest.MockedFunction<() => Promise<Array<{ group_key: string; count: string }>>>;
+    orderBy: jest.MockedFunction<
+      (sql: string, order?: 'ASC' | 'DESC') => QueryBuilderMock
+    >;
+    getRawMany: jest.MockedFunction<
+      () => Promise<Array<{ group_key: string; count: string }>>
+    >;
     getCount: jest.MockedFunction<() => Promise<number>>;
   };
 
@@ -30,7 +42,9 @@ describe('InteractionsService', () => {
       andWhere: jest.fn().mockReturnThis(),
       groupBy: jest.fn().mockReturnThis(),
       orderBy: jest.fn().mockReturnThis(),
-      getRawMany: jest.fn().mockResolvedValue([{ group_key: '2026-02-03', count: '2' }]),
+      getRawMany: jest
+        .fn()
+        .mockResolvedValue([{ group_key: '2026-02-03', count: '2' }]),
       getCount: jest.fn().mockResolvedValue(1),
     };
 

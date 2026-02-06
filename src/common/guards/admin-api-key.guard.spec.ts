@@ -2,7 +2,10 @@ import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AdminApiKeyGuard } from './admin-api-key.guard';
 
-const mockContext = (headers: Record<string, string> = {}, query: Record<string, string> = {}) =>
+const mockContext = (
+  headers: Record<string, string> = {},
+  query: Record<string, string> = {},
+) =>
   ({
     switchToHttp: () => ({
       getRequest: () => ({ headers, query }),
@@ -24,6 +27,8 @@ describe('AdminApiKeyGuard', () => {
     const guard = new AdminApiKeyGuard({
       get: () => 'secret',
     } as unknown as ConfigService);
-    expect(() => guard.canActivate(mockContext())).toThrow(UnauthorizedException);
+    expect(() => guard.canActivate(mockContext())).toThrow(
+      UnauthorizedException,
+    );
   });
 });

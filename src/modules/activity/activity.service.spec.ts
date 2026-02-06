@@ -5,7 +5,9 @@ import { ActivityService } from './activity.service';
 
 describe('ActivityService', () => {
   let service: ActivityService;
-  let repo: { find: jest.MockedFunction<(options?: unknown) => Promise<ActivityLog[]>> };
+  let repo: {
+    find: jest.MockedFunction<(options?: unknown) => Promise<ActivityLog[]>>;
+  };
 
   beforeEach(async () => {
     repo = {

@@ -20,7 +20,12 @@ export class TurnoIdParamsDto {
 
 export class ActualizarEstadoDto {
   @IsIn(['PENDIENTE', 'CONFIRMADO', 'CANCELADO', 'COMPLETADO', 'NO_ASISTIO'])
-  estado: 'PENDIENTE' | 'CONFIRMADO' | 'CANCELADO' | 'COMPLETADO' | 'NO_ASISTIO';
+  estado:
+    | 'PENDIENTE'
+    | 'CONFIRMADO'
+    | 'CANCELADO'
+    | 'COMPLETADO'
+    | 'NO_ASISTIO';
 
   @IsOptional()
   @Type(() => Number)

@@ -8,7 +8,10 @@ import { NotificacionesController } from './notificaciones.controller';
 import { NotificacionesService } from './notificaciones.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Contact, PreferenciasUsuario, Notificaciones]), WhatsappModule],
+  imports: [
+    TypeOrmModule.forFeature([Contact, PreferenciasUsuario, Notificaciones]),
+    WhatsappModule,
+  ],
   controllers: [NotificacionesController],
   providers: [NotificacionesService],
 })

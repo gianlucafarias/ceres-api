@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BotConfig } from '../../entities/bot-config.entity';
@@ -22,7 +26,9 @@ export class BotConfigService {
   async create(clave: string, dto: CreateBotConfigDto) {
     const existing = await this.getByKey(clave);
     if (existing) {
-      throw new ConflictException(`La configuracion con clave "${clave}" ya existe. Use PUT para actualizar.`);
+      throw new ConflictException(
+        `La configuracion con clave "${clave}" ya existe. Use PUT para actualizar.`,
+      );
     }
 
     const fecha_expiracion = this.parseFechaExpiracion(dto.fecha_expiracion);
@@ -41,10 +47,15 @@ export class BotConfigService {
   async update(clave: string, dto: UpdateBotConfigDto) {
     const existing = await this.getByKey(clave);
     if (!existing) {
-      throw new NotFoundException(`Configuracion con clave "${clave}" no encontrada. No se pudo actualizar.`);
+      throw new NotFoundException(
+        `Configuracion con clave "${clave}" no encontrada. No se pudo actualizar.`,
+      );
     }
 
-    const fecha_expiracion = this.parseFechaExpiracion(dto.fecha_expiracion, true);
+    const fecha_expiracion = this.parseFechaExpiracion(
+      dto.fecha_expiracion,
+      true,
+    );
 
     existing.valor = dto.valor;
     existing.activo = dto.activo;
@@ -56,7 +67,10 @@ export class BotConfigService {
     return this.repo.save(existing);
   }
 
-  private parseFechaExpiracion(value?: string | null, allowNull: boolean = false): Date | null {
+  private parseFechaExpiracion(
+    value?: string | null,
+    allowNull: boolean = false,
+  ): Date | null {
     if (value === null && allowNull) {
       return null;
     }
@@ -66,7 +80,9 @@ export class BotConfigService {
 
     const parsed = new Date(value);
     if (isNaN(parsed.getTime())) {
-      throw new Error('Datos invalidos: "fecha_expiracion" debe ser una fecha valida o null.');
+      throw new Error(
+        'Datos invalidos: "fecha_expiracion" debe ser una fecha valida o null.',
+      );
     }
     return parsed;
   }

@@ -1,4 +1,10 @@
-import { IsBoolean, IsDateString, IsOptional, IsString, Length } from 'class-validator';
+import {
+  IsBoolean,
+  IsDateString,
+  IsOptional,
+  IsString,
+  Length,
+} from 'class-validator';
 
 export class BotConfigKeyParamsDto {
   @IsString()

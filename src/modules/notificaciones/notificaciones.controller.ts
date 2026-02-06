@@ -1,4 +1,12 @@
-﻿import { Body, Controller, Get, NotFoundException, Param, Post, UseGuards } from '@nestjs/common';
+﻿import {
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { AdminApiKeyGuard } from '../../common/guards/admin-api-key.guard';
 import { BotApiKeyGuard } from '../../common/guards/bot-api-key.guard';
 import { PreferenciasUsuario } from '../../entities/preferencias-usuario.entity';
@@ -28,9 +36,14 @@ export class NotificacionesController {
   @UseGuards(BotApiKeyGuard)
   @Get('preferencias/:contactId')
   async obtenerPreferencias(@Param() params: PreferenciasParamsDto) {
-    const preferencias = await this.service.obtenerPreferencias(params.contactId);
+    const preferencias = await this.service.obtenerPreferencias(
+      params.contactId,
+    );
     if (!preferencias) {
-      throw new NotFoundException({ success: false, mensaje: 'Preferencias no encontradas' });
+      throw new NotFoundException({
+        success: false,
+        mensaje: 'Preferencias no encontradas',
+      });
     }
     return {
       success: true,
@@ -53,7 +66,10 @@ export class NotificacionesController {
   @Post('ejecutar-manual')
   async ejecutarManual() {
     await this.service.procesarNotificacionesDiarias('19:00');
-    return { success: true, mensaje: 'Notificaciones ejecutadas correctamente' };
+    return {
+      success: true,
+      mensaje: 'Notificaciones ejecutadas correctamente',
+    };
   }
 
   @UseGuards(AdminApiKeyGuard)

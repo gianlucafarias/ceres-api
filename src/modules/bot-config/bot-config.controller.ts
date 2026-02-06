@@ -1,8 +1,22 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Put, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { AdminApiKeyGuard } from '../../common/guards/admin-api-key.guard';
 import { toErrorMessage } from '../../common/utils/error-message';
 import { BotConfigService } from './bot-config.service';
-import { BotConfigKeyParamsDto, CreateBotConfigDto, UpdateBotConfigDto } from './dto/bot-config.dto';
+import {
+  BotConfigKeyParamsDto,
+  CreateBotConfigDto,
+  UpdateBotConfigDto,
+} from './dto/bot-config.dto';
 
 @UseGuards(AdminApiKeyGuard)
 @Controller({ path: 'config', version: '1' })
@@ -23,7 +37,10 @@ export class BotConfigController {
   async getByKey(@Param() params: BotConfigKeyParamsDto) {
     const clave = params.clave;
     if (!clave) {
-      throw new HttpException({ message: 'Falta el parametro "clave" en la ruta.' }, HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        { message: 'Falta el parametro "clave" en la ruta.' },
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     try {
@@ -43,10 +60,16 @@ export class BotConfigController {
   }
 
   @Post(':clave')
-  async create(@Param() params: BotConfigKeyParamsDto, @Body() body: CreateBotConfigDto) {
+  async create(
+    @Param() params: BotConfigKeyParamsDto,
+    @Body() body: CreateBotConfigDto,
+  ) {
     const clave = params.clave;
     if (!clave) {
-      throw new HttpException({ message: 'Falta el parametro "clave" en la ruta.' }, HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        { message: 'Falta el parametro "clave" en la ruta.' },
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     try {
@@ -56,7 +79,10 @@ export class BotConfigController {
         config,
       };
     } catch (error: unknown) {
-      const message = toErrorMessage(error, 'Error interno del servidor al crear la configuracion.');
+      const message = toErrorMessage(
+        error,
+        'Error interno del servidor al crear la configuracion.',
+      );
       if (message.includes('fecha_expiracion')) {
         throw new HttpException({ message }, HttpStatus.BAD_REQUEST);
       }
@@ -69,10 +95,16 @@ export class BotConfigController {
   }
 
   @Put(':clave')
-  async update(@Param() params: BotConfigKeyParamsDto, @Body() body: UpdateBotConfigDto) {
+  async update(
+    @Param() params: BotConfigKeyParamsDto,
+    @Body() body: UpdateBotConfigDto,
+  ) {
     const clave = params.clave;
     if (!clave) {
-      throw new HttpException({ message: 'Falta el parametro "clave" en la ruta.' }, HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        { message: 'Falta el parametro "clave" en la ruta.' },
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     try {
@@ -82,13 +114,18 @@ export class BotConfigController {
         config,
       };
     } catch (error: unknown) {
-      const message = toErrorMessage(error, 'Error interno del servidor al actualizar la configuracion.');
+      const message = toErrorMessage(
+        error,
+        'Error interno del servidor al actualizar la configuracion.',
+      );
       if (message.includes('fecha_expiracion')) {
         throw new HttpException({ message }, HttpStatus.BAD_REQUEST);
       }
       if (error instanceof HttpException) throw error;
       throw new HttpException(
-        { message: 'Error interno del servidor al actualizar la configuracion.' },
+        {
+          message: 'Error interno del servidor al actualizar la configuracion.',
+        },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

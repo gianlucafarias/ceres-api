@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, FindOptionsOrder, FindOptionsWhere, Like, Repository } from 'typeorm';
+import {
+  Between,
+  FindOptionsOrder,
+  FindOptionsWhere,
+  Like,
+  Repository,
+} from 'typeorm';
 import { Reclamo } from '../../entities/reclamo.entity';
 import { ReclamosFiltroAdminDto } from './dto/reclamos-admin.dto';
 
@@ -30,7 +36,9 @@ export class ReclamosRepository {
     });
   }
 
-  findAndCountForAdmin(filters: ReclamosFiltroAdminDto): Promise<[Reclamo[], number]> {
+  findAndCountForAdmin(
+    filters: ReclamosFiltroAdminDto,
+  ): Promise<[Reclamo[], number]> {
     const { page = 1, per_page = 10, sort = 'id', order = 'DESC' } = filters;
     const skip = (page - 1) * per_page;
     const where = this.buildWhere(filters);
@@ -48,7 +56,9 @@ export class ReclamosRepository {
     return this.repo.createQueryBuilder(alias);
   }
 
-  private buildWhere(filters: ReclamosFiltroAdminDto): FindOptionsWhere<Reclamo> {
+  private buildWhere(
+    filters: ReclamosFiltroAdminDto,
+  ): FindOptionsWhere<Reclamo> {
     const { estado, prioridad, barrio, search, from, to } = filters;
     const where: FindOptionsWhere<Reclamo> = {};
 
@@ -64,7 +74,10 @@ export class ReclamosRepository {
     return where;
   }
 
-  private buildOrder(sort: string, order: 'ASC' | 'DESC'): FindOptionsOrder<Reclamo> {
+  private buildOrder(
+    sort: string,
+    order: 'ASC' | 'DESC',
+  ): FindOptionsOrder<Reclamo> {
     const allowedSort: Array<keyof Reclamo> = [
       'id',
       'fecha',

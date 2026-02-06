@@ -1,7 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Reclamo } from '../../entities/reclamo.entity';
 import { CrearReclamoBotDto } from './dto/reclamos-bot.dto';
-import { ActualizarReclamoAdminDto, ReclamosFiltroAdminDto } from './dto/reclamos-admin.dto';
+import {
+  ActualizarReclamoAdminDto,
+  ReclamosFiltroAdminDto,
+} from './dto/reclamos-admin.dto';
 import { GeocodeService } from '../../shared/geocode/geocode.service';
 import { ActivityLogService } from '../../shared/activity-log/activity-log.service';
 import { ReclamosHistorialService } from './reclamos-historial.service';
@@ -28,7 +31,8 @@ export class ReclamosService {
     try {
       coords = await this.geocodeService.geocodeAddress(dto.ubicacion);
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Error desconocido';
+      const message =
+        error instanceof Error ? error.message : 'Error desconocido';
       this.logger.warn(`Geocode error: ${message}`);
     }
 
@@ -78,7 +82,8 @@ export class ReclamosService {
     const prevEstado = rec.estado;
     const prevPrioridad = rec.prioridad;
     const prevCuadrilla = rec.cuadrillaid;
-    const ubicacionCambiada = dto.ubicacion !== undefined && dto.ubicacion !== rec.ubicacion;
+    const ubicacionCambiada =
+      dto.ubicacion !== undefined && dto.ubicacion !== rec.ubicacion;
 
     if (dto.nombre !== undefined) rec.nombre = dto.nombre;
     if (dto.telefono !== undefined) rec.telefono = dto.telefono;
@@ -92,11 +97,14 @@ export class ReclamosService {
 
     if (ubicacionCambiada) {
       try {
-        const coords = await this.geocodeService.geocodeAddress(dto.ubicacion ?? rec.ubicacion);
+        const coords = await this.geocodeService.geocodeAddress(
+          dto.ubicacion ?? rec.ubicacion,
+        );
         rec.latitud = coords.latitud;
         rec.longitud = coords.longitud;
       } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Error desconocido';
+        const message =
+          error instanceof Error ? error.message : 'Error desconocido';
         this.logger.warn(`Geocode error: ${message}`);
       }
     }
@@ -105,8 +113,18 @@ export class ReclamosService {
 
     // Historial
     if (dto.estado !== undefined && dto.estado !== prevEstado) {
-      await this.historialService.registrarCambioEstado(id, prevEstado ?? null, dto.estado, dto.usuarioId);
-      await this.logCambioEstado(saved, prevEstado ?? null, dto.estado, dto.usuarioId);
+      await this.historialService.registrarCambioEstado(
+        id,
+        prevEstado ?? null,
+        dto.estado,
+        dto.usuarioId,
+      );
+      await this.logCambioEstado(
+        saved,
+        prevEstado ?? null,
+        dto.estado,
+        dto.usuarioId,
+      );
     }
     if (dto.prioridad !== undefined && dto.prioridad !== prevPrioridad) {
       await this.historialService.registrarCambioPrioridad(
@@ -162,8 +180,9 @@ export class ReclamosService {
 
   // --- helpers ---
   private toBotDto(rec: Reclamo): ReclamoSafe {
-    const { telefono, ...rest } = rec;
-    return rest;
+    const safe: ReclamoSafe = { ...rec };
+    delete safe.telefono;
+    return safe;
   }
 
   private async logCreacion(reclamo: Reclamo): Promise<void> {
@@ -180,7 +199,8 @@ export class ReclamosService {
         },
       });
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Error desconocido';
+      const message =
+        error instanceof Error ? error.message : 'Error desconocido';
       this.logger.warn(`Activity log error: ${message}`);
     }
   }
@@ -205,7 +225,8 @@ export class ReclamosService {
         },
       });
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Error desconocido';
+      const message =
+        error instanceof Error ? error.message : 'Error desconocido';
       this.logger.warn(`Activity log error: ${message}`);
     }
   }

@@ -19,19 +19,28 @@ describe('NotificacionesService', () => {
   let contactRepo: RepoMock<Contact>;
   let prefRepo: RepoMock<PreferenciasUsuario>;
   let notifRepo: RepoMock<Notificaciones>;
-  let whatsapp: { sendTemplate: jest.Mock<Promise<void>, [WhatsappTemplatePayload]> };
+  let whatsapp: {
+    sendTemplate: jest.Mock<Promise<void>, [WhatsappTemplatePayload]>;
+  };
 
   beforeEach(async () => {
     contactRepo = mockRepo<Contact>();
     prefRepo = mockRepo<PreferenciasUsuario>();
     notifRepo = mockRepo<Notificaciones>();
-    whatsapp = { sendTemplate: jest.fn().mockResolvedValue(undefined) };
+    whatsapp = {
+      sendTemplate: jest
+        .fn<Promise<void>, [WhatsappTemplatePayload]>()
+        .mockResolvedValue(undefined),
+    };
 
     const module = await Test.createTestingModule({
       providers: [
         NotificacionesService,
         { provide: getRepositoryToken(Contact), useValue: contactRepo },
-        { provide: getRepositoryToken(PreferenciasUsuario), useValue: prefRepo },
+        {
+          provide: getRepositoryToken(PreferenciasUsuario),
+          useValue: prefRepo,
+        },
         { provide: getRepositoryToken(Notificaciones), useValue: notifRepo },
         { provide: WhatsappTemplateService, useValue: whatsapp },
       ],
@@ -44,7 +53,11 @@ describe('NotificacionesService', () => {
     contactRepo.findOne.mockResolvedValue({ id: 1 } as Contact);
     prefRepo.findOne.mockResolvedValue(null);
     prefRepo.create.mockImplementation((x) => x as PreferenciasUsuario);
-    prefRepo.save.mockResolvedValue({ id: 10, contactId: 1, notificarHumedo: true } as PreferenciasUsuario);
+    prefRepo.save.mockResolvedValue({
+      id: 10,
+      contactId: 1,
+      notificarHumedo: true,
+    } as PreferenciasUsuario);
 
     const res = await service.actualizarPreferencias({
       contact_id: 1,
@@ -60,9 +73,16 @@ describe('NotificacionesService', () => {
   it('actualizarSeccion guarda notificacion con seccion', async () => {
     contactRepo.findOne.mockResolvedValue({ id: 1 } as Contact);
     notifRepo.create.mockImplementation((x) => x as Notificaciones);
-    notifRepo.save.mockResolvedValue({ id: 5, usuarioId: 1, seccionId: 2 } as Notificaciones);
+    notifRepo.save.mockResolvedValue({
+      id: 5,
+      usuarioId: 1,
+      seccionId: 2,
+    } as Notificaciones);
 
-    const res = await service.actualizarSeccion({ contact_id: 1, seccion_id: 2 });
+    const res = await service.actualizarSeccion({
+      contact_id: 1,
+      seccion_id: 2,
+    });
     expect(res.seccionId).toBe(2);
   });
 
@@ -85,9 +105,9 @@ describe('NotificacionesService', () => {
 
 function mockRepo<T>(): RepoMock<T> {
   return {
-    findOne: jest.fn(),
-    find: jest.fn(),
-    create: jest.fn(),
-    save: jest.fn(),
+    findOne: jest.fn<Promise<T | null>, [unknown?]>(),
+    find: jest.fn<Promise<T[]>, [unknown?]>(),
+    create: jest.fn<T, [Partial<T>]>(),
+    save: jest.fn<Promise<T>, [T]>(),
   };
 }

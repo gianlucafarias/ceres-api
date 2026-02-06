@@ -22,7 +22,9 @@ export class GeocodeService {
     private readonly config: ConfigService,
   ) {}
 
-  async geocodeAddress(address: string): Promise<{ latitud: number; longitud: number }> {
+  async geocodeAddress(
+    address: string,
+  ): Promise<{ latitud: number; longitud: number }> {
     const direccionCompleta = `${address}, Ceres, Santa Fe, Argentina`;
     const apiKey = this.config.get<string>('GOOGLE_MAPS_API_KEY');
 
@@ -45,7 +47,8 @@ export class GeocodeService {
 
       return { latitud: -29.884576, longitud: -61.96334 };
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Error desconocido';
+      const message =
+        error instanceof Error ? error.message : 'Error desconocido';
       this.logger.error(`Error al geocodificar: ${message}`);
       throw new Error('Error al geocodificar la direccion.');
     }

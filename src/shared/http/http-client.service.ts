@@ -11,12 +11,19 @@ export interface HttpRequestConfig {
 export class HttpClient {
   private readonly client = axios.create({});
 
-  async get<TResponse>(url: string, config?: HttpRequestConfig): Promise<TResponse> {
+  async get<TResponse>(
+    url: string,
+    config?: HttpRequestConfig,
+  ): Promise<TResponse> {
     const response = await this.client.get<TResponse>(url, config);
     return response.data;
   }
 
-  async post<TResponse, TBody = unknown>(url: string, body?: TBody, config?: HttpRequestConfig): Promise<TResponse> {
+  async post<TResponse, TBody = unknown>(
+    url: string,
+    body?: TBody,
+    config?: HttpRequestConfig,
+  ): Promise<TResponse> {
     const response = await this.client.post<TResponse>(url, body, config);
     return response.data;
   }

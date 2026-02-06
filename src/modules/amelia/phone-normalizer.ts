@@ -21,7 +21,7 @@ export function normalizeArgentinePhone(
     };
   }
 
-  let cleaned = phone.replace(/[\s\-\(\)\.\+]/g, '');
+  let cleaned = phone.replace(/[\s().+-]/g, '');
 
   if (!cleaned) {
     return {
@@ -106,7 +106,9 @@ export function normalizeArgentinePhone(
       };
     }
 
-    errors.push(`Telefono muy corto incluso con area: ${cleaned} (${cleaned.length})`);
+    errors.push(
+      `Telefono muy corto incluso con area: ${cleaned} (${cleaned.length})`,
+    );
     return {
       normalized: '+549' + withAreaCode,
       isValid: false,

@@ -13,14 +13,41 @@ describe('ReclamosService', () => {
     create: jest.MockedFunction<(input: Partial<Reclamo>) => Reclamo>;
     save: jest.MockedFunction<(input: Reclamo) => Promise<Reclamo>>;
     findById: jest.MockedFunction<(id: number) => Promise<Reclamo | null>>;
-    findByTelefono: jest.MockedFunction<(telefono: string) => Promise<Reclamo[]>>;
-    findAndCountForAdmin: jest.MockedFunction<(filters: unknown) => Promise<[Reclamo[], number]>>;
+    findByTelefono: jest.MockedFunction<
+      (telefono: string) => Promise<Reclamo[]>
+    >;
+    findAndCountForAdmin: jest.MockedFunction<
+      (filters: unknown) => Promise<[Reclamo[], number]>
+    >;
   };
   let historialService: {
-    registrarCreacion: jest.MockedFunction<(reclamoId: number) => Promise<unknown>>;
-    registrarCambioEstado: jest.MockedFunction<(id: number, prev: string | null, next: string, usuarioId?: number | null) => Promise<unknown>>;
-    registrarCambioPrioridad: jest.MockedFunction<(id: number, prev: string | null, next: string, usuarioId?: number | null) => Promise<unknown>>;
-    registrarCambioCuadrilla: jest.MockedFunction<(id: number, prev: number | null, next: number | null, usuarioId?: number | null) => Promise<unknown>>;
+    registrarCreacion: jest.MockedFunction<
+      (reclamoId: number) => Promise<unknown>
+    >;
+    registrarCambioEstado: jest.MockedFunction<
+      (
+        id: number,
+        prev: string | null,
+        next: string,
+        usuarioId?: number | null,
+      ) => Promise<unknown>
+    >;
+    registrarCambioPrioridad: jest.MockedFunction<
+      (
+        id: number,
+        prev: string | null,
+        next: string,
+        usuarioId?: number | null,
+      ) => Promise<unknown>
+    >;
+    registrarCambioCuadrilla: jest.MockedFunction<
+      (
+        id: number,
+        prev: number | null,
+        next: number | null,
+        usuarioId?: number | null,
+      ) => Promise<unknown>
+    >;
     listarPorReclamo: jest.MockedFunction<(id: number) => Promise<unknown[]>>;
   };
   let statsService: {
@@ -32,7 +59,9 @@ describe('ReclamosService', () => {
     statsAvanzadas: jest.MockedFunction<() => Promise<unknown>>;
   };
   let geocodeService: {
-    geocodeAddress: jest.MockedFunction<(address: string) => Promise<{ latitud: number; longitud: number }>>;
+    geocodeAddress: jest.MockedFunction<
+      (address: string) => Promise<{ latitud: number; longitud: number }>
+    >;
   };
   let activityLog: {
     logActivity: jest.MockedFunction<(params: unknown) => Promise<unknown>>;

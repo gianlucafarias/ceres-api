@@ -18,8 +18,10 @@ export class ConversacionesService {
       const toDate = new Date(to);
       toDate.setHours(23, 59, 59, 999);
 
-      qb.where('conversacion.fecha_hora >= :fromDate', { fromDate })
-        .andWhere('conversacion.fecha_hora <= :toDate', { toDate });
+      qb.where('conversacion.fecha_hora >= :fromDate', { fromDate }).andWhere(
+        'conversacion.fecha_hora <= :toDate',
+        { toDate },
+      );
     }
 
     return qb.getMany();

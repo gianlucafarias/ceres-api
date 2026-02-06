@@ -16,7 +16,8 @@ const toNumber = (value: string | undefined, fallback: number): number => {
 const hasRequestBody = (req: Request): boolean => {
   const contentLength = req.headers['content-length'];
   if (typeof contentLength === 'string' && contentLength !== '0') return true;
-  if (Array.isArray(contentLength) && contentLength.some((len) => len !== '0')) return true;
+  if (Array.isArray(contentLength) && contentLength.some((len) => len !== '0'))
+    return true;
   return typeof req.headers['transfer-encoding'] !== 'undefined';
 };
 
@@ -36,7 +37,9 @@ const requireJson: RequestHandler = (req, res, next) => {
   return next();
 };
 
-const isBodyParserError = (err: unknown): err is SyntaxError & { body: string } => {
+const isBodyParserError = (
+  err: unknown,
+): err is SyntaxError & { body: string } => {
   if (!(err instanceof SyntaxError)) return false;
   return typeof (err as { body?: unknown }).body !== 'undefined';
 };
@@ -56,6 +59,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bufferLogs: true,
   });
+  app.enableShutdownHooks();
 
   app.enableCors();
   app.setGlobalPrefix('api');
@@ -111,4 +115,4 @@ async function bootstrap() {
 
   await app.listen(process.env.PORT ? Number(process.env.PORT) : 3000);
 }
-bootstrap();
+void bootstrap();

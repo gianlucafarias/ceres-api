@@ -31,12 +31,12 @@ export class HistoryService {
   async getMessagesPerDay(days = 30) {
     const rows = await this.historyRepo
       .createQueryBuilder('history')
-      .select("DATE(history.created_at)", 'date')
+      .select('DATE(history.created_at)', 'date')
       .addSelect('COUNT(*)', 'count')
       .groupBy('date')
       .orderBy('date', 'DESC')
       .limit(days)
-      .getRawMany();
+      .getRawMany<{ date: string; count: string }>();
     return rows.map((r) => ({ date: r.date, count: Number(r.count) }));
   }
 
@@ -110,7 +110,9 @@ export class HistoryService {
       .getMany();
   }
 
-  async getInteractionsByConversationId({ conversationId }: ConversationIdParamDto) {
+  async getInteractionsByConversationId({
+    conversationId,
+  }: ConversationIdParamDto) {
     return this.historyRepo.find({
       where: { conversation_id: conversationId },
       order: { createdAt: 'ASC' },

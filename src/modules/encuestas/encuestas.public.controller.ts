@@ -1,4 +1,12 @@
-﻿import { Body, Controller, Get, NotFoundException, Param, ParseIntPipe, Post } from '@nestjs/common';
+﻿import {
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  ParseIntPipe,
+  Post,
+} from '@nestjs/common';
 import { EncuestasService } from './encuestas.service';
 import { GuardarEncuestaDto, ValidarDniDto } from './dto/encuestas-public.dto';
 
@@ -32,7 +40,10 @@ export class EncuestasPublicController {
   async estado(@Param('id', ParseIntPipe) id: number) {
     const data = await this.service.obtenerEstadoPublico(id);
     if (!data) {
-      throw new NotFoundException({ success: false, error: 'Encuesta no encontrada' });
+      throw new NotFoundException({
+        success: false,
+        error: 'Encuesta no encontrada',
+      });
     }
     return {
       success: true,

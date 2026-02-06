@@ -45,7 +45,7 @@ Archivo `.env` (ver `.env.example`):
 - Limite general por IP sobre `/api`.
 - Limite estricto por IP sobre `/api/v1/encuestas`.
 - Variables:
-  - `TRUST_PROXY=1` si hay proxy reverso (nginx) para leer `X-Forwarded-For`.
+  - `TRUST_PROXY=1` si hay proxy reverso (Apache2) para leer `X-Forwarded-For`.
   - `RATE_LIMIT_WINDOW_MS`, `RATE_LIMIT_MAX`.
   - `RATE_LIMIT_STRICT_WINDOW_MS`, `RATE_LIMIT_STRICT_MAX`.
 
@@ -59,4 +59,4 @@ Archivo `.env` (ver `.env.example`):
 
 ## Proximos pasos
 - Validar conexion: `npm run start:dev` y abrir `GET http://localhost:3000/api/v1/health`.
-- Ajustar nginx para rutear `/api/v1/*` al nuevo servicio (el bot legacy sigue sirviendo `/v1/*`).
+- Ajustar Apache2 para rutear `/api/v1/*` al nuevo servicio (el bot legacy sigue sirviendo `/v1/*`).

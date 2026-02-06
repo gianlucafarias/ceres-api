@@ -28,5 +28,5 @@ docker run --rm -p 3022:3022 \
 - `GET http://localhost:3022/api/v1/health`
 
 ## Notas
-- Si hay nginx/proxy, setear `TRUST_PROXY=1`.
+- Si hay Apache2/proxy reverso, setear `TRUST_PROXY=1`.
 - Paths estaticos: `MEDIA_PODA_PATH` y `MODIFIED_CERTIFICATES_PATH`.

@@ -10,7 +10,9 @@ export interface ConsultaResponse {
   error?: string;
 }
 
-export type SolicitarCedulonResponse = ConsultaResponse | { error: string; urlPDF?: string };
+export type SolicitarCedulonResponse =
+  | ConsultaResponse
+  | { error: string; urlPDF?: string };
 
 type ConsultaPayload = Record<string, unknown> | string;
 
@@ -25,8 +27,14 @@ export class ImpuestosService {
     private readonly config: ConfigService,
     private readonly http: HttpClient,
   ) {
-    this.apiUrl = this.config.get<string>('IMPUESTOS_API_URL', 'https://mceres-server.dyndns.org/unire_api.php');
-    this.muniUrl = this.config.get<string>('IMPUESTOS_MUNI_URL', 'https://mceres-server.dyndns.org/');
+    this.apiUrl = this.config.get<string>(
+      'IMPUESTOS_API_URL',
+      'https://mceres-server.dyndns.org/unire_api.php',
+    );
+    this.muniUrl = this.config.get<string>(
+      'IMPUESTOS_MUNI_URL',
+      'https://mceres-server.dyndns.org/',
+    );
     this.opeNom = this.config.get<string>('IMPUESTOS_OPE_NOM', 'PS');
     this.opePas = this.config.get<string>('IMPUESTOS_OPE_PAS', '123456');
   }
@@ -35,7 +43,10 @@ export class ImpuestosService {
     return this.consultaPost(payload);
   }
 
-  async obtenerPdf(partida: string, tipo: string): Promise<{ success?: boolean; url?: string; error?: string }> {
+  async obtenerPdf(
+    partida: string,
+    tipo: string,
+  ): Promise<{ success?: boolean; url?: string; error?: string }> {
     const primeraConsulta = {
       OPE_NOM: this.opeNom,
       OPE_PAS: this.opePas,
@@ -67,7 +78,8 @@ export class ImpuestosService {
       return { error: resultado2?.MENS || 'Error en la segunda consulta' };
     }
 
-    const camino = typeof resultado2.RESPUESTA === 'string' ? resultado2.RESPUESTA : '';
+    const camino =
+      typeof resultado2.RESPUESTA === 'string' ? resultado2.RESPUESTA : '';
     if (!camino) {
       return { error: 'No se recibio respuesta con la ruta del PDF' };
     }
@@ -86,7 +98,7 @@ export class ImpuestosService {
         if (status === 200) {
           return { success: true, url: urlPdf };
         }
-      } catch (error: unknown) {
+      } catch {
         // continue retry
       }
 
@@ -110,7 +122,9 @@ export class ImpuestosService {
     return this.consultaPost(consultaData);
   }
 
-  async solicitarCedulon(dto: SolicitarCedulonDto): Promise<ConsultaResponse | { error: string; urlPDF?: string }> {
+  async solicitarCedulon(
+    dto: SolicitarCedulonDto,
+  ): Promise<ConsultaResponse | { error: string; urlPDF?: string }> {
     const impresionData = {
       OPE_NOM: this.opeNom,
       OPE_PAS: this.opePas,
@@ -123,7 +137,8 @@ export class ImpuestosService {
       return resultado;
     }
 
-    const rutaPDF = typeof resultado.RESPUESTA === 'string' ? resultado.RESPUESTA : '';
+    const rutaPDF =
+      typeof resultado.RESPUESTA === 'string' ? resultado.RESPUESTA : '';
     if (!rutaPDF) {
       return { error: 'No se recibio respuesta con la ruta del PDF' };
     }
@@ -141,19 +156,27 @@ export class ImpuestosService {
     };
   }
 
-  private async consultaPost(urlData: ConsultaPayload): Promise<ConsultaResponse> {
+  private async consultaPost(
+    urlData: ConsultaPayload,
+  ): Promise<ConsultaResponse> {
     try {
-      const jsonData = typeof urlData === 'string' ? urlData : JSON.stringify(urlData);
+      const jsonData =
+        typeof urlData === 'string' ? urlData : JSON.stringify(urlData);
 
-      return await this.http.post<ConsultaResponse, string>(this.apiUrl, jsonData, {
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
+      return await this.http.post<ConsultaResponse, string>(
+        this.apiUrl,
+        jsonData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          timeout: 30000,
         },
-        timeout: 30000,
-      });
+      );
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Error en consultaPost';
+      const message =
+        error instanceof Error ? error.message : 'Error en consultaPost';
       return {
         RESU: 'ERROR',
         RESPUESTA: null,
