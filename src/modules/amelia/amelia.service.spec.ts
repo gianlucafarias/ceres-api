@@ -24,15 +24,29 @@ describe('AmeliaService', () => {
 
   beforeEach(async () => {
     turnoRepo = {
-      findOne: jest.fn(),
-      create: jest.fn((x) => x as AmeliaTurno),
-      save: jest.fn(async (x) => ({ ...x, id: x.id ?? 1 } as AmeliaTurno)),
-      find: jest.fn(),
-      createQueryBuilder: jest.fn(),
+      findOne: jest.fn<Promise<AmeliaTurno | null>, [unknown]>(),
+      create: jest
+        .fn<AmeliaTurno, [Partial<AmeliaTurno>]>()
+        .mockImplementation((x) => x as AmeliaTurno),
+      save: jest
+        .fn<Promise<AmeliaTurno>, [AmeliaTurno]>()
+        .mockImplementation((x) =>
+          Promise.resolve({ ...x, id: x.id ?? 1 } as AmeliaTurno),
+        ),
+      find: jest.fn<Promise<AmeliaTurno[]>, [unknown?]>(),
+      createQueryBuilder: jest.fn<unknown, []>(),
     };
 
-    activityLog = { logActivity: jest.fn().mockResolvedValue(undefined) };
-    whatsapp = { sendTemplate: jest.fn().mockResolvedValue(undefined) };
+    activityLog = {
+      logActivity: jest
+        .fn<Promise<void>, [unknown]>()
+        .mockResolvedValue(undefined),
+    };
+    whatsapp = {
+      sendTemplate: jest
+        .fn<Promise<void>, [unknown]>()
+        .mockResolvedValue(undefined),
+    };
 
     const module = await Test.createTestingModule({
       providers: [
@@ -71,7 +85,12 @@ describe('AmeliaService', () => {
         bookingStart: '2026-02-04T10:00:00Z',
         bookingEnd: '2026-02-04T10:30:00Z',
         service: { id: 1, name: 'Licencia', description: 'Desc' },
-        provider: { id: 1, firstName: 'Ana', lastName: 'Lopez', email: 'ana@demo.com' },
+        provider: {
+          id: 1,
+          firstName: 'Ana',
+          lastName: 'Lopez',
+          email: 'ana@demo.com',
+        },
         location: { name: 'Municipalidad' },
         bookings: {
           '1': {

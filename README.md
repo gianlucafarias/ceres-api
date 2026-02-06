@@ -1,14 +1,14 @@
-﻿# Ceres API (NestJS 11) — Migración incremental desde Express
+# Ceres API (NestJS 11) â€” MigraciÃ³n incremental desde Express
 
-Backend público de referencia para la ciudad de Ceres. Migramos paso a paso el servidor Express legacy a NestJS 11, manteniendo la base de datos PostgreSQL y compatibilidad de endpoints mientras modernizamos arquitectura, seguridad y DX.
+Backend pÃºblico de referencia para la ciudad de Ceres. Migramos paso a paso el servidor Express legacy a NestJS 11, manteniendo la base de datos PostgreSQL y compatibilidad de endpoints mientras modernizamos arquitectura, seguridad y DX.
 
 ## Estado actual
-- Infra básica lista: ConfigModule global, TypeORM con `synchronize: false`, Redis opcional, healthcheck `GET /api/v1/health`.
+- Infra bÃ¡sica lista: ConfigModule global, TypeORM con `synchronize: false`, Redis opcional, healthcheck `GET /api/v1/health`.
 - Modelo de datos portado a TypeORM (ver `src/entities/`).
-- DTOs alineados con el backend legacy por módulo (ver `src/modules/*/dto`).
-- Documentación de fases en `docs/migracion/`.
+- DTOs alineados con el backend legacy por mÃ³dulo (ver `src/modules/*/dto`).
+- DocumentaciÃ³n de fases en `docs/migracion/`.
 
-## Cómo correr
+## CÃ³mo correr
 ```bash
 npm install
 cp .env.example .env    # completar credenciales reales
@@ -30,24 +30,27 @@ docker run --rm -p 3022:3022 \
 ```
 
 ## CI/CD (Docker + GHCR)
-Ver `docs/migracion/21-ci-cd.md` para pasos de configuración completos.
+Ver `docs/migracion/21-ci-cd.md` para pasos de configuraciÃ³n completos.
+Para rollout incremental con legacy + Apache2, ver `docs/migracion/22-deploy-gradual-vps.md`.
+Para estrategia profesional de ramas, ver `docs/migracion/23-estrategia-ramas.md`.
+Mientras no se haga merge a `main`, usar deploy manual con `scripts/deploy-vps.sh`.
 
 ## Estructura clave
 - `src/entities`: entidades TypeORM mapeadas 1:1 a tablas existentes.
-- `src/modules/*/dto`: DTOs y contratos de validación (`class-validator`) por módulo.
+- `src/modules/*/dto`: DTOs y contratos de validaciÃ³n (`class-validator`) por mÃ³dulo.
 - `src/shared/redis`: servicio Redis global (opcional).
-- `docs/migracion`: guías por fase (infra, entidades, DTOs, próximos módulos).
+- `docs/migracion`: guÃ­as por fase (infra, entidades, DTOs, prÃ³ximos mÃ³dulos).
 
 ## Estrategia de ramas
-- Rama protegida: `main`.
 - Desarrollo activo: `develop`.
-- Cada avance se trabaja en ramas feature cortas desde `develop` y se mergea con PR/FF; no se pushea a `main` sin revisión.
+- Rama de release/produccion: `main`.
+- Cada avance se trabaja en ramas feature cortas desde `develop` y se mergea con PR/FF.
 
 ## Roadmap breve
-1. Completar health y conexión DB/Redis en entornos reales.
-2. Migrar módulos en orden: Analytics/Contactos → Reclamos → Encuesta+Redis → Notificaciones → Impuestos → BotConfig/Feedback/Votante → Amelia → Farmacias/Duty.
-3. Añadir autenticación JWT+roles y API keys para bot/webhooks al iniciar la migración de módulos.
-4. Pruebas de paridad E2E contra el legacy en cada módulo antes de mover tráfico.
+1. Completar health y conexiÃ³n DB/Redis en entornos reales.
+2. Migrar mÃ³dulos en orden: Analytics/Contactos â†’ Reclamos â†’ Encuesta+Redis â†’ Notificaciones â†’ Impuestos â†’ BotConfig/Feedback/Votante â†’ Amelia â†’ Farmacias/Duty.
+3. AÃ±adir autenticaciÃ³n JWT+roles y API keys para bot/webhooks al iniciar la migraciÃ³n de mÃ³dulos.
+4. Pruebas de paridad E2E contra el legacy en cada mÃ³dulo antes de mover trÃ¡fico.
 
 ## Licencia
-UNLICENSED (se definirá al hacer público el repo).
+UNLICENSED (se definirÃ¡ al hacer pÃºblico el repo).

@@ -99,7 +99,10 @@ export class ContactsService {
     };
   }
 
-  async getContactConversations(id: number, { from, to }: ConversationsRangeQueryDto) {
+  async getContactConversations(
+    id: number,
+    { from, to }: ConversationsRangeQueryDto,
+  ) {
     const qb = this.conversationRepo
       .createQueryBuilder('conversacion')
       .where('conversacion.contact_id = :id', { id });
@@ -108,10 +111,9 @@ export class ContactsService {
       const fromDate = new Date(from);
       const toDate = new Date(to);
       toDate.setHours(23, 59, 59, 999);
-      qb.andWhere('conversacion.fecha_hora >= :fromDate', { fromDate }).andWhere(
-        'conversacion.fecha_hora <= :toDate',
-        { toDate },
-      );
+      qb.andWhere('conversacion.fecha_hora >= :fromDate', {
+        fromDate,
+      }).andWhere('conversacion.fecha_hora <= :toDate', { toDate });
     }
 
     qb.orderBy('conversacion.fecha_hora', 'DESC');

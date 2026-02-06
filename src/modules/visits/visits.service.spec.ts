@@ -6,18 +6,32 @@ import { VisitsService } from './visits.service';
 
 describe('VisitsService', () => {
   let service: VisitsService;
-  let flowRepo: { find: jest.MockedFunction<() => Promise<Array<{ id: number; nombre_flujo: string; contador: number }>>> };
-  let convRepo: { createQueryBuilder: jest.MockedFunction<() => QueryBuilderMock> };
+  let flowRepo: {
+    find: jest.MockedFunction<
+      () => Promise<
+        Array<{ id: number; nombre_flujo: string; contador: number }>
+      >
+    >;
+  };
+  let convRepo: {
+    createQueryBuilder: jest.MockedFunction<() => QueryBuilderMock>;
+  };
 
   type QueryBuilderMock = {
-    where: jest.MockedFunction<(sql: string, params?: Record<string, unknown>) => QueryBuilderMock>;
-    andWhere: jest.MockedFunction<(sql: string, params?: Record<string, unknown>) => QueryBuilderMock>;
+    where: jest.MockedFunction<
+      (sql: string, params?: Record<string, unknown>) => QueryBuilderMock
+    >;
+    andWhere: jest.MockedFunction<
+      (sql: string, params?: Record<string, unknown>) => QueryBuilderMock
+    >;
     getCount: jest.MockedFunction<() => Promise<number>>;
   };
 
   beforeEach(async () => {
     flowRepo = {
-      find: jest.fn().mockResolvedValue([{ id: 1, nombre_flujo: 'F1', contador: 2 }]),
+      find: jest
+        .fn()
+        .mockResolvedValue([{ id: 1, nombre_flujo: 'F1', contador: 2 }]),
     };
     convRepo = {
       createQueryBuilder: jest.fn(() => ({
@@ -39,7 +53,10 @@ describe('VisitsService', () => {
   });
 
   it('retorna total usando rango', async () => {
-    const res = await service.getVisitasFlujo({ from: '2026-02-01', to: '2026-02-03' });
+    const res = await service.getVisitasFlujo({
+      from: '2026-02-01',
+      to: '2026-02-03',
+    });
     expect(res.totalVisitas).toBe(3);
   });
 

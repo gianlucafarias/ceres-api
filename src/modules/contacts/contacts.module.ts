@@ -9,7 +9,9 @@ import { ContactsController } from './contacts.controller';
 import { ContactsService } from './contacts.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Contact, History, Reclamo, Converstation])],
+  imports: [
+    TypeOrmModule.forFeature([Contact, History, Reclamo, Converstation]),
+  ],
   controllers: [ContactsController],
   providers: [ContactsService, AdminApiKeyGuard],
 })

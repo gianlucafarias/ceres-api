@@ -1,7 +1,21 @@
-﻿import { Body, Controller, Delete, Get, NotFoundException, Param, Put, Query, UseGuards } from '@nestjs/common';
+﻿import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  Put,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { AdminApiKeyGuard } from '../../common/guards/admin-api-key.guard';
 import { EncuestasService } from './encuestas.service';
-import { EditarEncuestaDto, EncuestaIdParamDto, EncuestasQueryDto } from './dto/encuestas-admin.dto';
+import {
+  EditarEncuestaDto,
+  EncuestaIdParamDto,
+  EncuestasQueryDto,
+} from './dto/encuestas-admin.dto';
 
 @UseGuards(AdminApiKeyGuard)
 @Controller({ path: 'encuestaobras', version: '1' })
@@ -43,25 +57,41 @@ export class EncuestasAdminController {
   async respuesta(@Param() params: EncuestaIdParamDto) {
     const encuesta = await this.service.obtenerEncuesta(params.id);
     if (!encuesta) {
-      throw new NotFoundException({ success: false, error: 'Encuesta no encontrada' });
+      throw new NotFoundException({
+        success: false,
+        error: 'Encuesta no encontrada',
+      });
     }
     return { success: true, data: encuesta };
   }
 
   @Put('editar/:id')
-  async editar(@Param() params: EncuestaIdParamDto, @Body() dto: EditarEncuestaDto) {
+  async editar(
+    @Param() params: EncuestaIdParamDto,
+    @Body() dto: EditarEncuestaDto,
+  ) {
     const encuesta = await this.service.editarEncuesta(params.id, dto);
     if (!encuesta) {
-      throw new NotFoundException({ success: false, error: 'Encuesta no encontrada' });
+      throw new NotFoundException({
+        success: false,
+        error: 'Encuesta no encontrada',
+      });
     }
-    return { success: true, mensaje: 'Encuesta editada correctamente', data: encuesta };
+    return {
+      success: true,
+      mensaje: 'Encuesta editada correctamente',
+      data: encuesta,
+    };
   }
 
   @Delete('eliminar/:id')
   async eliminar(@Param() params: EncuestaIdParamDto) {
     const deleted = await this.service.eliminarEncuesta(params.id);
     if (!deleted) {
-      throw new NotFoundException({ success: false, error: 'Encuesta no encontrada' });
+      throw new NotFoundException({
+        success: false,
+        error: 'Encuesta no encontrada',
+      });
     }
     return { success: true, mensaje: 'Encuesta eliminada correctamente' };
   }
@@ -70,7 +100,10 @@ export class EncuestasAdminController {
   async porId(@Param() params: EncuestaIdParamDto) {
     const encuesta = await this.service.obtenerEncuesta(params.id);
     if (!encuesta) {
-      throw new NotFoundException({ success: false, error: 'Encuesta no encontrada' });
+      throw new NotFoundException({
+        success: false,
+        error: 'Encuesta no encontrada',
+      });
     }
     return { success: true, data: encuesta };
   }

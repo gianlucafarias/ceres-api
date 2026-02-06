@@ -4,17 +4,33 @@ import { ReclamosStatsService } from './reclamos-stats.service';
 
 describe('ReclamosStatsService', () => {
   let service: ReclamosStatsService;
-  let reclamosRepo: { createQueryBuilder: jest.MockedFunction<() => QueryBuilderMock> };
+  let reclamosRepo: {
+    createQueryBuilder: jest.MockedFunction<() => QueryBuilderMock>;
+  };
 
   type QueryBuilderMock = {
-    select: jest.MockedFunction<(sql: string, alias?: string) => QueryBuilderMock>;
-    addSelect: jest.MockedFunction<(sql: string, alias?: string) => QueryBuilderMock>;
+    select: jest.MockedFunction<
+      (sql: string, alias?: string) => QueryBuilderMock
+    >;
+    addSelect: jest.MockedFunction<
+      (sql: string, alias?: string) => QueryBuilderMock
+    >;
     groupBy: jest.MockedFunction<(sql: string) => QueryBuilderMock>;
-    where: jest.MockedFunction<(sql: string, params?: Record<string, unknown>) => QueryBuilderMock>;
-    andWhere: jest.MockedFunction<(sql: string, params?: Record<string, unknown>) => QueryBuilderMock>;
-    orderBy: jest.MockedFunction<(sql: string, order?: 'ASC' | 'DESC') => QueryBuilderMock>;
-    innerJoin: jest.MockedFunction<(table: unknown, alias: string, condition: string) => QueryBuilderMock>;
-    getRawMany: jest.MockedFunction<() => Promise<Array<Record<string, unknown>>>>;
+    where: jest.MockedFunction<
+      (sql: string, params?: Record<string, unknown>) => QueryBuilderMock
+    >;
+    andWhere: jest.MockedFunction<
+      (sql: string, params?: Record<string, unknown>) => QueryBuilderMock
+    >;
+    orderBy: jest.MockedFunction<
+      (sql: string, order?: 'ASC' | 'DESC') => QueryBuilderMock
+    >;
+    innerJoin: jest.MockedFunction<
+      (table: unknown, alias: string, condition: string) => QueryBuilderMock
+    >;
+    getRawMany: jest.MockedFunction<
+      () => Promise<Array<Record<string, unknown>>>
+    >;
     getRawOne: jest.MockedFunction<() => Promise<Record<string, unknown>>>;
   };
 
@@ -38,7 +54,9 @@ describe('ReclamosStatsService', () => {
       select: jest.fn().mockReturnThis(),
       addSelect: jest.fn().mockReturnThis(),
       groupBy: jest.fn().mockReturnThis(),
-      getRawMany: jest.fn().mockResolvedValue([{ estado: 'PENDIENTE', count: '2' }]),
+      getRawMany: jest
+        .fn()
+        .mockResolvedValue([{ estado: 'PENDIENTE', count: '2' }]),
     } as QueryBuilderMock;
 
     reclamosRepo.createQueryBuilder.mockReturnValueOnce(qb);
@@ -55,7 +73,9 @@ describe('ReclamosStatsService', () => {
       where: jest.fn().mockReturnThis(),
       groupBy: jest.fn().mockReturnThis(),
       orderBy: jest.fn().mockReturnThis(),
-      getRawMany: jest.fn().mockResolvedValue([{ mes: '2026-01-01', cantidad: '4' }]),
+      getRawMany: jest
+        .fn()
+        .mockResolvedValue([{ mes: '2026-01-01', cantidad: '4' }]),
     } as QueryBuilderMock;
 
     const qbTiempo = {
@@ -71,7 +91,9 @@ describe('ReclamosStatsService', () => {
       andWhere: jest.fn().mockReturnThis(),
       groupBy: jest.fn().mockReturnThis(),
       orderBy: jest.fn().mockReturnThis(),
-      getRawMany: jest.fn().mockResolvedValue([{ cuadrillaId: 1, reclamosResueltos: '5' }]),
+      getRawMany: jest
+        .fn()
+        .mockResolvedValue([{ cuadrillaId: 1, reclamosResueltos: '5' }]),
     } as QueryBuilderMock;
 
     reclamosRepo.createQueryBuilder
@@ -82,7 +104,7 @@ describe('ReclamosStatsService', () => {
     const res = await service.statsAvanzadas();
     expect(res).toEqual({
       reclamosPorMes: [{ mes: '2026-01-01', cantidad: '4' }],
-      tiempoPromedioResolucion: '3',
+      tiempoPromedioResolucion: 3,
       eficienciaCuadrilla: [{ cuadrillaId: 1, reclamosResueltos: '5' }],
     });
   });

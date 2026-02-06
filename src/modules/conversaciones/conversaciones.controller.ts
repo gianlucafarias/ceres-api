@@ -1,4 +1,11 @@
-import { Controller, Get, HttpException, HttpStatus, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { AdminApiKeyGuard } from '../../common/guards/admin-api-key.guard';
 import { toErrorMessage } from '../../common/utils/error-message';
 import { ConversacionesQueryDto } from './dto/conversaciones.dto';
@@ -15,7 +22,10 @@ export class ConversacionesController {
       const conversaciones = await this.service.getAll(query.from, query.to);
       return conversaciones;
     } catch (error: unknown) {
-      const message = toErrorMessage(error, 'Error al obtener las conversaciones');
+      const message = toErrorMessage(
+        error,
+        'Error al obtener las conversaciones',
+      );
       throw new HttpException(
         { error: message },
         HttpStatus.INTERNAL_SERVER_ERROR,

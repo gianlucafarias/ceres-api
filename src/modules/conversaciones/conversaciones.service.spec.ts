@@ -9,8 +9,12 @@ describe('ConversacionesService', () => {
   let qb: QueryBuilderMock;
 
   type QueryBuilderMock = {
-    where: jest.MockedFunction<(sql: string, params?: Record<string, unknown>) => QueryBuilderMock>;
-    andWhere: jest.MockedFunction<(sql: string, params?: Record<string, unknown>) => QueryBuilderMock>;
+    where: jest.MockedFunction<
+      (sql: string, params?: Record<string, unknown>) => QueryBuilderMock
+    >;
+    andWhere: jest.MockedFunction<
+      (sql: string, params?: Record<string, unknown>) => QueryBuilderMock
+    >;
     getMany: jest.MockedFunction<() => Promise<Array<{ id: number }>>>;
   };
 

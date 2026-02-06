@@ -34,7 +34,8 @@ export class ReclamosStatsService {
   }
 
   countByBarrio() {
-    const normalizedBarrio = "TRIM(REPLACE(LOWER(reclamo.barrio), 'barrio ', ''))";
+    const normalizedBarrio =
+      "TRIM(REPLACE(LOWER(reclamo.barrio), 'barrio ', ''))";
     return this.reclamosRepo
       .createQueryBuilder('reclamo')
       .select(normalizedBarrio, 'barrio')
@@ -45,11 +46,9 @@ export class ReclamosStatsService {
   }
 
   async statsBasicas() {
-    const [countsByEstado, countsByPrioridad, countsByTipo] = await Promise.all([
-      this.countByEstado(),
-      this.countByPrioridad(),
-      this.countByTipo(),
-    ]);
+    const [countsByEstado, countsByPrioridad, countsByTipo] = await Promise.all(
+      [this.countByEstado(), this.countByPrioridad(), this.countByTipo()],
+    );
 
     return {
       countsByEstado,
@@ -69,18 +68,25 @@ export class ReclamosStatsService {
       .where('reclamo.fecha >= :sixMonthsAgo', { sixMonthsAgo })
       .groupBy('mes')
       .orderBy('mes', 'ASC')
-      .getRawMany();
+      .getRawMany<{ mes: string; cantidad: string }>();
 
     const tiempoResolucion = await this.reclamosRepo
       .createQueryBuilder('reclamo')
-      .select("AVG(EXTRACT(EPOCH FROM (h2.fecha - h1.fecha)) / 86400)", 'promedioDias')
-      .innerJoin(ReclamoHistorial, 'h1', "h1.reclamo_id = reclamo.id AND h1.tipo = 'CREACION'")
+      .select(
+        'AVG(EXTRACT(EPOCH FROM (h2.fecha - h1.fecha)) / 86400)',
+        'promedioDias',
+      )
+      .innerJoin(
+        ReclamoHistorial,
+        'h1',
+        "h1.reclamo_id = reclamo.id AND h1.tipo = 'CREACION'",
+      )
       .innerJoin(
         ReclamoHistorial,
         'h2',
         "h2.reclamo_id = reclamo.id AND h2.tipo = 'ESTADO' AND h2.valor_nuevo = 'COMPLETADO'",
       )
-      .getRawOne();
+      .getRawOne<{ promedioDias: string | null }>();
 
     const eficienciaCuadrilla = await this.reclamosRepo
       .createQueryBuilder('reclamo')
@@ -90,11 +96,11 @@ export class ReclamosStatsService {
       .andWhere('reclamo.cuadrillaid IS NOT NULL')
       .groupBy('reclamo.cuadrillaid')
       .orderBy('reclamosResueltos', 'DESC')
-      .getRawMany();
+      .getRawMany<{ cuadrillaId: number; reclamosResueltos: string }>();
 
     return {
       reclamosPorMes,
-      tiempoPromedioResolucion: tiempoResolucion?.promedioDias || 0,
+      tiempoPromedioResolucion: Number(tiempoResolucion?.promedioDias ?? 0),
       eficienciaCuadrilla,
     };
   }

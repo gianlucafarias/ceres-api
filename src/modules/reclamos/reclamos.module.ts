@@ -14,7 +14,11 @@ import { ReclamosService } from './reclamos.service';
 import { ReclamosStatsService } from './reclamos-stats.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Reclamo, ReclamoHistorial]), GeocodeModule, ActivityLogModule],
+  imports: [
+    TypeOrmModule.forFeature([Reclamo, ReclamoHistorial]),
+    GeocodeModule,
+    ActivityLogModule,
+  ],
   controllers: [ReclamosAdminController, ReclamosBotController],
   providers: [
     ReclamosService,

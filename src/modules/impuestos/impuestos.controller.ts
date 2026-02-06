@@ -1,7 +1,23 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { BotApiKeyGuard } from '../../common/guards/bot-api-key.guard';
-import { ConsultarDeudaDto, PdfParamsDto, SolicitarCedulonDto } from './dto/impuestos.dto';
-import type { ConsultaResponse, SolicitarCedulonResponse } from './impuestos.service';
+import {
+  ConsultarDeudaDto,
+  PdfParamsDto,
+  SolicitarCedulonDto,
+} from './dto/impuestos.dto';
+import type {
+  ConsultaResponse,
+  SolicitarCedulonResponse,
+} from './impuestos.service';
 import { ImpuestosService } from './impuestos.service';
 
 @UseGuards(BotApiKeyGuard)
@@ -16,7 +32,10 @@ export class ImpuestosController {
 
   @Get('pdf/:tipo/:partida')
   async getPdf(@Param() params: PdfParamsDto) {
-    const resultado = await this.service.obtenerPdf(params.partida, params.tipo);
+    const resultado = await this.service.obtenerPdf(
+      params.partida,
+      params.tipo,
+    );
     if (resultado.error) {
       throw new HttpException(resultado, HttpStatus.BAD_REQUEST);
     }
@@ -24,19 +43,29 @@ export class ImpuestosController {
   }
 
   @Post('consultar-deuda')
-  async consultarDeuda(@Body() dto: ConsultarDeudaDto): Promise<ConsultaResponse> {
+  async consultarDeuda(
+    @Body() dto: ConsultarDeudaDto,
+  ): Promise<ConsultaResponse> {
     const resultado = await this.service.consultarDeuda(dto);
     if (!resultado || resultado.RESU !== 'OK') {
-      throw new HttpException(resultado || { error: 'Error en la consulta de deuda' }, HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        resultado || { error: 'Error en la consulta de deuda' },
+        HttpStatus.BAD_REQUEST,
+      );
     }
     return resultado;
   }
 
   @Post('solicitar-cedulon')
-  async solicitarCedulon(@Body() dto: SolicitarCedulonDto): Promise<SolicitarCedulonResponse> {
+  async solicitarCedulon(
+    @Body() dto: SolicitarCedulonDto,
+  ): Promise<SolicitarCedulonResponse> {
     const resultado = await this.service.solicitarCedulon(dto);
     if (!resultado || !this.hasResu(resultado) || resultado.RESU !== 'OK') {
-      throw new HttpException(resultado || { error: 'Error en la solicitud de cedulon' }, HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        resultado || { error: 'Error en la solicitud de cedulon' },
+        HttpStatus.BAD_REQUEST,
+      );
     }
     return resultado;
   }

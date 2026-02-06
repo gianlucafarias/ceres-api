@@ -88,15 +88,21 @@ export class AmeliaWebhookParser {
     };
   }
 
-  private resolveAppointment(payload: Record<string, unknown>): Record<string, unknown> {
+  private resolveAppointment(
+    payload: Record<string, unknown>,
+  ): Record<string, unknown> {
     const directAppointment = payload.appointment;
     if (this.isRecord(directAppointment)) {
       return directAppointment;
     }
 
     const appointmentsRaw = payload.appointments;
-    if (Array.isArray(appointmentsRaw) && appointmentsRaw.length > 0 && this.isRecord(appointmentsRaw[0])) {
-      return appointmentsRaw[0] as Record<string, unknown>;
+    if (
+      Array.isArray(appointmentsRaw) &&
+      appointmentsRaw.length > 0 &&
+      this.isRecord(appointmentsRaw[0])
+    ) {
+      return appointmentsRaw[0];
     }
 
     if (this.isRecord(payload) && payload.id && payload.bookings) {
@@ -120,8 +126,16 @@ export class AmeliaWebhookParser {
   private parseAppointment(raw: Record<string, unknown>): AmeliaAppointment {
     const id = this.getNumber(raw, 'id', 'appointment.id');
     const status = this.getString(raw, 'status', 'appointment.status');
-    const bookingStart = this.getString(raw, 'bookingStart', 'appointment.bookingStart');
-    const bookingEnd = this.getString(raw, 'bookingEnd', 'appointment.bookingEnd');
+    const bookingStart = this.getString(
+      raw,
+      'bookingStart',
+      'appointment.bookingStart',
+    );
+    const bookingEnd = this.getString(
+      raw,
+      'bookingEnd',
+      'appointment.bookingEnd',
+    );
 
     const serviceRaw = this.ensureRecord(raw.service, 'appointment.service');
     const service: AmeliaServiceInfo = {
@@ -195,8 +209,16 @@ export class AmeliaWebhookParser {
 
     const customer: AmeliaCustomer = {
       id: this.getNumber(customerRaw, 'id', 'booking.customer.id'),
-      firstName: this.getString(customerRaw, 'firstName', 'booking.customer.firstName'),
-      lastName: this.getString(customerRaw, 'lastName', 'booking.customer.lastName'),
+      firstName: this.getString(
+        customerRaw,
+        'firstName',
+        'booking.customer.firstName',
+      ),
+      lastName: this.getString(
+        customerRaw,
+        'lastName',
+        'booking.customer.lastName',
+      ),
       email: this.getString(customerRaw, 'email', 'booking.customer.email'),
       phone: this.getString(customerRaw, 'phone', 'booking.customer.phone'),
     };
@@ -222,7 +244,9 @@ export class AmeliaWebhookParser {
     };
   }
 
-  private parseCustomFields(raw: unknown): Record<string, AmeliaCustomField> | undefined {
+  private parseCustomFields(
+    raw: unknown,
+  ): Record<string, AmeliaCustomField> | undefined {
     if (!this.isRecord(raw)) return undefined;
     const result: Record<string, AmeliaCustomField> = {};
 
@@ -239,7 +263,9 @@ export class AmeliaWebhookParser {
     return Object.keys(result).length > 0 ? result : undefined;
   }
 
-  private stripToken(payload: Record<string, unknown>): Record<string, unknown> {
+  private stripToken(
+    payload: Record<string, unknown>,
+  ): Record<string, unknown> {
     const clone: Record<string, unknown> = { ...payload };
     if ('token' in clone) {
       delete clone.token;
@@ -258,7 +284,11 @@ export class AmeliaWebhookParser {
     return typeof value === 'object' && value !== null;
   }
 
-  private getString(record: Record<string, unknown>, key: string, label: string): string {
+  private getString(
+    record: Record<string, unknown>,
+    key: string,
+    label: string,
+  ): string {
     const value = record[key];
     if (typeof value !== 'string' || value.trim() === '') {
       throw new Error(`Payload invalido: ${label}`);
@@ -266,12 +296,19 @@ export class AmeliaWebhookParser {
     return value;
   }
 
-  private getOptionalString(record: Record<string, unknown>, key: string): string | undefined {
+  private getOptionalString(
+    record: Record<string, unknown>,
+    key: string,
+  ): string | undefined {
     const value = record[key];
     return typeof value === 'string' && value.trim() !== '' ? value : undefined;
   }
 
-  private getNumber(record: Record<string, unknown>, key: string, label: string): number {
+  private getNumber(
+    record: Record<string, unknown>,
+    key: string,
+    label: string,
+  ): number {
     const value = record[key];
     if (typeof value !== 'number' || Number.isNaN(value)) {
       throw new Error(`Payload invalido: ${label}`);
@@ -279,8 +316,13 @@ export class AmeliaWebhookParser {
     return value;
   }
 
-  private getOptionalNumber(record: Record<string, unknown>, key: string): number | undefined {
+  private getOptionalNumber(
+    record: Record<string, unknown>,
+    key: string,
+  ): number | undefined {
     const value = record[key];
-    return typeof value === 'number' && !Number.isNaN(value) ? value : undefined;
+    return typeof value === 'number' && !Number.isNaN(value)
+      ? value
+      : undefined;
   }
 }

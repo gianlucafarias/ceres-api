@@ -36,14 +36,20 @@ export class FarmaciasController {
       if (message.includes('no encontrada')) {
         throw new HttpException({ message }, HttpStatus.NOT_FOUND);
       }
-      throw new HttpException({ message: 'Error al obtener la farmacia' }, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        { message: 'Error al obtener la farmacia' },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
   // Admin
   @UseGuards(AdminApiKeyGuard)
   @Put('pharmacy/:code')
-  async update(@Param() params: PharmacyCodeParamsDto, @Body() body: UpdatePharmacyDto) {
+  async update(
+    @Param() params: PharmacyCodeParamsDto,
+    @Body() body: UpdatePharmacyDto,
+  ) {
     try {
       const codeUpper = params.code.trim().toUpperCase();
       const updates = this.cleanPharmacyUpdates(body);
@@ -52,7 +58,14 @@ export class FarmaciasController {
         throw new HttpException(
           {
             message: 'Debe proporcionar al menos un campo para actualizar',
-            allowedFields: ['name', 'address', 'phone', 'lat', 'lng', 'googleMapsAddress'],
+            allowedFields: [
+              'name',
+              'address',
+              'phone',
+              'lat',
+              'lng',
+              'googleMapsAddress',
+            ],
           },
           HttpStatus.BAD_REQUEST,
         );
@@ -65,7 +78,10 @@ export class FarmaciasController {
         throw new HttpException({ message }, HttpStatus.NOT_FOUND);
       }
       if (error instanceof HttpException) throw error;
-      throw new HttpException({ message: 'Error al actualizar la farmacia' }, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        { message: 'Error al actualizar la farmacia' },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -74,7 +90,10 @@ export class FarmaciasController {
   async getToday() {
     const row = await this.service.getDutyToday();
     if (!row) {
-      throw new HttpException({ message: 'No hay turno para hoy' }, HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        { message: 'No hay turno para hoy' },
+        HttpStatus.NOT_FOUND,
+      );
     }
     return row;
   }
@@ -89,7 +108,10 @@ export class FarmaciasController {
   @Get('farmaciadeturno')
   async getRange(@Query() query: DutyRangeQueryDto) {
     if (query.from > query.to) {
-      throw new HttpException({ message: 'from no puede ser mayor que to' }, HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        { message: 'from no puede ser mayor que to' },
+        HttpStatus.BAD_REQUEST,
+      );
     }
     const rows = await this.service.getDutyRange(query.from, query.to);
     return { from: query.from, to: query.to, count: rows.length, rows };
@@ -100,7 +122,10 @@ export class FarmaciasController {
   async getByDate(@Param() params: DutyDateParamsDto) {
     const row = await this.service.getDutyByDate(params.date);
     if (!row) {
-      throw new HttpException({ message: `No hay turno para ${params.date}` }, HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        { message: `No hay turno para ${params.date}` },
+        HttpStatus.NOT_FOUND,
+      );
     }
     return row;
   }
@@ -108,16 +133,25 @@ export class FarmaciasController {
   // Admin
   @UseGuards(AdminApiKeyGuard)
   @Put('farmaciadeturno/:date')
-  async updateByDate(@Param() params: DutyDateParamsDto, @Body() body: UpdateDutyScheduleDto) {
+  async updateByDate(
+    @Param() params: DutyDateParamsDto,
+    @Body() body: UpdateDutyScheduleDto,
+  ) {
     if (!body.pharmacyCode) {
-      throw new HttpException({ message: 'pharmacyCode es requerido' }, HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        { message: 'pharmacyCode es requerido' },
+        HttpStatus.BAD_REQUEST,
+      );
     }
     return this.service.updateDutyByDate(params.date, body.pharmacyCode);
   }
 
   // Public
   @Get('farmacia/:code/duty-schedule')
-  async getByPharmacy(@Param() params: PharmacyCodeParamsDto, @Query() query: DutyByPharmacyQueryDto) {
+  async getByPharmacy(
+    @Param() params: PharmacyCodeParamsDto,
+    @Query() query: DutyByPharmacyQueryDto,
+  ) {
     const code = params.code.trim().toUpperCase();
     const from = query.from || this.toISODateOnly(new Date());
     const limit = query.limit ?? 20;
@@ -132,7 +166,10 @@ export class FarmaciasController {
     if (body.name !== undefined) updates.name = body.name.trim();
     if (body.address !== undefined) updates.address = body.address.trim();
     if (body.phone !== undefined) updates.phone = body.phone.trim();
-    if (body.googleMapsAddress !== undefined && body.googleMapsAddress !== null) {
+    if (
+      body.googleMapsAddress !== undefined &&
+      body.googleMapsAddress !== null
+    ) {
       updates.googleMapsAddress = body.googleMapsAddress.trim();
     }
     if (body.lat !== undefined) updates.lat = body.lat;

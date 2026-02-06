@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "ceres-api",
   "version": "0.0.1",
   "description": "",
@@ -31,6 +31,7 @@
     "class-transformer": "0.5.1",
     "class-validator": "0.14.1",
     "date-fns": "^4.1.0",
+    "express-rate-limit": "^7.5.0",
     "pdf-lib": "^1.17.1",
     "pg": "8.11.3",
     "redis": "4.7.1",

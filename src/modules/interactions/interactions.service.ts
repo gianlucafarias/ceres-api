@@ -27,7 +27,7 @@ export class InteractionsService {
       .groupBy(groupExpr)
       .orderBy(groupExpr, 'ASC');
 
-    const rows = await qb.getRawMany();
+    const rows = await qb.getRawMany<{ group_key: string; count: string }>();
     return rows.map((r) => ({ group: r.group_key, count: Number(r.count) }));
   }
 

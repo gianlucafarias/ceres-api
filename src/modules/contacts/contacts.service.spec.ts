@@ -24,7 +24,10 @@ describe('ContactsService', () => {
   });
 
   it('devuelve contactos ordenados', async () => {
-    const contacts = await service.getContacts({ sort: 'createdAt', order: 'DESC' });
+    const contacts = await service.getContacts({
+      sort: 'createdAt',
+      order: 'DESC',
+    });
     expect(Array.isArray(contacts)).toBe(true);
   });
 });

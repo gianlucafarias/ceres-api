@@ -1,10 +1,17 @@
-﻿import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+﻿import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { EncuestaPresupuesto } from '../../entities/encuesta-presupuesto.entity';
 import { RedisService } from '../../shared/redis/redis.service';
 import { GuardarEncuestaDto } from './dto/encuestas-public.dto';
-import { EditarEncuestaDto, EncuestasQueryDto } from './dto/encuestas-admin.dto';
+import {
+  EditarEncuestaDto,
+  EncuestasQueryDto,
+} from './dto/encuestas-admin.dto';
 
 interface DniValidationResult {
   puedeContinuar: boolean;
@@ -31,7 +38,10 @@ export class EncuestasService {
 
     const existente = await this.encuestaRepo.findOne({ where: { dni } });
     const result: DniValidationResult = existente
-      ? { puedeContinuar: false, mensaje: 'Ya completaste la encuesta anteriormente' }
+      ? {
+          puedeContinuar: false,
+          mensaje: 'Ya completaste la encuesta anteriormente',
+        }
       : { puedeContinuar: true, mensaje: 'DNI valido, puedes continuar' };
 
     await this.setCache(cacheKey, result, 3600);
@@ -99,7 +109,8 @@ export class EncuestasService {
       obrasUrgentes: dto.obrasUrgentes ?? encuesta.obrasUrgentes,
       obrasUrgentesOtro: dto.obrasUrgentesOtro ?? encuesta.obrasUrgentesOtro,
       serviciosMejorar: dto.serviciosMejorar ?? encuesta.serviciosMejorar,
-      serviciosMejorarOtro: dto.serviciosMejorarOtro ?? encuesta.serviciosMejorarOtro,
+      serviciosMejorarOtro:
+        dto.serviciosMejorarOtro ?? encuesta.serviciosMejorarOtro,
       espacioMejorar: dto.espacioMejorar ?? encuesta.espacioMejorar,
       propuesta: dto.propuesta ?? encuesta.propuesta,
       quiereContacto: dto.quiereContacto ?? encuesta.quiereContacto,
@@ -147,11 +158,15 @@ export class EncuestasService {
     }
 
     if (desde) {
-      qb.andWhere('encuesta.fechaCreacion >= :desde', { desde: new Date(desde) });
+      qb.andWhere('encuesta.fechaCreacion >= :desde', {
+        desde: new Date(desde),
+      });
     }
 
     if (hasta) {
-      qb.andWhere('encuesta.fechaCreacion <= :hasta', { hasta: endOfDay(hasta) });
+      qb.andWhere('encuesta.fechaCreacion <= :hasta', {
+        hasta: endOfDay(hasta),
+      });
     }
 
     if (search) {
@@ -170,7 +185,7 @@ export class EncuestasService {
       'fechaActualizacion',
     ]);
     const sortColumn = allowedSort.has(sort) ? sort : 'id';
-    qb.orderBy(`encuesta.${sortColumn}`, order as 'ASC' | 'DESC');
+    qb.orderBy(`encuesta.${sortColumn}`, order);
 
     qb.skip((page - 1) * per_page).take(per_page);
 
@@ -189,15 +204,16 @@ export class EncuestasService {
 
     const totalEncuestas = await this.encuestaRepo.count({ where });
 
-    const porBarrio = barrio && barrio !== 'todos'
-      ? [{ barrio, cantidad: totalEncuestas }]
-      : await this.encuestaRepo
-          .createQueryBuilder('encuesta')
-          .select('encuesta.barrio', 'barrio')
-          .addSelect('COUNT(*)', 'cantidad')
-          .groupBy('encuesta.barrio')
-          .orderBy('cantidad', 'DESC')
-          .getRawMany();
+    const porBarrio =
+      barrio && barrio !== 'todos'
+        ? [{ barrio, cantidad: totalEncuestas }]
+        : await this.encuestaRepo
+            .createQueryBuilder('encuesta')
+            .select('encuesta.barrio', 'barrio')
+            .addSelect('COUNT(*)', 'cantidad')
+            .groupBy('encuesta.barrio')
+            .orderBy('cantidad', 'DESC')
+            .getRawMany();
 
     const encuestas = await this.encuestaRepo.find({ where });
 
@@ -205,10 +221,22 @@ export class EncuestasService {
     const serviciosCount: Record<string, number> = {};
     let personasDejaronContacto = 0;
 
-    const obrasUrgentesOtroMap = new Map<string, { comentario: string; encuestaId: number }>();
-    const serviciosMejorarOtroMap = new Map<string, { comentario: string; encuestaId: number }>();
-    const espacioMejorarMap = new Map<string, { comentario: string; encuestaId: number }>();
-    const propuestasMap = new Map<string, { comentario: string; encuestaId: number }>();
+    const obrasUrgentesOtroMap = new Map<
+      string,
+      { comentario: string; encuestaId: number }
+    >();
+    const serviciosMejorarOtroMap = new Map<
+      string,
+      { comentario: string; encuestaId: number }
+    >();
+    const espacioMejorarMap = new Map<
+      string,
+      { comentario: string; encuestaId: number }
+    >();
+    const propuestasMap = new Map<
+      string,
+      { comentario: string; encuestaId: number }
+    >();
 
     for (const encuesta of encuestas) {
       (encuesta.obrasUrgentes || []).forEach((obra) => {
@@ -223,7 +251,10 @@ export class EncuestasService {
         personasDejaronContacto += 1;
       }
 
-      if (encuesta.obrasUrgentesOtro && encuesta.obrasUrgentesOtro.trim() !== '') {
+      if (
+        encuesta.obrasUrgentesOtro &&
+        encuesta.obrasUrgentesOtro.trim() !== ''
+      ) {
         const key = `${encuesta.id}-${encuesta.obrasUrgentesOtro.trim()}`;
         obrasUrgentesOtroMap.set(key, {
           comentario: encuesta.obrasUrgentesOtro.trim(),
@@ -231,7 +262,10 @@ export class EncuestasService {
         });
       }
 
-      if (encuesta.serviciosMejorarOtro && encuesta.serviciosMejorarOtro.trim() !== '') {
+      if (
+        encuesta.serviciosMejorarOtro &&
+        encuesta.serviciosMejorarOtro.trim() !== ''
+      ) {
         const key = `${encuesta.id}-${encuesta.serviciosMejorarOtro.trim()}`;
         serviciosMejorarOtroMap.set(key, {
           comentario: encuesta.serviciosMejorarOtro.trim(),
@@ -266,9 +300,10 @@ export class EncuestasService {
       .sort((a, b) => b.cantidad - a.cantidad)
       .slice(0, 10);
 
-    const porcentajeContacto = totalEncuestas > 0
-      ? Math.round((personasDejaronContacto / totalEncuestas) * 100)
-      : 0;
+    const porcentajeContacto =
+      totalEncuestas > 0
+        ? Math.round((personasDejaronContacto / totalEncuestas) * 100)
+        : 0;
 
     return {
       totalEncuestas,
@@ -303,7 +338,9 @@ export class EncuestasService {
     let memoriaUsada = 'N/A';
     try {
       const info = await this.redis.info('memory');
-      const line = info.split('\r\n').find((l) => l.startsWith('used_memory_human:'));
+      const line = info
+        .split('\r\n')
+        .find((l) => l.startsWith('used_memory_human:'));
       memoriaUsada = line ? line.split(':')[1] : 'N/A';
     } catch {
       memoriaUsada = 'N/A';
@@ -327,7 +364,11 @@ export class EncuestasService {
     }
   }
 
-  private async setCache(key: string, value: unknown, ttlSeconds: number): Promise<void> {
+  private async setCache(
+    key: string,
+    value: unknown,
+    ttlSeconds: number,
+  ): Promise<void> {
     if (!this.redis.isEnabled()) return;
     try {
       await this.redis.setEx(key, ttlSeconds, JSON.stringify(value));

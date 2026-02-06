@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Patch, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { AdminApiKeyGuard } from '../../common/guards/admin-api-key.guard';
 import {
   ActualizarReclamoAdminDto,
@@ -58,7 +66,10 @@ export class ReclamosAdminController {
   }
 
   @Patch(':id')
-  actualizar(@Param() params: ReclamoIdParamDto, @Body() dto: ActualizarReclamoAdminDto) {
+  actualizar(
+    @Param() params: ReclamoIdParamDto,
+    @Body() dto: ActualizarReclamoAdminDto,
+  ) {
     return this.service.actualizarAdmin(params.id, dto);
   }
 }

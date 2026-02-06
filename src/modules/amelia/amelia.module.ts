@@ -9,7 +9,11 @@ import { AmeliaService } from './amelia.service';
 import { AmeliaTurnoService } from './amelia-turno.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([AmeliaTurno]), ActivityLogModule, WhatsappModule],
+  imports: [
+    TypeOrmModule.forFeature([AmeliaTurno]),
+    ActivityLogModule,
+    WhatsappModule,
+  ],
   controllers: [AmeliaController],
   providers: [AmeliaWebhookParser, AmeliaTurnoService, AmeliaService],
 })

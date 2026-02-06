@@ -23,7 +23,9 @@ export class ActivityService {
     private readonly repo: Repository<ActivityLog>,
   ) {}
 
-  async getRecentActivities(query: ActivityQueryDto): Promise<ActivityResponse[]> {
+  async getRecentActivities(
+    query: ActivityQueryDto,
+  ): Promise<ActivityResponse[]> {
     const limit = query.limit ?? 10;
     const where = query.type ? { type: query.type } : {};
 

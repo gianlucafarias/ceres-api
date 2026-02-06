@@ -6,7 +6,11 @@ import { Notificaciones } from '../../entities/notificaciones.entity';
 import { PreferenciasUsuario } from '../../entities/preferencias-usuario.entity';
 import { WhatsappTemplateService } from '../../shared/whatsapp/whatsapp-template.service';
 import { WhatsappComponent } from '../../shared/whatsapp/whatsapp.types';
-import { ActualizarPreferenciasDto, ActualizarSeccionDto, EnviarTemplateDto } from './dto/notificaciones.dto';
+import {
+  ActualizarPreferenciasDto,
+  ActualizarSeccionDto,
+  EnviarTemplateDto,
+} from './dto/notificaciones.dto';
 
 @Injectable()
 export class NotificacionesService {
@@ -21,12 +25,16 @@ export class NotificacionesService {
   ) {}
 
   async actualizarPreferencias(dto: ActualizarPreferenciasDto) {
-    const contacto = await this.contactRepo.findOne({ where: { id: dto.contact_id } });
+    const contacto = await this.contactRepo.findOne({
+      where: { id: dto.contact_id },
+    });
     if (!contacto) {
       throw new NotFoundException('Contacto no encontrado');
     }
 
-    let preferencias = await this.prefRepo.findOne({ where: { contactId: dto.contact_id } });
+    let preferencias = await this.prefRepo.findOne({
+      where: { contactId: dto.contact_id },
+    });
 
     if (!preferencias) {
       preferencias = this.prefRepo.create({
@@ -59,7 +67,9 @@ export class NotificacionesService {
   }
 
   async actualizarSeccion(dto: ActualizarSeccionDto) {
-    const contacto = await this.contactRepo.findOne({ where: { id: dto.contact_id } });
+    const contacto = await this.contactRepo.findOne({
+      where: { id: dto.contact_id },
+    });
     if (!contacto) {
       throw new NotFoundException('Contacto no encontrado');
     }
@@ -89,18 +99,38 @@ export class NotificacionesService {
       const usuarioId = contacto.id;
 
       if (pref.notificarHumedo && this.esResiduoHumedo(diaSemana)) {
-        await this.enviarNotificacion(usuarioId, contacto.phone, 'humedo', horaEnvio);
+        await this.enviarNotificacion(
+          usuarioId,
+          contacto.phone,
+          'humedo',
+          horaEnvio,
+        );
         await this.registrarNotificacion(usuarioId);
       }
 
       if (pref.notificarSeco && this.esResiduoSeco(diaSemana)) {
-        await this.enviarNotificacion(usuarioId, contacto.phone, 'seco', horaEnvio);
+        await this.enviarNotificacion(
+          usuarioId,
+          contacto.phone,
+          'seco',
+          horaEnvio,
+        );
         await this.registrarNotificacion(usuarioId);
       }
 
       const seccionId = await this.obtenerSeccionDeUsuario(usuarioId);
-      if (pref.notificarPatio && seccionId && this.esResiduoPatio(hoy, seccionId)) {
-        await this.enviarNotificacion(usuarioId, contacto.phone, 'patio', horaEnvio, `Seccion ${seccionId}`);
+      if (
+        pref.notificarPatio &&
+        seccionId &&
+        this.esResiduoPatio(hoy, seccionId)
+      ) {
+        await this.enviarNotificacion(
+          usuarioId,
+          contacto.phone,
+          'patio',
+          horaEnvio,
+          `Seccion ${seccionId}`,
+        );
         await this.registrarNotificacion(usuarioId);
       }
     }
@@ -143,7 +173,9 @@ export class NotificacionesService {
     return semanaActual === seccionId;
   }
 
-  private async obtenerSeccionDeUsuario(usuarioId: number): Promise<number | null> {
+  private async obtenerSeccionDeUsuario(
+    usuarioId: number,
+  ): Promise<number | null> {
     const notificacion = await this.notifRepo.findOne({
       where: { usuarioId },
       order: { id: 'DESC' },
@@ -190,7 +222,8 @@ export class NotificacionesService {
         ],
       });
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Error desconocido';
+      const message =
+        error instanceof Error ? error.message : 'Error desconocido';
       console.error('[notificaciones] error enviando whatsapp', {
         usuarioId,
         telefono,
@@ -200,10 +233,16 @@ export class NotificacionesService {
   }
 
   async enviarTemplate(dto: EnviarTemplateDto): Promise<void> {
-    const components: WhatsappComponent[] | undefined = dto.components?.map((component) => ({
-      type: component.type,
-      parameters: component.parameters?.map((param) => ({ type: 'text', text: param.text })) ?? [],
-    }));
+    const components: WhatsappComponent[] | undefined = dto.components?.map(
+      (component) => ({
+        type: component.type,
+        parameters:
+          component.parameters?.map((param) => ({
+            type: 'text',
+            text: param.text,
+          })) ?? [],
+      }),
+    );
 
     const payload = {
       number: dto.number,

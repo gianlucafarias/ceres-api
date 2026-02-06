@@ -11,7 +11,10 @@ export class UsersService {
     private readonly contactRepo: Repository<Contact>,
   ) {}
 
-  async getUsersCount({ from, to }: UsersCountQueryDto): Promise<{ count: number }> {
+  async getUsersCount({
+    from,
+    to,
+  }: UsersCountQueryDto): Promise<{ count: number }> {
     const qb = this.contactRepo.createQueryBuilder('contact');
 
     if (from && to) {

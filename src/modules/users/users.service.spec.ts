@@ -8,8 +8,12 @@ describe('UsersService', () => {
   let qbMock: QueryBuilderMock;
 
   type QueryBuilderMock = {
-    where: jest.MockedFunction<(sql: string, params?: Record<string, unknown>) => QueryBuilderMock>;
-    andWhere: jest.MockedFunction<(sql: string, params?: Record<string, unknown>) => QueryBuilderMock>;
+    where: jest.MockedFunction<
+      (sql: string, params?: Record<string, unknown>) => QueryBuilderMock
+    >;
+    andWhere: jest.MockedFunction<
+      (sql: string, params?: Record<string, unknown>) => QueryBuilderMock
+    >;
     getCount: jest.MockedFunction<() => Promise<number>>;
   };
 

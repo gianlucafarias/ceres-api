@@ -30,7 +30,12 @@ export class ReclamosHistorialService {
     });
   }
 
-  registrarCambioEstado(reclamoId: number, anterior: string | null, nuevo: string, usuarioId?: number | null) {
+  registrarCambioEstado(
+    reclamoId: number,
+    anterior: string | null,
+    nuevo: string,
+    usuarioId?: number | null,
+  ) {
     return this.saveChange({
       reclamoId,
       tipo: 'ESTADO',
@@ -41,7 +46,12 @@ export class ReclamosHistorialService {
     });
   }
 
-  registrarCambioPrioridad(reclamoId: number, anterior: string | null, nuevo: string, usuarioId?: number | null) {
+  registrarCambioPrioridad(
+    reclamoId: number,
+    anterior: string | null,
+    nuevo: string,
+    usuarioId?: number | null,
+  ) {
     return this.saveChange({
       reclamoId,
       tipo: 'PRIORIDAD',
