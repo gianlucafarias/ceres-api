@@ -56,3 +56,9 @@ pids
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Runtime static storage (keep folders only)
+media/poda/*
+!media/poda/.gitkeep
+modified_certificates/*
+!modified_certificates/.gitkeep
