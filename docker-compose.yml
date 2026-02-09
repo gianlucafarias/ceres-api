@@ -1,18 +1,15 @@
-﻿version: "3.9"
+version: "3.9"
 
 services:
   api:
     image: ghcr.io/gianlucafarias/ceres-api:${API_IMAGE_TAG:-main}
     container_name: ceres-api
     init: true
+    network_mode: host
     env_file: .env
     environment:
       NODE_ENV: production
       PORT: 3022
-    ports:
-      - "3022:3022"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     healthcheck:
       test:
         [
