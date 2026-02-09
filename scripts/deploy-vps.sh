@@ -66,10 +66,6 @@ if [ -n "${GHCR_TOKEN:-}" ] && [ -n "${GHCR_USERNAME:-}" ]; then
   echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USERNAME}" --password-stdin
 fi
 
-if [ -n "${DOCKERHUB_TOKEN:-}" ] && [ -n "${DOCKERHUB_USERNAME:-}" ]; then
-  echo "${DOCKERHUB_TOKEN}" | docker login docker.io -u "${DOCKERHUB_USERNAME}" --password-stdin
-fi
-
 docker pull "${IMAGE_NAME}:${IMAGE_TAG}" || {
   echo "No se pudo descargar ${IMAGE_NAME}:${IMAGE_TAG}."
   echo "Tip: setea IMAGE_TAG manualmente a un tag existente (por ejemplo '${BRANCH}' o un sha publicado)."

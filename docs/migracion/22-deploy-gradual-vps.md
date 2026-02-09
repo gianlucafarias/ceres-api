@@ -80,6 +80,7 @@ BRANCH=main IMAGE_TAG=main ./scripts/deploy-vps.sh
 
 Notas:
 - Si `OBS_STACK_ENABLED=true` en `.env`, el script levanta tambien `prometheus` y `grafana` con `docker-compose.observability.yml`.
+- Las imagenes de observabilidad se resuelven desde GHCR (`ceres-prometheus` y `ceres-grafana`).
 - Puertos por defecto observabilidad (solo localhost VPS): Prometheus `127.0.0.1:9091`, Grafana `127.0.0.1:3003`.
 - Para acceso remoto seguro usar tunel SSH:
   `ssh -L 3003:127.0.0.1:3003 -L 9091:127.0.0.1:9091 <user>@<vps>`.
