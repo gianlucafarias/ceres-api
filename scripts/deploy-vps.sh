@@ -76,7 +76,28 @@ deploy_api_only() {
   API_IMAGE_TAG="${IMAGE_TAG}" ${COMPOSE_CMD} up -d --remove-orphans api
 }
 
+write_prometheus_config() {
+  local scrape_interval
+  local ops_api_key
+  scrape_interval="$(get_env_var OBS_PROMETHEUS_SCRAPE_INTERVAL 30s)"
+  ops_api_key="$(get_env_var OPS_API_KEY "")"
+
+  cat > .deploy/prometheus.yml <<EOF
+global:
+  scrape_interval: ${scrape_interval}
+  evaluation_interval: ${scrape_interval}
+scrape_configs:
+  - job_name: "ceres-api"
+    metrics_path: "/api/v1/ops/metrics"
+    params:
+      api_key: ["${ops_api_key}"]
+    static_configs:
+      - targets: ["host.docker.internal:3022"]
+EOF
+}
+
 deploy_with_observability() {
+  write_prometheus_config
   API_IMAGE_TAG="${IMAGE_TAG}" ${COMPOSE_CMD} \
     -f docker-compose.yml \
     -f docker-compose.observability.yml \
@@ -118,6 +139,7 @@ rollback_api_only() {
 }
 
 rollback_with_observability() {
+  write_prometheus_config
   API_IMAGE_TAG="${ROLLBACK_TAG}" ${COMPOSE_CMD} \
     -f docker-compose.yml \
     -f docker-compose.observability.yml \
