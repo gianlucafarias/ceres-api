@@ -1,5 +1,7 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, Req, Res, UseGuards } from '@nestjs/common';
+import type { Request, Response } from 'express';
 import { AdminApiKeyGuard } from '../../common/guards/admin-api-key.guard';
+import { applyHttpEtag } from '../../common/utils/http-etag';
 import { VisitsRangeQueryDto } from './dto/visits.dto';
 import { VisitsService } from './visits.service';
 
@@ -9,7 +11,13 @@ export class VisitsController {
   constructor(private readonly service: VisitsService) {}
 
   @Get()
-  getVisitasFlujo(@Query() query: VisitsRangeQueryDto) {
-    return this.service.getVisitasFlujo(query);
+  async getVisitasFlujo(
+    @Query() query: VisitsRangeQueryDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const payload = await this.service.getVisitasFlujo(query);
+    if (applyHttpEtag(req, res, payload)) return;
+    return payload;
   }
 }

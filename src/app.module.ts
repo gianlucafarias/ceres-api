@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
@@ -23,6 +23,10 @@ import { FarmaciasModule } from './modules/farmacias/farmacias.module';
 import { BotConfigModule } from './modules/bot-config/bot-config.module';
 import { FeedbackModule } from './modules/feedback/feedback.module';
 import { ConversacionesModule } from './modules/conversaciones/conversaciones.module';
+import { DashboardCeresitoModule } from './modules/dashboard-ceresito/dashboard-ceresito.module';
+import { AdminBootstrapModule } from './modules/admin-bootstrap/admin-bootstrap.module';
+import { ObservabilityMiddleware } from './modules/observability/observability.middleware';
+import { ObservabilityModule } from './modules/observability/observability.module';
 
 @Module({
   imports: [
@@ -46,6 +50,7 @@ import { ConversacionesModule } from './modules/conversaciones/conversaciones.mo
     }),
     HttpModule,
     RedisModule,
+    ObservabilityModule,
     HealthModule,
     UsersModule,
     InteractionsModule,
@@ -63,8 +68,14 @@ import { ConversacionesModule } from './modules/conversaciones/conversaciones.mo
     BotConfigModule,
     FeedbackModule,
     ConversacionesModule,
+    DashboardCeresitoModule,
+    AdminBootstrapModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, ObservabilityMiddleware],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(ObservabilityMiddleware).forRoutes('*');
+  }
+}

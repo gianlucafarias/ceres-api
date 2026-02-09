@@ -5,6 +5,7 @@ import { Notificaciones } from '../../entities/notificaciones.entity';
 import { PreferenciasUsuario } from '../../entities/preferencias-usuario.entity';
 import { WhatsappTemplateService } from '../../shared/whatsapp/whatsapp-template.service';
 import { WhatsappTemplatePayload } from '../../shared/whatsapp/whatsapp.types';
+import { OpsNotificationsService } from '../observability/ops-notifications.service';
 import { NotificacionesService } from './notificaciones.service';
 
 interface RepoMock<T> {
@@ -22,6 +23,9 @@ describe('NotificacionesService', () => {
   let whatsapp: {
     sendTemplate: jest.Mock<Promise<void>, [WhatsappTemplatePayload]>;
   };
+  let opsNotifications: {
+    emitInternalEvent: jest.Mock<void, [unknown]>;
+  };
 
   beforeEach(async () => {
     contactRepo = mockRepo<Contact>();
@@ -31,6 +35,9 @@ describe('NotificacionesService', () => {
       sendTemplate: jest
         .fn<Promise<void>, [WhatsappTemplatePayload]>()
         .mockResolvedValue(undefined),
+    };
+    opsNotifications = {
+      emitInternalEvent: jest.fn<void, [unknown]>(),
     };
 
     const module = await Test.createTestingModule({
@@ -43,6 +50,7 @@ describe('NotificacionesService', () => {
         },
         { provide: getRepositoryToken(Notificaciones), useValue: notifRepo },
         { provide: WhatsappTemplateService, useValue: whatsapp },
+        { provide: OpsNotificationsService, useValue: opsNotifications },
       ],
     }).compile();
 

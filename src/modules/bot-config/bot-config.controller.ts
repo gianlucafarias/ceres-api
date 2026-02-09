@@ -74,10 +74,7 @@ export class BotConfigController {
 
     try {
       const config = await this.service.create(clave, body);
-      return {
-        message: `Configuracion con clave "${clave}" creada correctamente.`,
-        config,
-      };
+      return config;
     } catch (error: unknown) {
       const message = toErrorMessage(
         error,
@@ -109,10 +106,7 @@ export class BotConfigController {
 
     try {
       const config = await this.service.update(clave, body);
-      return {
-        message: `Configuracion con clave "${clave}" actualizada correctamente.`,
-        config,
-      };
+      return config;
     } catch (error: unknown) {
       const message = toErrorMessage(
         error,

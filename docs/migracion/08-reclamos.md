@@ -1,28 +1,41 @@
 ﻿# 08 - Módulo Reclamos (sin PDF)
 
 ## Alcance
+
 - Crea/consulta reclamos desde bot/ciudadano.
 - Gestión completa desde dashboard (listado, detalle, actualización, historial, stats básicas).
 - PDFs y estadísticas avanzadas quedan para fase siguiente.
 
 ## Seguridad
+
 - Bot/Ciudadano: `BOT_API_KEY` (header `x-api-key` o `?api_key=`).
 - Dashboard: `ADMIN_API_KEY`.
-- PII: el teléfono solo se devuelve en endpoints admin. Respuestas bot excluyen `telefono`.
+- PII: no exponer `telefono` en respuestas para dashboard; relacionados del mismo solicitante se resuelve por `:id` internamente.
 
 ## Endpoints (v1)
+
 ### Bot (`BOT_API_KEY`)
+
 - `POST /api/v1/reclamos` (crear) → id, estado, fecha, reclamo, barrio, ubicacion (sin teléfono).
 - `GET /api/v1/reclamos/:id/estado` → estado y datos básicos (sin teléfono).
 
 ### Dashboard (`ADMIN_API_KEY`)
+
 - `GET /api/v1/reclamos` (paginado, filtros estado/prioridad/barrio/fecha/search, sort/order).
-- `GET /api/v1/reclamos/:id` (detalle completo, incluye teléfono).
+- `GET /api/v1/reclamos/:id` (detalle admin).
+- `GET /api/v1/reclamos/:id/relacionados` (mismo solicitante, sin PII de contacto).
 - `PATCH /api/v1/reclamos/:id` (estado, prioridad, cuadrilla, detalle, ubicacion).
 - `GET /api/v1/reclamos/:id/historial`
 - `GET /api/v1/reclamos/estadisticas/basicas` (por estado, prioridad y tipo).
 
+### Contrato `GET /api/v1/reclamos/:id/relacionados`
+
+- Respuesta: `{ data: ReclamoRelacionado[], total: number }`
+- `ReclamoRelacionado` incluye: `id`, `fecha`, `reclamo`, `estado`, `barrio`, `ubicacion`, `detalle`.
+- No expone PII (`telefono`, `dni`, `email`).
+
 ## Estructura
+
 - `src/modules/reclamos/`
   - `reclamos.module.ts`
   - `reclamos.service.ts`
@@ -33,6 +46,7 @@
   - `reclamos.service.spec.ts`
 
 ## Notas
+
 - Se conserva la entidad `Reclamo` y `ReclamoHistorial`.
 - Paginación obligatoria en listados admin.
 - Historial registra cambios de estado, prioridad y cuadrilla; usa `usuarioId` si se envía.
@@ -41,6 +55,6 @@
 - Versionado URI `v1`.
 
 ## Relacionados
+
 - Ver `09-reclamos-pdf.md` (PDFs).
 - Ver `10-reclamos-estadisticas.md` (estadísticas avanzadas).
-

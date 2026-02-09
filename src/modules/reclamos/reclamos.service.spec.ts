@@ -1,3 +1,4 @@
+import { NotFoundException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { Reclamo } from '../../entities/reclamo.entity';
 import { ActivityLogService } from '../../shared/activity-log/activity-log.service';
@@ -147,4 +148,78 @@ describe('ReclamosService', () => {
     expect(res).not.toBeNull();
     expect(res && 'telefono' in res).toBe(false);
   });
+
+  it('relacionadosAdmin devuelve relacionados del mismo solicitante sin PII', async () => {
+    reclamosRepo.findById.mockResolvedValue(
+      buildReclamo({
+        id: 10,
+        telefono: '3491123456',
+      }),
+    );
+    reclamosRepo.findByTelefono.mockResolvedValue([
+      buildReclamo({
+        id: 10,
+        telefono: '3491123456',
+      }),
+      buildReclamo({
+        id: 11,
+        telefono: '3491123456',
+        detalle: 'Detalle relacionado',
+      }),
+    ]);
+
+    const res = await service.relacionadosAdmin(10);
+
+    expect(res.total).toBe(1);
+    expect(res.data).toHaveLength(1);
+    expect(res.data[0]).toMatchObject({
+      id: 11,
+      reclamo: 'Bache',
+      estado: 'PENDIENTE',
+      barrio: 'Centro',
+      ubicacion: 'San Martin 123',
+      detalle: 'Detalle relacionado',
+    });
+    expect(res.data[0].fecha).toBeInstanceOf(Date);
+    expect((res.data[0] as Record<string, unknown>).telefono).toBeUndefined();
+    expect((res.data[0] as Record<string, unknown>).nombre).toBeUndefined();
+  });
+
+  it('relacionadosAdmin devuelve 404 si el reclamo base no existe', async () => {
+    reclamosRepo.findById.mockResolvedValue(null);
+
+    await expect(service.relacionadosAdmin(999)).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
+    expect(reclamosRepo.findByTelefono).not.toHaveBeenCalled();
+  });
+
+  it('relacionadosAdmin devuelve data vacia si no hay otros reclamos del solicitante', async () => {
+    const current = buildReclamo({ id: 10, telefono: '3491123456' });
+    reclamosRepo.findById.mockResolvedValue(current);
+    reclamosRepo.findByTelefono.mockResolvedValue([current]);
+
+    const res = await service.relacionadosAdmin(10);
+
+    expect(res).toEqual({ data: [], total: 0 });
+  });
 });
+
+function buildReclamo(overrides: Partial<Reclamo> = {}): Reclamo {
+  return {
+    id: 1,
+    fecha: new Date('2026-02-01T10:00:00.000Z'),
+    nombre: 'Juan Perez',
+    reclamo: 'Bache',
+    ubicacion: 'San Martin 123',
+    barrio: 'Centro',
+    telefono: '3491123456',
+    estado: 'PENDIENTE',
+    detalle: 'Detalle',
+    prioridad: 'MEDIA',
+    cuadrillaid: null,
+    latitud: null,
+    longitud: null,
+    ...overrides,
+  };
+}

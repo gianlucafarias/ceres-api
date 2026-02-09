@@ -46,11 +46,13 @@ sudo apt-get install -y docker-compose-plugin
 4. Se despliega con `API_IMAGE_TAG=<git-sha> docker compose up -d`.
 5. Se espera estado `healthy` del contenedor.
 6. Si falla, se hace rollback automatico a la imagen que estaba corriendo (snapshot local `rollback-local`); si no existe snapshot, usa el tag guardado en `.deploy/current_api_image_tag`.
+7. Si `.env` tiene `OBS_STACK_ENABLED=true`, el deploy tambien levanta `prometheus` y `grafana`.
 
 ## Archivos
 - `.github/workflows/ci.yml`: tests y build.
 - `.github/workflows/deploy.yml`: build + push + deploy + rollback.
 - `docker-compose.yml`: API en `3022`, healthcheck y soporte de `API_IMAGE_TAG`.
+- `docker-compose.observability.yml`: stack opcional de observabilidad para VPS (Prometheus/Grafana).
 
 ## Operacion
 - Ver health desde VPS: `curl -fsS http://127.0.0.1:3022/api/v1/health`

@@ -245,6 +245,86 @@
                               ]
                  },
                  {
+                     "name":  "Dashboard Ceresito (Admin)",
+                     "item":  [
+                                  {
+                                      "name":  "GET /v1/dashboard/ceresito/summary",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "x-api-key",
+                                                                         "value":  "{{adminApiKey}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/v1/dashboard/ceresito/summary?from={{startDate}}\u0026to={{endDate}}"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Admin (Settings)",
+                     "item":  [
+                                  {
+                                      "name":  "GET /v1/admin/bootstrap",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "x-api-key",
+                                                                         "value":  "{{adminApiKey}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/v1/admin/bootstrap"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Observability (Ops)",
+                     "item":  [
+                                  {
+                                      "name":  "GET /v1/ops/metrics",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "x-api-key",
+                                                                         "value":  "{{opsApiKey}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/v1/ops/metrics"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "POST /v1/ops/notifications/events",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "x-api-key",
+                                                                         "value":  "{{opsEventsApiKey}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"source\": \"dashboard\",\n  \"type\": \"legacy_fallback\",\n  \"severity\": \"warn\",\n  \"title\": \"Fallback a legacy\",\n  \"message\": \"Timeout contra core\",\n  \"metadata\": {\n    \"provider\": \"legacy-core\"\n  }\n}",
+                                                                   "options":  {
+                                                                                   "raw":  {
+                                                                                               "language":  "json"
+                                                                                           }
+                                                                               }
+                                                               },
+                                                      "url":  "{{baseUrl}}/v1/ops/notifications/events"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
                      "name":  "Visits (Admin)",
                      "item":  [
                                   {
@@ -372,6 +452,19 @@
                                                                      }
                                                                  ],
                                                       "url":  "{{baseUrl}}/v1/reclamos/{{reclamoId}}/historial"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "GET /v1/reclamos/:id/relacionados",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "x-api-key",
+                                                                         "value":  "{{adminApiKey}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/v1/reclamos/{{reclamoId}}/relacionados"
                                                   }
                                   },
                                   {
@@ -1223,6 +1316,14 @@
                          "value":  ""
                      },
                      {
+                         "key":  "opsApiKey",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "opsEventsApiKey",
+                         "value":  ""
+                     },
+                     {
                          "key":  "botApiKey",
                          "value":  ""
                      },
@@ -1253,6 +1354,10 @@
                      {
                          "key":  "groupBy",
                          "value":  "day"
+                     },
+                     {
+                         "key":  "treatedStatus",
+                         "value":  "ASIGNADO"
                      },
                      {
                          "key":  "impuestosTipo",
@@ -1324,3 +1429,4 @@
                      }
                  ]
 }
+

@@ -6,6 +6,7 @@ import { Notificaciones } from '../../entities/notificaciones.entity';
 import { PreferenciasUsuario } from '../../entities/preferencias-usuario.entity';
 import { WhatsappTemplateService } from '../../shared/whatsapp/whatsapp-template.service';
 import { WhatsappComponent } from '../../shared/whatsapp/whatsapp.types';
+import { OpsNotificationsService } from '../observability/ops-notifications.service';
 import {
   ActualizarPreferenciasDto,
   ActualizarSeccionDto,
@@ -22,6 +23,7 @@ export class NotificacionesService {
     @InjectRepository(Notificaciones)
     private readonly notifRepo: Repository<Notificaciones>,
     private readonly whatsapp: WhatsappTemplateService,
+    private readonly opsNotifications: OpsNotificationsService,
   ) {}
 
   async actualizarPreferencias(dto: ActualizarPreferenciasDto) {
@@ -224,10 +226,17 @@ export class NotificacionesService {
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Error desconocido';
-      console.error('[notificaciones] error enviando whatsapp', {
-        usuarioId,
-        telefono,
+      this.opsNotifications.emitInternalEvent({
+        source: 'backend',
+        type: 'whatsapp_send_failure',
+        severity: 'error',
+        title: 'Fallo en envio de WhatsApp',
         message,
+        metadata: {
+          usuarioId,
+          telefono,
+          tipoResiduo,
+        },
       });
     }
   }

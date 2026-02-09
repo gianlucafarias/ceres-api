@@ -60,6 +60,11 @@ export class ReclamosAdminController {
     return this.service.historialAdmin(params.id);
   }
 
+  @Get(':id/relacionados')
+  relacionados(@Param() params: ReclamoIdParamDto) {
+    return this.service.relacionadosAdmin(params.id);
+  }
+
   @Get(':id')
   detalle(@Param() params: ReclamoIdParamDto) {
     return this.service.detalleAdmin(params.id);

@@ -25,6 +25,7 @@
 - Reutiliza entidades existentes: `Contact`, `History`, `Reclamo`, `Converstation`.
 - No altera el esquema; `synchronize` sigue desactivado.
 - Versionado URI `v1`.
+- `GET /api/v1/contacts/last-interactions` ahora incluye `ETag` y puede responder `304` con `If-None-Match`.
 
 ## Pruebas
 - Unit test de servicio con repositorios mock (`contacts.service.spec.ts`).

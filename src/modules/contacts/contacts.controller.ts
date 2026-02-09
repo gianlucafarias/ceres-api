@@ -1,11 +1,15 @@
 import {
   Controller,
   Get,
+  NotFoundException,
   Param,
   ParseIntPipe,
   Query,
+  Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
+import type { Request, Response } from 'express';
 import {
   ContactIdParamDto,
   ContactsQueryDto,
@@ -13,6 +17,7 @@ import {
 } from './dto/contacts.dto';
 import { ContactsService } from './contacts.service';
 import { AdminApiKeyGuard } from '../../common/guards/admin-api-key.guard';
+import { applyHttpEtag } from '../../common/utils/http-etag';
 
 @UseGuards(AdminApiKeyGuard)
 @Controller({ path: 'contacts', version: '1' })
@@ -20,8 +25,13 @@ export class ContactsController {
   constructor(private readonly service: ContactsService) {}
 
   @Get('last-interactions')
-  getLastInteractions() {
-    return this.service.getLastUserInteractions();
+  async getLastInteractions(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const payload = await this.service.getLastUserInteractions();
+    if (applyHttpEtag(req, res, payload)) return;
+    return payload;
   }
 
   @Get()
@@ -33,7 +43,7 @@ export class ContactsController {
   async getContact(@Param() params: ContactIdParamDto) {
     const result = await this.service.getContactDetailsById(params.id);
     if (!result) {
-      return { message: 'Contacto no encontrado' };
+      throw new NotFoundException('Contacto no encontrado');
     }
     return result;
   }

@@ -64,8 +64,10 @@ export class ContactsService {
   async getContacts(query: ContactsQueryDto) {
     const { sort = 'createdAt', order = 'DESC' } = query;
     const sortField: ContactsQueryDto['sort'] = sort ?? 'createdAt';
+    const normalizedOrder: 'ASC' | 'DESC' =
+      (order ?? 'DESC').toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
     const orderBy: FindOptionsOrder<Contact> = {
-      [sortField]: order ?? 'DESC',
+      [sortField]: normalizedOrder,
     };
     const contacts = await this.contactRepo.find({
       order: orderBy,
@@ -101,7 +103,7 @@ export class ContactsService {
 
   async getContactConversations(
     id: number,
-    { from, to }: ConversationsRangeQueryDto,
+    { from, to, page = 1, limit = 20 }: ConversationsRangeQueryDto,
   ) {
     const qb = this.conversationRepo
       .createQueryBuilder('conversacion')
@@ -116,7 +118,15 @@ export class ContactsService {
       }).andWhere('conversacion.fecha_hora <= :toDate', { toDate });
     }
 
-    qb.orderBy('conversacion.fecha_hora', 'DESC');
-    return qb.getMany();
+    const skip = (page - 1) * limit;
+    qb.orderBy('conversacion.fecha_hora', 'DESC').skip(skip).take(limit);
+
+    const [items, total] = await qb.getManyAndCount();
+    return {
+      items,
+      total,
+      page,
+      pageSize: limit,
+    };
   }
 }
