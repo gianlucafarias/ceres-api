@@ -101,7 +101,35 @@ jobs:
               exit 1
             fi
 
-            API_IMAGE_TAG="${NEW_TAG}" ${COMPOSE_CMD} up -d --remove-orphans api
+            get_env_var() {
+              local key="$1"
+              local fallback="${2:-}"
+              if [ ! -f .env ]; then
+                echo "${fallback}"
+                return
+              fi
+
+              local line
+              line="$(grep -E "^${key}=" .env | tail -n1 || true)"
+              if [ -z "${line}" ]; then
+                echo "${fallback}"
+                return
+              fi
+
+              echo "${line#*=}"
+            }
+
+            OBS_STACK_ENABLED="$(get_env_var OBS_STACK_ENABLED false)"
+
+            if [ "${OBS_STACK_ENABLED}" = "true" ]; then
+              API_IMAGE_TAG="${NEW_TAG}" ${COMPOSE_CMD} \
+                -f docker-compose.yml \
+                -f docker-compose.observability.yml \
+                --profile observability \
+                up -d --remove-orphans api prometheus grafana
+            else
+              API_IMAGE_TAG="${NEW_TAG}" ${COMPOSE_CMD} up -d --remove-orphans api
+            fi
 
             ATTEMPTS=30
             SLEEP_SECONDS=2
@@ -123,7 +151,15 @@ jobs:
             done
 
             echo "Deploy failed with tag ${NEW_TAG}. Rolling back to ${ROLLBACK_TAG}."
-            API_IMAGE_TAG="${ROLLBACK_TAG}" ${COMPOSE_CMD} up -d --remove-orphans api
+            if [ "${OBS_STACK_ENABLED}" = "true" ]; then
+              API_IMAGE_TAG="${ROLLBACK_TAG}" ${COMPOSE_CMD} \
+                -f docker-compose.yml \
+                -f docker-compose.observability.yml \
+                --profile observability \
+                up -d --remove-orphans api prometheus grafana
+            else
+              API_IMAGE_TAG="${ROLLBACK_TAG}" ${COMPOSE_CMD} up -d --remove-orphans api
+            fi
 
             i=1
             while [ "$i" -le "$ATTEMPTS" ]; do

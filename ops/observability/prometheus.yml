@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+
+scrape_configs:
+  - job_name: "ceres-api"
+    metrics_path: "/api/v1/ops/metrics"
+    params:
+      api_key: ["CHANGE_ME_OPS_API_KEY"]
+    static_configs:
+      # En Linux/VPS usar host o IP real del backend
+      - targets: ["host.docker.internal:3012"]
