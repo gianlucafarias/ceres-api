@@ -13,15 +13,17 @@ services:
       - /bin/sh
       - -c
     command: >-
+      SCRAPE_INTERVAL="${OBS_PROMETHEUS_SCRAPE_INTERVAL:-30s}";
+      API_KEY="${OPS_API_KEY:-}";
       printf '%s\n'
       'global:'
-      '  scrape_interval: ${OBS_PROMETHEUS_SCRAPE_INTERVAL:-30s}'
-      '  evaluation_interval: ${OBS_PROMETHEUS_SCRAPE_INTERVAL:-30s}'
+      "  scrape_interval: $${SCRAPE_INTERVAL}"
+      "  evaluation_interval: $${SCRAPE_INTERVAL}"
       'scrape_configs:'
       '  - job_name: "ceres-api"'
       '    metrics_path: "/api/v1/ops/metrics"'
       '    params:'
-      '      api_key: ["${OPS_API_KEY}"]'
+      "      api_key: [\"$${API_KEY}\"]"
       '    static_configs:'
       '      - targets: ["host.docker.internal:3022"]'
       > /tmp/prometheus.yml &&
