@@ -30,7 +30,6 @@ OBS_REQUEST_LOG_SAMPLE_RATE=0
 OBS_REQUEST_LOG_5XX_ENABLED=true
 OBS_PROMETHEUS_HOST_PORT=9091
 OBS_PROMETHEUS_SCRAPE_INTERVAL=30s
-OBS_API_METRICS_TARGET=host.docker.internal:3022
 OBS_GRAFANA_HOST_PORT=3003
 OBS_GRAFANA_ADMIN_USER=admin
 OBS_GRAFANA_ADMIN_PASSWORD=admin
@@ -60,7 +59,6 @@ Los puertos son configurables con:
 
 - `OBS_PROMETHEUS_HOST_PORT`
 - `OBS_GRAFANA_HOST_PORT`
-- `OBS_API_METRICS_TARGET` (target de scrape de Prometheus)
 
 El scrape de Prometheus autentica con `OPS_API_KEY` y por defecto apunta a:
 
