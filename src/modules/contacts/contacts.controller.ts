@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  NotFoundException,
   Param,
   ParseIntPipe,
   Query,
@@ -33,7 +34,7 @@ export class ContactsController {
   async getContact(@Param() params: ContactIdParamDto) {
     const result = await this.service.getContactDetailsById(params.id);
     if (!result) {
-      return { message: 'Contacto no encontrado' };
+      throw new NotFoundException('Contacto no encontrado');
     }
     return result;
   }

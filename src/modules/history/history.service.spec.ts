@@ -59,4 +59,27 @@ describe('HistoryService', () => {
     });
     expect(res).toHaveLength(1);
   });
+
+  it('history by phone devuelve contrato paginado unificado', async () => {
+    historyRepo.findAndCount.mockResolvedValue([[{ id: 1 } as History], 3]);
+
+    const result = await service.getHistoryByPhone({
+      phone: '3491123456',
+      page: 2,
+      limit: 1,
+    });
+
+    expect(historyRepo.findAndCount).toHaveBeenCalledWith({
+      where: { phone: '3491123456' },
+      order: { createdAt: 'DESC' },
+      skip: 1,
+      take: 1,
+    });
+    expect(result).toEqual({
+      items: [{ id: 1 }],
+      total: 3,
+      page: 2,
+      pageSize: 1,
+    });
+  });
 });

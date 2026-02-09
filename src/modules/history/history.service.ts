@@ -77,17 +77,17 @@ export class HistoryService {
   async getHistoryByPhone(query: ContactHistoryQueryDto) {
     const { phone, page = 1, limit = 20 } = query;
     const skip = (page - 1) * limit;
-    const [data, total] = await this.historyRepo.findAndCount({
+    const [items, total] = await this.historyRepo.findAndCount({
       where: { phone },
       order: { createdAt: 'DESC' },
       skip,
       take: limit,
     });
     return {
-      data,
+      items,
       total,
-      pageCount: Math.ceil(total / limit),
-      currentPage: page,
+      page,
+      pageSize: limit,
     };
   }
 

@@ -1,7 +1,14 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { History } from './history.entity';
 
 @Entity({ name: 'contact' })
+@Index('idx_contact_last_interaction', ['lastInteraction'])
 export class Contact {
   @PrimaryGeneratedColumn()
   id!: number;

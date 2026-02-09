@@ -8,6 +8,12 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "typeorm": "node --require ts-node/register --require tsconfig-paths/register ./node_modules/typeorm/cli.js -d src/database/data-source.ts",
+    "typeorm:dist": "node ./node_modules/typeorm/cli.js -d dist/database/data-source.js",
+    "migration:show": "npm run typeorm -- migration:show",
+    "migration:run": "npm run typeorm -- migration:run",
+    "migration:show:dist": "npm run typeorm:dist -- migration:show",
+    "migration:run:dist": "npm run typeorm:dist -- migration:run",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
