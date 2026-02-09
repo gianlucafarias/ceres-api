@@ -23,6 +23,7 @@ import { FarmaciasModule } from './modules/farmacias/farmacias.module';
 import { BotConfigModule } from './modules/bot-config/bot-config.module';
 import { FeedbackModule } from './modules/feedback/feedback.module';
 import { ConversacionesModule } from './modules/conversaciones/conversaciones.module';
+import { DashboardCeresitoModule } from './modules/dashboard-ceresito/dashboard-ceresito.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { ConversacionesModule } from './modules/conversaciones/conversaciones.mo
     BotConfigModule,
     FeedbackModule,
     ConversacionesModule,
+    DashboardCeresitoModule,
   ],
   controllers: [AppController],
   providers: [AppService],

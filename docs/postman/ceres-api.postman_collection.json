@@ -245,6 +245,24 @@
                               ]
                  },
                  {
+                     "name":  "Dashboard Ceresito (Admin)",
+                     "item":  [
+                                  {
+                                      "name":  "GET /v1/dashboard/ceresito/summary",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "x-api-key",
+                                                                         "value":  "{{adminApiKey}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/v1/dashboard/ceresito/summary?from={{startDate}}\u0026to={{endDate}}\u0026treatedStatus={{treatedStatus}}"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
                      "name":  "Visits (Admin)",
                      "item":  [
                                   {
@@ -1266,6 +1284,10 @@
                      {
                          "key":  "groupBy",
                          "value":  "day"
+                     },
+                     {
+                         "key":  "treatedStatus",
+                         "value":  "ASIGNADO"
                      },
                      {
                          "key":  "impuestosTipo",
