@@ -46,7 +46,8 @@ Agregar observabilidad util para produccion sin romper contratos existentes y co
 Las alertas son asincronas y no bloquean la respuesta HTTP.
 
 - Flag principal: `OPS_ALERTS_ENABLED` (default `false`).
-- Webhook: `OPS_SLACK_WEBHOOK_URL`.
+- Webhook: `OPS_SLACK_WEBHOOK_URL` (fallback: `SLACK_WEBHOOK_URL`).
+- Alias utiles: `OPS_SLACK_BOT_NAME`/`SLACK_BOT_NAME`, `OPS_SLACK_CHANNEL`/`SLACK_CHANNEL`.
 - Severidad minima: `OPS_ALERT_MIN_SEVERITY` (default `error`).
 - Throttle por fingerprint: `OPS_ALERT_THROTTLE_SECONDS` (default `300`).
 - Timeout de envio: `OPS_ALERT_TIMEOUT_MS` (default `3000`).
@@ -82,3 +83,4 @@ Se agrega middleware global:
 - `src/modules/observability/observability.middleware.ts`
 - `src/common/guards/ops-api-key.guard.ts`
 - `src/common/guards/ops-events-api-key.guard.ts`
+- `docker-compose.observability.yml`

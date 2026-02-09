@@ -150,14 +150,24 @@ export class OpsNotificationsService {
     event: NormalizedOpsEvent,
     context?: NotificationContext,
   ): Promise<void> {
-    const webhookUrl = this.config.get<string>('OPS_SLACK_WEBHOOK_URL');
+    const webhookUrl = this.getSlackWebhookUrl();
     if (!webhookUrl) {
-      throw new Error('OPS_SLACK_WEBHOOK_URL is not configured');
+      throw new Error(
+        'Slack webhook is not configured (OPS_SLACK_WEBHOOK_URL/SLACK_WEBHOOK_URL)',
+      );
     }
 
-    const payload = {
+    const payload: {
+      text: string;
+      username?: string;
+      channel?: string;
+    } = {
       text: this.buildSlackText(event, context),
     };
+    const botName = this.getSlackBotName();
+    const channel = this.getSlackChannel();
+    if (botName) payload.username = botName;
+    if (channel) payload.channel = channel;
 
     await this.http.post<unknown, typeof payload>(webhookUrl, payload, {
       timeout: this.getSlackTimeoutMs(),
@@ -276,6 +286,30 @@ export class OpsNotificationsService {
     const parsed = Number.parseInt(raw, 10);
 
     return Number.isFinite(parsed) && parsed >= 0 ? parsed : 300;
+  }
+
+  private getSlackWebhookUrl(): string {
+    const opsWebhook = this.config.get<string>('OPS_SLACK_WEBHOOK_URL', '');
+    if (opsWebhook.trim().length > 0) return opsWebhook.trim();
+
+    const legacyWebhook = this.config.get<string>('SLACK_WEBHOOK_URL', '');
+    return legacyWebhook.trim();
+  }
+
+  private getSlackBotName(): string | null {
+    const opsName = this.config.get<string>('OPS_SLACK_BOT_NAME', '');
+    if (opsName.trim().length > 0) return opsName.trim();
+
+    const legacyName = this.config.get<string>('SLACK_BOT_NAME', '');
+    return legacyName.trim().length > 0 ? legacyName.trim() : null;
+  }
+
+  private getSlackChannel(): string | null {
+    const opsChannel = this.config.get<string>('OPS_SLACK_CHANNEL', '');
+    if (opsChannel.trim().length > 0) return opsChannel.trim();
+
+    const legacyChannel = this.config.get<string>('SLACK_CHANNEL', '');
+    return legacyChannel.trim().length > 0 ? legacyChannel.trim() : null;
   }
 
   private async isThrottled(

@@ -31,6 +31,26 @@ else
   exit 1
 fi
 
+get_env_var() {
+  local key="$1"
+  local fallback="${2:-}"
+  if [ ! -f .env ]; then
+    echo "${fallback}"
+    return
+  fi
+
+  local line
+  line="$(grep -E "^${key}=" .env | tail -n1 || true)"
+  if [ -z "${line}" ]; then
+    echo "${fallback}"
+    return
+  fi
+
+  echo "${line#*=}"
+}
+
+OBS_STACK_ENABLED="$(get_env_var OBS_STACK_ENABLED false)"
+
 mkdir -p .deploy
 PREVIOUS_IMAGE_ID="$(docker inspect --format='{{.Image}}' ceres-api 2>/dev/null || true)"
 PREVIOUS_TAG="$(cat .deploy/current_api_image_tag 2>/dev/null || echo ${BRANCH})"
@@ -51,7 +71,15 @@ docker pull "${IMAGE_NAME}:${IMAGE_TAG}" || {
   exit 1
 }
 
-API_IMAGE_TAG="${IMAGE_TAG}" ${COMPOSE_CMD} up -d --remove-orphans api
+if [ "${OBS_STACK_ENABLED}" = "true" ]; then
+  API_IMAGE_TAG="${IMAGE_TAG}" ${COMPOSE_CMD} \
+    -f docker-compose.yml \
+    -f docker-compose.observability.yml \
+    --profile observability \
+    up -d --remove-orphans api prometheus grafana
+else
+  API_IMAGE_TAG="${IMAGE_TAG}" ${COMPOSE_CMD} up -d --remove-orphans api
+fi
 
 ATTEMPTS=30
 SLEEP_SECONDS=2
@@ -69,5 +97,13 @@ for i in $(seq 1 "${ATTEMPTS}"); do
 done
 
 echo "Deploy fallo. Rollback a ${ROLLBACK_TAG}."
-API_IMAGE_TAG="${ROLLBACK_TAG}" ${COMPOSE_CMD} up -d --remove-orphans api
+if [ "${OBS_STACK_ENABLED}" = "true" ]; then
+  API_IMAGE_TAG="${ROLLBACK_TAG}" ${COMPOSE_CMD} \
+    -f docker-compose.yml \
+    -f docker-compose.observability.yml \
+    --profile observability \
+    up -d --remove-orphans api prometheus grafana
+else
+  API_IMAGE_TAG="${ROLLBACK_TAG}" ${COMPOSE_CMD} up -d --remove-orphans api
+fi
 exit 1

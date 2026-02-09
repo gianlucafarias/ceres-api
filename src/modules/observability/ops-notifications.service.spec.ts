@@ -130,6 +130,30 @@ describe('OpsNotificationsService', () => {
     expect(metrics.recordSlackNotification).toHaveBeenCalledWith('sent');
   });
 
+  it('usa webhook legacy SLACK_WEBHOOK_URL cuando OPS_SLACK_WEBHOOK_URL no existe', async () => {
+    configValues.OPS_ALERTS_ENABLED = 'true';
+    configValues.OPS_ALERT_MIN_SEVERITY = 'warn';
+    configValues.OPS_ALERT_THROTTLE_SECONDS = '0';
+    configValues.OPS_SLACK_WEBHOOK_URL = '';
+    configValues.SLACK_WEBHOOK_URL = 'https://hooks.slack.test/legacy';
+    httpClient.post.mockResolvedValue({});
+
+    service.ingestExternalEvent({
+      source: 'dashboard',
+      type: 'legacy_fallback',
+      severity: 'error',
+      message: 'Fallback activado',
+    });
+
+    await waitAsyncJobs();
+
+    expect(httpClient.post).toHaveBeenCalledWith(
+      'https://hooks.slack.test/legacy',
+      expect.any(Object),
+      expect.any(Object),
+    );
+  });
+
   it('aplica throttle en memoria para eventos repetidos', async () => {
     configValues.OPS_ALERTS_ENABLED = 'true';
     configValues.OPS_ALERT_MIN_SEVERITY = 'warn';
