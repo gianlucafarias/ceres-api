@@ -51,6 +51,7 @@ Las alertas son asincronas y no bloquean la respuesta HTTP.
 - Severidad minima: `OPS_ALERT_MIN_SEVERITY` (default `error`).
 - Throttle por fingerprint: `OPS_ALERT_THROTTLE_SECONDS` (default `300`).
 - Timeout de envio: `OPS_ALERT_TIMEOUT_MS` (default `3000`).
+- Target de scrape Prometheus: `OBS_API_METRICS_TARGET` (default `host.docker.internal:3022`).
 
 Si Redis esta disponible, el throttle es distribuido. Si no, usa fallback en memoria.
 

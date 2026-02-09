@@ -20,12 +20,14 @@ services:
             params:
               api_key: ["${OPS_API_KEY}"]
             static_configs:
-              - targets: ["api:3022"]
+              - targets: ["${OBS_API_METRICS_TARGET:-host.docker.internal:3022}"]
         EOF
         exec /bin/prometheus --config.file=/tmp/prometheus.yml --storage.tsdb.path=/prometheus
     depends_on:
       api:
         condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - prometheus-data:/prometheus
     ports:
