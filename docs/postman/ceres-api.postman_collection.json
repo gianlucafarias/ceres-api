@@ -257,7 +257,25 @@
                                                                          "value":  "{{adminApiKey}}"
                                                                      }
                                                                  ],
-                                                      "url":  "{{baseUrl}}/v1/dashboard/ceresito/summary?from={{startDate}}\u0026to={{endDate}}\u0026treatedStatus={{treatedStatus}}"
+                                                      "url":  "{{baseUrl}}/v1/dashboard/ceresito/summary?from={{startDate}}\u0026to={{endDate}}"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Admin (Settings)",
+                     "item":  [
+                                  {
+                                      "name":  "GET /v1/admin/bootstrap",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "x-api-key",
+                                                                         "value":  "{{adminApiKey}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/v1/admin/bootstrap"
                                                   }
                                   }
                               ]
@@ -1359,3 +1377,4 @@
                      }
                  ]
 }
+

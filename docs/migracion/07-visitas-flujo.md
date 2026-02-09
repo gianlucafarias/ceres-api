@@ -26,6 +26,7 @@
 - Reutiliza entidades `Flow` (visitas_flujo) y `Converstation`.
 - No modifica esquema; `synchronize` permanece desactivado.
 - Versionado URI `v1`.
+- `GET /api/v1/visitas-flujo` ahora incluye `ETag` y puede responder `304` con `If-None-Match`.
 
 ## Pruebas
 - Unit tests con repositorios mock (`visits.service.spec.ts`).

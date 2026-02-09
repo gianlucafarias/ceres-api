@@ -78,15 +78,14 @@ describe('DashboardCeresitoService', () => {
       to: '2026-01-31',
     });
 
-    expect(res.success).toBe(true);
-    expect(res.data.kpis).toEqual({
+    expect(res).toMatchObject({
       uniqueUsers: 10,
       conversations: 20,
-      messagesSent: 30,
+      sentMessages: 30,
       claimsReceived: 40,
-      claimsTreated: 5,
+      claimsHandled: 5,
     });
-    expect(res.data.meta.treatedStatus).toBe('ASIGNADO');
+    expect(res.generatedAt).toEqual(expect.any(String));
     const secondReclamoCountCall = reclamoRepo.count.mock.calls[1]?.[0];
     expect(secondReclamoCountCall).toBeDefined();
 
@@ -109,25 +108,12 @@ describe('DashboardCeresitoService', () => {
 
   it('retorna cache sin consultar repositorios', async () => {
     const cached: DashboardCeresitoSummaryResponse = {
-      success: true,
-      data: {
-        period: {
-          from: '2026-01-01T00:00:00.000Z',
-          to: '2026-01-31T23:59:59.999Z',
-          timezone: 'America/Argentina/Cordoba',
-        },
-        kpis: {
-          uniqueUsers: 1,
-          conversations: 2,
-          messagesSent: 3,
-          claimsReceived: 4,
-          claimsTreated: 5,
-        },
-        meta: {
-          treatedStatus: 'ASIGNADO',
-          generatedAt: '2026-02-09T14:00:00.000Z',
-        },
-      },
+      uniqueUsers: 1,
+      conversations: 2,
+      sentMessages: 3,
+      claimsReceived: 4,
+      claimsHandled: 5,
+      generatedAt: '2026-02-09T14:00:00.000Z',
     };
     redis.get.mockResolvedValue(JSON.stringify(cached));
 
@@ -154,14 +140,13 @@ describe('DashboardCeresitoService', () => {
       treatedStatus: 'COMPLETADO',
     });
 
-    expect(res.data.kpis).toEqual({
+    expect(res).toMatchObject({
       uniqueUsers: 0,
       conversations: 0,
-      messagesSent: 0,
+      sentMessages: 0,
       claimsReceived: 0,
-      claimsTreated: 0,
+      claimsHandled: 0,
     });
-    expect(res.data.meta.treatedStatus).toBe('COMPLETADO');
   });
 
   it('lanza 400 si from es mayor que to', async () => {

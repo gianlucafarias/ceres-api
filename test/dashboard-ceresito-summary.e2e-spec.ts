@@ -21,25 +21,12 @@ describe('Dashboard Ceresito summary (e2e)', () => {
   beforeEach(async () => {
     service.getSummary.mockReset();
     service.getSummary.mockResolvedValue({
-      success: true,
-      data: {
-        period: {
-          from: '2026-02-01T00:00:00.000Z',
-          to: '2026-02-09T23:59:59.999Z',
-          timezone: 'America/Argentina/Cordoba',
-        },
-        kpis: {
-          uniqueUsers: 1,
-          conversations: 2,
-          messagesSent: 3,
-          claimsReceived: 4,
-          claimsTreated: 5,
-        },
-        meta: {
-          treatedStatus: 'ASIGNADO',
-          generatedAt: '2026-02-09T14:00:00.000Z',
-        },
-      },
+      uniqueUsers: 1,
+      conversations: 2,
+      sentMessages: 3,
+      claimsReceived: 4,
+      claimsHandled: 5,
+      generatedAt: '2026-02-09T14:00:00.000Z',
     });
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -96,12 +83,15 @@ describe('Dashboard Ceresito summary (e2e)', () => {
       .set('x-api-key', adminApiKey)
       .expect(200);
 
-    expect(response.body).toHaveProperty('success', true);
-    expect(response.body).toHaveProperty('data.kpis.uniqueUsers', 1);
-    expect(response.body).toHaveProperty('data.kpis.conversations', 2);
-    expect(response.body).toHaveProperty('data.kpis.messagesSent', 3);
-    expect(response.body).toHaveProperty('data.kpis.claimsReceived', 4);
-    expect(response.body).toHaveProperty('data.kpis.claimsTreated', 5);
+    expect(response.body).toHaveProperty('uniqueUsers', 1);
+    expect(response.body).toHaveProperty('conversations', 2);
+    expect(response.body).toHaveProperty('sentMessages', 3);
+    expect(response.body).toHaveProperty('claimsReceived', 4);
+    expect(response.body).toHaveProperty('claimsHandled', 5);
+    expect(response.body).toHaveProperty(
+      'generatedAt',
+      '2026-02-09T14:00:00.000Z',
+    );
     expect(service.getSummary).toHaveBeenCalledTimes(1);
   });
 });

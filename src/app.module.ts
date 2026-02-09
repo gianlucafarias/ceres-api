@@ -24,6 +24,7 @@ import { BotConfigModule } from './modules/bot-config/bot-config.module';
 import { FeedbackModule } from './modules/feedback/feedback.module';
 import { ConversacionesModule } from './modules/conversaciones/conversaciones.module';
 import { DashboardCeresitoModule } from './modules/dashboard-ceresito/dashboard-ceresito.module';
+import { AdminBootstrapModule } from './modules/admin-bootstrap/admin-bootstrap.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { DashboardCeresitoModule } from './modules/dashboard-ceresito/dashboard-
     FeedbackModule,
     ConversacionesModule,
     DashboardCeresitoModule,
+    AdminBootstrapModule,
   ],
   controllers: [AppController],
   providers: [AppService],

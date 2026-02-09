@@ -10,34 +10,16 @@ import { RedisService } from '../../shared/redis/redis.service';
 import { DashboardCeresitoSummaryQueryDto } from './dto/dashboard-ceresito-summary.dto';
 
 const DEFAULT_TREATED_STATUS = 'ASIGNADO';
-const DEFAULT_TIMEZONE = 'America/Argentina/Cordoba';
 const DEFAULT_CACHE_TTL_SECONDS = 60;
 const DEFAULT_RANGE_DAYS = 90;
 
-type DashboardSummaryKpis = {
+export type DashboardCeresitoSummaryResponse = {
   uniqueUsers: number;
   conversations: number;
-  messagesSent: number;
+  sentMessages: number;
   claimsReceived: number;
-  claimsTreated: number;
-};
-
-type DashboardSummaryData = {
-  period: {
-    from: string;
-    to: string;
-    timezone: string;
-  };
-  kpis: DashboardSummaryKpis;
-  meta: {
-    treatedStatus: string;
-    generatedAt: string;
-  };
-};
-
-export type DashboardCeresitoSummaryResponse = {
-  success: true;
-  data: DashboardSummaryData;
+  claimsHandled: number;
+  generatedAt: string;
 };
 
 @Injectable()
@@ -73,9 +55,9 @@ export class DashboardCeresitoService {
     const [
       uniqueUsers,
       conversations,
-      messagesSent,
+      sentMessages,
       claimsReceived,
-      claimsTreated,
+      claimsHandled,
     ] = await Promise.all([
       this.contactRepo.count({ where: { createdAt: range } }),
       this.conversationRepo.count({ where: { fecha_hora: range } }),
@@ -90,25 +72,12 @@ export class DashboardCeresitoService {
     ]);
 
     const summary: DashboardCeresitoSummaryResponse = {
-      success: true,
-      data: {
-        period: {
-          from: period.from.toISOString(),
-          to: period.to.toISOString(),
-          timezone: DEFAULT_TIMEZONE,
-        },
-        kpis: {
-          uniqueUsers,
-          conversations,
-          messagesSent,
-          claimsReceived,
-          claimsTreated,
-        },
-        meta: {
-          treatedStatus,
-          generatedAt: new Date().toISOString(),
-        },
-      },
+      uniqueUsers,
+      conversations,
+      sentMessages,
+      claimsReceived,
+      claimsHandled,
+      generatedAt: new Date().toISOString(),
     };
 
     await this.setCachedSummary(cacheKey, summary);
@@ -210,27 +179,15 @@ function endOfDay(base: Date): Date {
 function isDashboardSummaryResponse(
   value: unknown,
 ): value is DashboardCeresitoSummaryResponse {
-  if (!isObject(value) || value.success !== true) return false;
-  if (!isObject(value.data)) return false;
-  if (!isObject(value.data.period)) return false;
-  if (!isObject(value.data.kpis)) return false;
-  if (!isObject(value.data.meta)) return false;
-
-  const period = value.data.period;
-  const kpis = value.data.kpis;
-  const meta = value.data.meta;
+  if (!isObject(value)) return false;
 
   return (
-    typeof period.from === 'string' &&
-    typeof period.to === 'string' &&
-    typeof period.timezone === 'string' &&
-    typeof meta.treatedStatus === 'string' &&
-    typeof meta.generatedAt === 'string' &&
-    typeof kpis.uniqueUsers === 'number' &&
-    typeof kpis.conversations === 'number' &&
-    typeof kpis.messagesSent === 'number' &&
-    typeof kpis.claimsReceived === 'number' &&
-    typeof kpis.claimsTreated === 'number'
+    typeof value.uniqueUsers === 'number' &&
+    typeof value.conversations === 'number' &&
+    typeof value.sentMessages === 'number' &&
+    typeof value.claimsReceived === 'number' &&
+    typeof value.claimsHandled === 'number' &&
+    typeof value.generatedAt === 'string'
   );
 }
 

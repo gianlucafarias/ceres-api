@@ -1,4 +1,4 @@
-﻿# 25 - Dashboard Ceresito Summary
+# 25 - Dashboard Ceresito Summary
 
 ## Objetivo
 
@@ -13,7 +13,7 @@ Reducir overfetch en la carga inicial del dashboard Ceresito consolidando los KP
 
 - `from` (ISO, opcional)
 - `to` (ISO, opcional)
-- `treatedStatus` (opcional, default `ASIGNADO`)
+- `treatedStatus` (opcional, default `ASIGNADO` para compatibilidad con metricas tratadas)
 
 Si `from` y/o `to` no se envian, se usa una ventana por defecto de 90 dias hasta fin de dia actual.
 
@@ -21,34 +21,21 @@ Si `from` y/o `to` no se envian, se usa una ventana por defecto de 90 dias hasta
 
 ```json
 {
-  "success": true,
-  "data": {
-    "period": {
-      "from": "2025-11-09T00:00:00.000Z",
-      "to": "2026-02-09T23:59:59.999Z",
-      "timezone": "America/Argentina/Cordoba"
-    },
-    "kpis": {
-      "uniqueUsers": 0,
-      "conversations": 0,
-      "messagesSent": 0,
-      "claimsReceived": 0,
-      "claimsTreated": 0
-    },
-    "meta": {
-      "treatedStatus": "ASIGNADO",
-      "generatedAt": "2026-02-09T14:00:00.000Z"
-    }
-  }
+  "uniqueUsers": 0,
+  "conversations": 0,
+  "sentMessages": 0,
+  "claimsReceived": 0,
+  "claimsHandled": 0,
+  "generatedAt": "2026-02-09T14:00:00.000Z"
 }
 ```
 
 ## Criterios
 
-- Unifica 5 llamados del header en 1.
-- Mantiene endpoints existentes para compatibilidad.
+- Reemplaza 5 requests actuales del header por 1 request agregado.
+- Mantiene endpoints actuales para compatibilidad.
 - Devuelve `0` (no `null`) cuando no hay datos.
-- `400` en fechas invalidas (validacion DTO).
+- `400` en fechas invalidas (DTO + validacion global).
 - No incluye healthcheck (`/api/v1/health` se mantiene separado).
 
 ## Cache
@@ -57,7 +44,7 @@ Se agrega cache en Redis para este endpoint:
 
 - Key: `dashboard:ceresito:summary:<from>:<to>:<treatedStatus>`
 - TTL configurable por `DASHBOARD_CERESITO_CACHE_TTL_SECONDS` (default `60`).
-- Si Redis no esta configurado, funciona sin cache.
+- Si Redis no esta disponible, responde igual sin cache.
 
 ## Implementacion
 
@@ -65,3 +52,4 @@ Se agrega cache en Redis para este endpoint:
 - `src/modules/dashboard-ceresito/dashboard-ceresito.controller.ts`
 - `src/modules/dashboard-ceresito/dashboard-ceresito.service.ts`
 - `src/modules/dashboard-ceresito/dto/dashboard-ceresito-summary.dto.ts`
+- `test/dashboard-ceresito-summary.e2e-spec.ts`
