@@ -12,19 +12,19 @@ services:
     entrypoint:
       - /bin/sh
       - -c
-    command: |
-      cat > /tmp/prometheus.yml <<EOF
-      global:
-        scrape_interval: ${OBS_PROMETHEUS_SCRAPE_INTERVAL:-30s}
-        evaluation_interval: ${OBS_PROMETHEUS_SCRAPE_INTERVAL:-30s}
-      scrape_configs:
-        - job_name: "ceres-api"
-          metrics_path: "/api/v1/ops/metrics"
-          params:
-            api_key: ["${OPS_API_KEY}"]
-          static_configs:
-            - targets: ["host.docker.internal:3022"]
-      EOF
+    command: >-
+      printf '%s\n'
+      'global:'
+      '  scrape_interval: ${OBS_PROMETHEUS_SCRAPE_INTERVAL:-30s}'
+      '  evaluation_interval: ${OBS_PROMETHEUS_SCRAPE_INTERVAL:-30s}'
+      'scrape_configs:'
+      '  - job_name: "ceres-api"'
+      '    metrics_path: "/api/v1/ops/metrics"'
+      '    params:'
+      '      api_key: ["${OPS_API_KEY}"]'
+      '    static_configs:'
+      '      - targets: ["host.docker.internal:3022"]'
+      > /tmp/prometheus.yml &&
       exec /bin/prometheus --config.file=/tmp/prometheus.yml --storage.tsdb.path=/prometheus
     depends_on:
       api:
