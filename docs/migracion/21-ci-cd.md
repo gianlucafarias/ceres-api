@@ -42,11 +42,12 @@ sudo apt-get install -y docker-compose-plugin
 ## Flujo de deploy
 1. Push/Merge a `main`.
 2. GitHub Actions construye imagen y publica en GHCR (`:main` y `:<git-sha>`).
-3. Workflow conecta al VPS por SSH.
-4. Se despliega con `API_IMAGE_TAG=<git-sha> docker compose up -d`.
-5. Se espera estado `healthy` del contenedor.
-6. Si falla, se hace rollback automatico a la imagen que estaba corriendo (snapshot local `rollback-local`); si no existe snapshot, usa el tag guardado en `.deploy/current_api_image_tag`.
-7. Si `.env` tiene `OBS_STACK_ENABLED=true`, el deploy tambien levanta `prometheus` y `grafana`.
+3. Workflow sincroniza imagenes de observabilidad en GHCR (`ceres-prometheus` y `ceres-grafana`).
+4. Workflow conecta al VPS por SSH.
+5. Se despliega con `API_IMAGE_TAG=<git-sha> docker compose up -d`.
+6. Se espera estado `healthy` del contenedor.
+7. Si falla, se hace rollback automatico a la imagen que estaba corriendo (snapshot local `rollback-local`); si no existe snapshot, usa el tag guardado en `.deploy/current_api_image_tag`.
+8. Si `.env` tiene `OBS_STACK_ENABLED=true`, el deploy tambien levanta `prometheus` y `grafana`.
 
 ## Archivos
 - `.github/workflows/ci.yml`: tests y build.
@@ -62,7 +63,7 @@ sudo apt-get install -y docker-compose-plugin
 ## Seguridad
 - `.env` queda solo en el VPS (no se sube al repo).
 - Imagen privada en GHCR; el VPS usa `GHCR_TOKEN` para leer.
-- El deploy usa `git pull --ff-only` (evita sobrescribir trabajo local con `reset --hard`).
+- El deploy usa `git reset --hard origin/main` para evitar fallas por working tree sucio en carpeta operativa.
 - El deploy soporta `docker compose` y `docker-compose`.
 
 ## Estado actual
