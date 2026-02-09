@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Reclamo } from '../../entities/reclamo.entity';
 import { CrearReclamoBotDto } from './dto/reclamos-bot.dto';
 import {
@@ -12,6 +12,10 @@ import { ReclamosRepository } from './reclamos.repository';
 import { ReclamosStatsService } from './reclamos-stats.service';
 
 type ReclamoSafe = Omit<Reclamo, 'telefono'> & { telefono?: string };
+type ReclamoRelacionadoAdmin = Pick<
+  Reclamo,
+  'id' | 'fecha' | 'reclamo' | 'estado' | 'barrio' | 'ubicacion' | 'detalle'
+>;
 
 @Injectable()
 export class ReclamosService {
@@ -73,6 +77,25 @@ export class ReclamosService {
 
   async detalleAdmin(id: number) {
     return this.reclamosRepo.findById(id);
+  }
+
+  async relacionadosAdmin(
+    id: number,
+  ): Promise<{ data: ReclamoRelacionadoAdmin[]; total: number }> {
+    const current = await this.reclamosRepo.findById(id);
+    if (!current) {
+      throw new NotFoundException(`Reclamo con id ${id} no encontrado`);
+    }
+
+    const sameApplicant = await this.reclamosPorTelefono(current.telefono);
+    const data = sameApplicant
+      .filter((item) => item.id !== id)
+      .map((item) => this.toRelacionadoAdminDto(item));
+
+    return {
+      data,
+      total: data.length,
+    };
   }
 
   async actualizarAdmin(id: number, dto: ActualizarReclamoAdminDto) {
@@ -183,6 +206,18 @@ export class ReclamosService {
     const safe: ReclamoSafe = { ...rec };
     delete safe.telefono;
     return safe;
+  }
+
+  private toRelacionadoAdminDto(rec: Reclamo): ReclamoRelacionadoAdmin {
+    return {
+      id: rec.id,
+      fecha: rec.fecha,
+      reclamo: rec.reclamo,
+      estado: rec.estado,
+      barrio: rec.barrio,
+      ubicacion: rec.ubicacion,
+      detalle: rec.detalle,
+    };
   }
 
   private async logCreacion(reclamo: Reclamo): Promise<void> {

@@ -375,6 +375,19 @@
                                                   }
                                   },
                                   {
+                                      "name":  "GET /v1/reclamos/:id/relacionados",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "x-api-key",
+                                                                         "value":  "{{adminApiKey}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/v1/reclamos/{{reclamoId}}/relacionados"
+                                                  }
+                                  },
+                                  {
                                       "name":  "GET /v1/reclamos/estadisticas/basicas",
                                       "request":  {
                                                       "method":  "GET",
