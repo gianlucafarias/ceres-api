@@ -6,6 +6,9 @@ services:
     container_name: ceres-prometheus
     restart: unless-stopped
     profiles: [ "observability" ]
+    user: "0:0"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     command:
       - /bin/sh
       - -c
@@ -20,7 +23,7 @@ services:
             params:
               api_key: ["${OPS_API_KEY}"]
             static_configs:
-              - targets: ["api:3022"]
+              - targets: ["host.docker.internal:3022"]
         EOF
         exec /bin/prometheus --config.file=/tmp/prometheus.yml --storage.tsdb.path=/prometheus
     depends_on:
