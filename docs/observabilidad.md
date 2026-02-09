@@ -33,6 +33,8 @@ OBS_PROMETHEUS_SCRAPE_INTERVAL=30s
 OBS_GRAFANA_HOST_PORT=3003
 OBS_GRAFANA_ADMIN_USER=admin
 OBS_GRAFANA_ADMIN_PASSWORD=admin
+OBS_PROMETHEUS_IMAGE=ghcr.io/gianlucafarias/ceres-prometheus:v2.51.1
+OBS_GRAFANA_IMAGE=ghcr.io/gianlucafarias/ceres-grafana:10.2.3
 ```
 
 Tambien se soporta compatibilidad con variables legacy:
@@ -61,6 +63,7 @@ Los puertos son configurables con:
 - `OBS_GRAFANA_HOST_PORT`
 
 El scrape de Prometheus usa internamente `api:3022` y autentica con `OPS_API_KEY`.
+Las imagenes de Prometheus/Grafana se consumen desde GHCR para evitar rate-limit de Docker Hub en el VPS.
 
 Para producción en VPS:
 

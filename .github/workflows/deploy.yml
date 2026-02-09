@@ -15,6 +15,10 @@ concurrency:
 
 env:
   IMAGE_NAME: ghcr.io/gianlucafarias/ceres-api
+  OBS_PROMETHEUS_IMAGE: ghcr.io/gianlucafarias/ceres-prometheus
+  OBS_PROMETHEUS_TAG: v2.51.1
+  OBS_GRAFANA_IMAGE: ghcr.io/gianlucafarias/ceres-grafana
+  OBS_GRAFANA_TAG: 10.2.3
 
 jobs:
   quality-gate:
@@ -53,6 +57,16 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:main
             ${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.image_tag }}
+      - name: Mirror observability images to GHCR
+        continue-on-error: true
+        run: |
+          set -eu
+          docker buildx imagetools create \
+            --tag "${{ env.OBS_PROMETHEUS_IMAGE }}:${{ env.OBS_PROMETHEUS_TAG }}" \
+            "docker.io/prom/prometheus:${{ env.OBS_PROMETHEUS_TAG }}"
+          docker buildx imagetools create \
+            --tag "${{ env.OBS_GRAFANA_IMAGE }}:${{ env.OBS_GRAFANA_TAG }}" \
+            "docker.io/grafana/grafana:${{ env.OBS_GRAFANA_TAG }}"
 
   deploy:
     runs-on: ubuntu-latest
@@ -122,14 +136,29 @@ jobs:
 
             OBS_STACK_ENABLED="$(get_env_var OBS_STACK_ENABLED false)"
 
-            if [ "${OBS_STACK_ENABLED}" = "true" ]; then
+            deploy_api_only() {
+              API_IMAGE_TAG="${NEW_TAG}" ${COMPOSE_CMD} up -d --remove-orphans api
+            }
+
+            deploy_with_observability() {
               API_IMAGE_TAG="${NEW_TAG}" ${COMPOSE_CMD} \
                 -f docker-compose.yml \
                 -f docker-compose.observability.yml \
                 --profile observability \
                 up -d --remove-orphans api prometheus grafana
+            }
+
+            if [ "${OBS_STACK_ENABLED}" = "true" ]; then
+              set +e
+              deploy_with_observability
+              OBS_DEPLOY_EXIT=$?
+              set -e
+              if [ "${OBS_DEPLOY_EXIT}" -ne 0 ]; then
+                echo "WARN: observability deploy failed, continuing with API-only deploy."
+                deploy_api_only
+              fi
             else
-              API_IMAGE_TAG="${NEW_TAG}" ${COMPOSE_CMD} up -d --remove-orphans api
+              deploy_api_only
             fi
 
             ATTEMPTS=30
@@ -152,14 +181,29 @@ jobs:
             done
 
             echo "Deploy failed with tag ${NEW_TAG}. Rolling back to ${ROLLBACK_TAG}."
-            if [ "${OBS_STACK_ENABLED}" = "true" ]; then
+            rollback_api_only() {
+              API_IMAGE_TAG="${ROLLBACK_TAG}" ${COMPOSE_CMD} up -d --remove-orphans api
+            }
+
+            rollback_with_observability() {
               API_IMAGE_TAG="${ROLLBACK_TAG}" ${COMPOSE_CMD} \
                 -f docker-compose.yml \
                 -f docker-compose.observability.yml \
                 --profile observability \
                 up -d --remove-orphans api prometheus grafana
+            }
+
+            if [ "${OBS_STACK_ENABLED}" = "true" ]; then
+              set +e
+              rollback_with_observability
+              OBS_ROLLBACK_EXIT=$?
+              set -e
+              if [ "${OBS_ROLLBACK_EXIT}" -ne 0 ]; then
+                echo "WARN: observability rollback failed, trying API-only rollback."
+                rollback_api_only
+              fi
             else
-              API_IMAGE_TAG="${ROLLBACK_TAG}" ${COMPOSE_CMD} up -d --remove-orphans api
+              rollback_api_only
             fi
 
             i=1
