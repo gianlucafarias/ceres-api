@@ -14,9 +14,10 @@ IMAGE_TAG="${IMAGE_TAG:-}"
 
 cd "${APP_DIR}"
 
+git config --global --add safe.directory "${APP_DIR}"
 git fetch origin "${BRANCH}"
 git checkout "${BRANCH}"
-git pull --ff-only origin "${BRANCH}"
+git reset --hard "origin/${BRANCH}"
 
 if [ -z "${IMAGE_TAG}" ]; then
   IMAGE_TAG="$(git rev-parse HEAD)"

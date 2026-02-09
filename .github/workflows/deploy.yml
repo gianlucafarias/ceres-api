@@ -74,9 +74,10 @@ jobs:
             set -eu
             cd /var/www/ceres-api
 
+            git config --global --add safe.directory /var/www/ceres-api
             git fetch origin main
             git checkout main
-            git pull --ff-only origin main
+            git reset --hard origin/main
 
             mkdir -p .deploy
             PREVIOUS_IMAGE_ID="$(docker inspect --format='{{.Image}}' ceres-api 2>/dev/null || true)"
