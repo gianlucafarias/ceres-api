@@ -9,30 +9,15 @@ services:
     user: "0:0"
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    entrypoint:
-      - /bin/sh
-      - -c
-    command: >-
-      SCRAPE_INTERVAL="${OBS_PROMETHEUS_SCRAPE_INTERVAL:-30s}";
-      API_KEY="${OPS_API_KEY:-}";
-      printf '%s\n'
-      'global:'
-      "  scrape_interval: $${SCRAPE_INTERVAL}"
-      "  evaluation_interval: $${SCRAPE_INTERVAL}"
-      'scrape_configs:'
-      '  - job_name: "ceres-api"'
-      '    metrics_path: "/api/v1/ops/metrics"'
-      '    params:'
-      "      api_key: [\"$${API_KEY}\"]"
-      '    static_configs:'
-      '      - targets: ["host.docker.internal:3022"]'
-      > /tmp/prometheus.yml &&
-      exec /bin/prometheus --config.file=/tmp/prometheus.yml --storage.tsdb.path=/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
     depends_on:
       api:
         condition: service_healthy
     volumes:
       - prometheus-data:/prometheus
+      - ./.deploy/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     ports:
       - "127.0.0.1:${OBS_PROMETHEUS_HOST_PORT:-9091}:9090"
 
