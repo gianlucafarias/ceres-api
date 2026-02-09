@@ -66,20 +66,39 @@ if [ -n "${GHCR_TOKEN:-}" ] && [ -n "${GHCR_USERNAME:-}" ]; then
   echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USERNAME}" --password-stdin
 fi
 
+if [ -n "${DOCKERHUB_TOKEN:-}" ] && [ -n "${DOCKERHUB_USERNAME:-}" ]; then
+  echo "${DOCKERHUB_TOKEN}" | docker login docker.io -u "${DOCKERHUB_USERNAME}" --password-stdin
+fi
+
 docker pull "${IMAGE_NAME}:${IMAGE_TAG}" || {
   echo "No se pudo descargar ${IMAGE_NAME}:${IMAGE_TAG}."
   echo "Tip: setea IMAGE_TAG manualmente a un tag existente (por ejemplo '${BRANCH}' o un sha publicado)."
   exit 1
 }
 
-if [ "${OBS_STACK_ENABLED}" = "true" ]; then
+deploy_api_only() {
+  API_IMAGE_TAG="${IMAGE_TAG}" ${COMPOSE_CMD} up -d --remove-orphans api
+}
+
+deploy_with_observability() {
   API_IMAGE_TAG="${IMAGE_TAG}" ${COMPOSE_CMD} \
     -f docker-compose.yml \
     -f docker-compose.observability.yml \
     --profile observability \
     up -d --remove-orphans api prometheus grafana
+}
+
+if [ "${OBS_STACK_ENABLED}" = "true" ]; then
+  set +e
+  deploy_with_observability
+  OBS_DEPLOY_EXIT=$?
+  set -e
+  if [ "${OBS_DEPLOY_EXIT}" -ne 0 ]; then
+    echo "WARN: observability deploy failed, continuing with API-only deploy."
+    deploy_api_only
+  fi
 else
-  API_IMAGE_TAG="${IMAGE_TAG}" ${COMPOSE_CMD} up -d --remove-orphans api
+  deploy_api_only
 fi
 
 ATTEMPTS=30
@@ -98,13 +117,28 @@ for i in $(seq 1 "${ATTEMPTS}"); do
 done
 
 echo "Deploy fallo. Rollback a ${ROLLBACK_TAG}."
-if [ "${OBS_STACK_ENABLED}" = "true" ]; then
+rollback_api_only() {
+  API_IMAGE_TAG="${ROLLBACK_TAG}" ${COMPOSE_CMD} up -d --remove-orphans api
+}
+
+rollback_with_observability() {
   API_IMAGE_TAG="${ROLLBACK_TAG}" ${COMPOSE_CMD} \
     -f docker-compose.yml \
     -f docker-compose.observability.yml \
     --profile observability \
     up -d --remove-orphans api prometheus grafana
+}
+
+if [ "${OBS_STACK_ENABLED}" = "true" ]; then
+  set +e
+  rollback_with_observability
+  OBS_ROLLBACK_EXIT=$?
+  set -e
+  if [ "${OBS_ROLLBACK_EXIT}" -ne 0 ]; then
+    echo "WARN: observability rollback failed, trying API-only rollback."
+    rollback_api_only
+  fi
 else
-  API_IMAGE_TAG="${ROLLBACK_TAG}" ${COMPOSE_CMD} up -d --remove-orphans api
+  rollback_api_only
 fi
 exit 1
