@@ -45,7 +45,9 @@ export class HistoryService {
     const limit = this.toPositiveInt(query.limit, 10);
     const contactId = this.toPositiveInt(query.contactId, 0);
     const conversationId =
-      typeof query.conversationId === 'string' ? query.conversationId.trim() : '';
+      typeof query.conversationId === 'string'
+        ? query.conversationId.trim()
+        : '';
 
     if (conversationId) {
       const messages = await this.historyRepo.find({

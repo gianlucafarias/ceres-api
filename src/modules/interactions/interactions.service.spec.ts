@@ -29,15 +29,14 @@ describe('InteractionsService', () => {
       (sql: string, order?: 'ASC' | 'DESC') => QueryBuilderMock
     >;
     getRawMany: jest.MockedFunction<
-      () =>
-        Promise<
-          Array<{
-            group_key: string;
-            count: string;
-            sent_messages: string;
-            received_messages: string;
-          }>
-        >
+      () => Promise<
+        Array<{
+          group_key: string;
+          count: string;
+          sent_messages: string;
+          received_messages: string;
+        }>
+      >
     >;
     getCount: jest.MockedFunction<() => Promise<number>>;
   };

@@ -33,4 +33,3 @@ export function toSafeCount(value: unknown): number {
   if (!Number.isFinite(parsed)) return 0;
   return parsed;
 }
-

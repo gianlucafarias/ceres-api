@@ -15,18 +15,17 @@ describe('FeedbackService', () => {
     addSelect: jest.MockedFunction<(...args: unknown[]) => FeedbackQbMock>;
     orderBy: jest.MockedFunction<(...args: unknown[]) => FeedbackQbMock>;
     getRawMany: jest.MockedFunction<
-      () =>
-        Promise<
-          Array<{
-            id: string;
-            nombre: string;
-            calificacion: string;
-            comentario: string | null;
-            timestamp: string;
-            conversation_id: string | null;
-            contact_id: string | null;
-          }>
-        >
+      () => Promise<
+        Array<{
+          id: string;
+          nombre: string;
+          calificacion: string;
+          comentario: string | null;
+          timestamp: string;
+          conversation_id: string | null;
+          contact_id: string | null;
+        }>
+      >
     >;
   };
 
