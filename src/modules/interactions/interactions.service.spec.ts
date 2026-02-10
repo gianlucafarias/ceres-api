@@ -29,7 +29,14 @@ describe('InteractionsService', () => {
       (sql: string, order?: 'ASC' | 'DESC') => QueryBuilderMock
     >;
     getRawMany: jest.MockedFunction<
-      () => Promise<Array<{ group_key: string; count: string }>>
+      () => Promise<
+        Array<{
+          group_key: string;
+          count: string;
+          sent_messages: string;
+          received_messages: string;
+        }>
+      >
     >;
     getCount: jest.MockedFunction<() => Promise<number>>;
   };
@@ -42,9 +49,14 @@ describe('InteractionsService', () => {
       andWhere: jest.fn().mockReturnThis(),
       groupBy: jest.fn().mockReturnThis(),
       orderBy: jest.fn().mockReturnThis(),
-      getRawMany: jest
-        .fn()
-        .mockResolvedValue([{ group_key: '2026-02-03', count: '2' }]),
+      getRawMany: jest.fn().mockResolvedValue([
+        {
+          group_key: '2026-02-03',
+          count: '2',
+          sent_messages: '1',
+          received_messages: '1',
+        },
+      ]),
       getCount: jest.fn().mockResolvedValue(1),
     };
 
@@ -63,16 +75,23 @@ describe('InteractionsService', () => {
     service = module.get(InteractionsService);
   });
 
-  it('agrupa por día', async () => {
+  it('groups by day and returns sent and received counts', async () => {
     const res = await service.getInteractionsLastWeek({
       start_date: '2026-02-01',
       end_date: '2026-02-03',
       group_by: 'day',
     });
-    expect(res[0]).toEqual({ group: '2026-02-03', count: 2 });
+
+    expect(res[0]).toEqual({
+      group: '2026-02-03',
+      count: 2,
+      sentMessages: 1,
+      receivedMessages: 1,
+    });
+    expect(qbMock.andWhere).toHaveBeenCalledWith("history.answer !~ '^__'");
   });
 
-  it('count sin rango usa count()', async () => {
+  it('count without range uses count()', async () => {
     const res = await service.getInteractionsCount({});
     expect(res).toEqual({ count: 7 });
     expect(repoMock.count).toHaveBeenCalled();
