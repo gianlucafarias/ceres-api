@@ -82,4 +82,44 @@ describe('HistoryService', () => {
       pageSize: 1,
     });
   });
+
+  it('conversation details hace fallback por contacto cuando no encuentra conversationId', async () => {
+    historyRepo.find.mockResolvedValue([]);
+    historyRepo.findAndCount.mockResolvedValue([[{ id: 10 } as History], 1]);
+
+    const result = await service.getConversationDetails({
+      conversationId: 'missing-conversation',
+      contactId: 8,
+      page: 1,
+      limit: 10,
+    });
+
+    expect(historyRepo.find).toHaveBeenCalledWith({
+      where: { conversation_id: 'missing-conversation' },
+      order: { createdAt: 'ASC' },
+    });
+    expect(historyRepo.findAndCount).toHaveBeenCalledWith({
+      where: { contact: { id: 8 } },
+      order: { createdAt: 'DESC' },
+      skip: 0,
+      take: 10,
+    });
+    expect(result).toEqual({
+      messages: [{ id: 10 }],
+      totalMessages: 1,
+      currentPage: 1,
+      totalPages: 1,
+    });
+  });
+
+  it('conversation details devuelve estructura vacia cuando no hay identificadores', async () => {
+    const result = await service.getConversationDetails({});
+
+    expect(result).toEqual({
+      messages: [],
+      totalMessages: 0,
+      currentPage: 1,
+      totalPages: 0,
+    });
+  });
 });
