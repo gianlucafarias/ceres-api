@@ -7,6 +7,11 @@ import { Converstation } from '../../entities/conversation.entity';
 import { History } from '../../entities/history.entity';
 import { Reclamo } from '../../entities/reclamo.entity';
 import { RedisService } from '../../shared/redis/redis.service';
+import {
+  applyValidMessageFilters,
+  buildReceivedMessageCondition,
+  toSafeCount,
+} from '../interactions/history-message-metrics';
 import { DashboardCeresitoSummaryQueryDto } from './dto/dashboard-ceresito-summary.dto';
 
 const DEFAULT_TREATED_STATUS = 'ASIGNADO';
@@ -61,7 +66,7 @@ export class DashboardCeresitoService {
     ] = await Promise.all([
       this.contactRepo.count({ where: { createdAt: range } }),
       this.conversationRepo.count({ where: { fecha_hora: range } }),
-      this.historyRepo.count({ where: { createdAt: range } }),
+      this.countSentMessages(period.from, period.to),
       this.reclamoRepo.count({ where: { fecha: range } }),
       this.reclamoRepo.count({
         where: {
@@ -82,6 +87,20 @@ export class DashboardCeresitoService {
 
     await this.setCachedSummary(cacheKey, summary);
     return summary;
+  }
+
+  private async countSentMessages(from: Date, to: Date): Promise<number> {
+    const qb = this.historyRepo
+      .createQueryBuilder('history')
+      .select('COUNT(*)', 'count')
+      .where('history.created_at >= :from', { from })
+      .andWhere('history.created_at <= :to', { to });
+
+    applyValidMessageFilters(qb, 'history');
+    qb.andWhere(`NOT (${buildReceivedMessageCondition('history')})`);
+
+    const raw = await qb.getRawOne<{ count?: string | number }>();
+    return toSafeCount(raw?.count);
   }
 
   private resolvePeriod(from?: string, to?: string): { from: Date; to: Date } {

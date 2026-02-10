@@ -3,6 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
 import { History } from '../../entities/history.entity';
 import {
+  applyValidMessageFilters,
+  buildReceivedMessageCondition,
+  toSafeCount,
+} from './history-message-metrics';
+import {
   InteractionsCountQueryDto,
   InteractionsGroupParamsDto,
   InteractionsRangeParamsDto,
@@ -18,17 +23,38 @@ export class InteractionsService {
   async getInteractionsLastWeek(params: InteractionsGroupParamsDto) {
     const { start_date, end_date, group_by } = params;
     const groupExpr = this.groupSelect(group_by);
+    const receivedCondition = buildReceivedMessageCondition('history');
     const qb = this.historyRepo
       .createQueryBuilder('history')
       .select(groupExpr, 'group_key')
       .addSelect('COUNT(*)', 'count')
+      .addSelect(
+        `SUM(CASE WHEN ${receivedCondition} THEN 0 ELSE 1 END)`,
+        'sent_messages',
+      )
+      .addSelect(
+        `SUM(CASE WHEN ${receivedCondition} THEN 1 ELSE 0 END)`,
+        'received_messages',
+      )
       .where('history.created_at >= :startDate', { startDate: start_date })
       .andWhere('history.created_at <= :endDate', { endDate: end_date })
       .groupBy(groupExpr)
       .orderBy(groupExpr, 'ASC');
 
-    const rows = await qb.getRawMany<{ group_key: string; count: string }>();
-    return rows.map((r) => ({ group: r.group_key, count: Number(r.count) }));
+    applyValidMessageFilters(qb, 'history');
+
+    const rows = await qb.getRawMany<{
+      group_key: string;
+      count: string;
+      sent_messages: string;
+      received_messages: string;
+    }>();
+    return rows.map((r) => ({
+      group: r.group_key,
+      count: toSafeCount(r.count),
+      sentMessages: toSafeCount(r.sent_messages),
+      receivedMessages: toSafeCount(r.received_messages),
+    }));
   }
 
   async getInteractionsToday() {

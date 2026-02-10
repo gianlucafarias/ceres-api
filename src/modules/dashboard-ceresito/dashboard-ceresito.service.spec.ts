@@ -15,13 +15,31 @@ import {
 
 type CountRepo<T> = Pick<Repository<T>, 'count'>;
 
+type HistoryCountQbMock = {
+  select: jest.MockedFunction<
+    (sql: string, alias?: string) => HistoryCountQbMock
+  >;
+  where: jest.MockedFunction<
+    (sql: string, params?: Record<string, unknown>) => HistoryCountQbMock
+  >;
+  andWhere: jest.MockedFunction<
+    (sql: string, params?: Record<string, unknown>) => HistoryCountQbMock
+  >;
+  getRawOne: jest.MockedFunction<
+    () => Promise<{ count?: string | number } | undefined>
+  >;
+};
+
 describe('DashboardCeresitoService', () => {
   let service: DashboardCeresitoService;
+  let qbMock: HistoryCountQbMock;
   let contactRepo: { count: jest.MockedFunction<CountRepo<Contact>['count']> };
   let conversationRepo: {
     count: jest.MockedFunction<CountRepo<Converstation>['count']>;
   };
-  let historyRepo: { count: jest.MockedFunction<CountRepo<History>['count']> };
+  let historyRepo: {
+    createQueryBuilder: jest.MockedFunction<() => HistoryCountQbMock>;
+  };
   let reclamoRepo: { count: jest.MockedFunction<CountRepo<Reclamo>['count']> };
   let redis: {
     get: jest.MockedFunction<(key: string) => Promise<string | null>>;
@@ -31,9 +49,18 @@ describe('DashboardCeresitoService', () => {
   };
 
   beforeEach(async () => {
+    qbMock = {
+      select: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      getRawOne: jest.fn().mockResolvedValue({ count: '0' }),
+    };
+
     contactRepo = { count: jest.fn() };
     conversationRepo = { count: jest.fn() };
-    historyRepo = { count: jest.fn() };
+    historyRepo = {
+      createQueryBuilder: jest.fn(() => qbMock),
+    };
     reclamoRepo = { count: jest.fn() };
     redis = {
       get: jest.fn(),
@@ -66,11 +93,11 @@ describe('DashboardCeresitoService', () => {
     service = module.get(DashboardCeresitoService);
   });
 
-  it('arma summary y cachea respuesta con treatedStatus por defecto', async () => {
+  it('builds summary and caches with default treatedStatus', async () => {
     redis.get.mockResolvedValue(null);
     contactRepo.count.mockResolvedValue(10);
     conversationRepo.count.mockResolvedValue(20);
-    historyRepo.count.mockResolvedValue(30);
+    qbMock.getRawOne.mockResolvedValue({ count: '30' });
     reclamoRepo.count.mockResolvedValueOnce(40).mockResolvedValueOnce(5);
 
     const res = await service.getSummary({
@@ -86,6 +113,12 @@ describe('DashboardCeresitoService', () => {
       claimsHandled: 5,
     });
     expect(res.generatedAt).toEqual(expect.any(String));
+
+    const hasNotReceivedFilter = qbMock.andWhere.mock.calls.some(
+      ([sql]) => typeof sql === 'string' && sql.includes('NOT ('),
+    );
+    expect(hasNotReceivedFilter).toBe(true);
+
     const secondReclamoCountCall = reclamoRepo.count.mock.calls[1]?.[0];
     expect(secondReclamoCountCall).toBeDefined();
 
@@ -106,7 +139,7 @@ describe('DashboardCeresitoService', () => {
     expect(redis.setEx).toHaveBeenCalledTimes(1);
   });
 
-  it('retorna cache sin consultar repositorios', async () => {
+  it('returns cache without querying repositories', async () => {
     const cached: DashboardCeresitoSummaryResponse = {
       uniqueUsers: 1,
       conversations: 2,
@@ -122,16 +155,16 @@ describe('DashboardCeresitoService', () => {
     expect(res).toEqual(cached);
     expect(contactRepo.count).not.toHaveBeenCalled();
     expect(conversationRepo.count).not.toHaveBeenCalled();
-    expect(historyRepo.count).not.toHaveBeenCalled();
+    expect(historyRepo.createQueryBuilder).not.toHaveBeenCalled();
     expect(reclamoRepo.count).not.toHaveBeenCalled();
     expect(redis.setEx).not.toHaveBeenCalled();
   });
 
-  it('devuelve ceros cuando no hay datos', async () => {
+  it('returns zeros when there is no data', async () => {
     redis.get.mockResolvedValue(null);
     contactRepo.count.mockResolvedValue(0);
     conversationRepo.count.mockResolvedValue(0);
-    historyRepo.count.mockResolvedValue(0);
+    qbMock.getRawOne.mockResolvedValue({ count: '0' });
     reclamoRepo.count.mockResolvedValueOnce(0).mockResolvedValueOnce(0);
 
     const res = await service.getSummary({
@@ -149,7 +182,7 @@ describe('DashboardCeresitoService', () => {
     });
   });
 
-  it('lanza 400 si from es mayor que to', async () => {
+  it('throws 400 when from is greater than to', async () => {
     await expect(
       service.getSummary({ from: '2026-02-10', to: '2026-02-01' }),
     ).rejects.toBeInstanceOf(BadRequestException);
