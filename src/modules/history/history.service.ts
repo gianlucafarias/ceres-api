@@ -41,22 +41,36 @@ export class HistoryService {
   }
 
   async getConversationDetails(query: ConversationDetailsQueryDto) {
-    const { contactId, conversationId, page = 1, limit = 10 } = query;
+    const page = this.toPositiveInt(query.page, 1);
+    const limit = this.toPositiveInt(query.limit, 10);
+    const contactId = this.toPositiveInt(query.contactId, 0);
+    const conversationId =
+      typeof query.conversationId === 'string'
+        ? query.conversationId.trim()
+        : '';
+
     if (conversationId) {
       const messages = await this.historyRepo.find({
         where: { conversation_id: conversationId },
         order: { createdAt: 'ASC' },
       });
-      if (!messages.length) return null;
-      return {
-        messages,
-        totalMessages: messages.length,
-        currentPage: 1,
-        totalPages: 1,
-      };
+      if (!messages.length && !contactId) {
+        return this.buildEmptyConversationDetails(page);
+      }
+      if (messages.length) {
+        return {
+          messages,
+          totalMessages: messages.length,
+          currentPage: 1,
+          totalPages: 1,
+        };
+      }
     }
 
-    if (!contactId) return null;
+    if (!contactId) {
+      return this.buildEmptyConversationDetails(page);
+    }
+
     const skip = (page - 1) * limit;
     const [messages, totalMessages] = await this.historyRepo.findAndCount({
       where: { contact: { id: contactId } },
@@ -65,12 +79,33 @@ export class HistoryService {
       take: limit,
     });
 
+    if (!messages.length) {
+      return this.buildEmptyConversationDetails(page);
+    }
+
     const totalPages = Math.ceil(totalMessages / limit);
     return {
       messages: messages.reverse(),
       totalMessages,
       currentPage: page,
       totalPages,
+    };
+  }
+
+  private toPositiveInt(value: unknown, fallback: number): number {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed)) return fallback;
+    const intValue = Math.trunc(parsed);
+    if (intValue <= 0) return fallback;
+    return intValue;
+  }
+
+  private buildEmptyConversationDetails(page: number) {
+    return {
+      messages: [],
+      totalMessages: 0,
+      currentPage: page,
+      totalPages: 0,
     };
   }
 
