@@ -177,7 +177,7 @@ export class FarmaciasController {
     @Query() query: DutyByPharmacyQueryDto,
   ) {
     const code = params.code.trim().toUpperCase();
-    const from = query.from || this.toISODateOnly(new Date());
+    const from = query.from || this.service.getCurrentCalendarDateISO();
     const limit = query.limit ?? 20;
 
     const rows = await this.service.getDutyByPharmacy(code, from, limit);
@@ -200,12 +200,5 @@ export class FarmaciasController {
     if (body.lng !== undefined) updates.lng = body.lng;
 
     return updates;
-  }
-
-  private toISODateOnly(d: Date) {
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd}`;
   }
 }

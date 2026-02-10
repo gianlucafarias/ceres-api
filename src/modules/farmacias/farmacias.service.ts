@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { DutySchedule } from '../../entities/duty-schedule.entity';
 import { Pharmacy } from '../../entities/pharmacy.entity';
 
+const DEFAULT_CALENDAR_TIME_ZONE = 'America/Argentina/Buenos_Aires';
+
 type DutyCalendarPreview = {
   today: { date: string; schedule: DutySchedule | null };
   tomorrow: { date: string; schedule: DutySchedule | null };
@@ -13,6 +15,9 @@ type DutyCalendarPreview = {
 @Injectable()
 export class FarmaciasService {
   private bootstrapEtagRevision = 0;
+  private readonly calendarTimeZone =
+    process.env.FARMACIAS_CALENDAR_TIME_ZONE?.trim() ||
+    DEFAULT_CALENDAR_TIME_ZONE;
 
   constructor(
     @InjectRepository(Pharmacy)
@@ -42,7 +47,7 @@ export class FarmaciasService {
   }
 
   async getDutyToday() {
-    const today = this.toISODateOnly(new Date());
+    const today = this.getCurrentCalendarDateISO();
     return this.getDutyByDate(today);
   }
 
@@ -77,7 +82,7 @@ export class FarmaciasService {
         date,
         pharmacyCode: pharmacy.code,
         pharmacy,
-        scheduleYear: new Date(date).getFullYear(),
+        scheduleYear: this.getYearFromISODate(date),
         source: 'manual-override',
       });
       const saved = await this.dutyRepo.save(row);
@@ -87,7 +92,7 @@ export class FarmaciasService {
 
     existing.pharmacyCode = pharmacy.code;
     existing.pharmacy = pharmacy;
-    existing.scheduleYear = new Date(date).getFullYear();
+    existing.scheduleYear = this.getYearFromISODate(date);
     existing.source = 'manual-override';
     const saved = await this.dutyRepo.save(existing);
     this.invalidateBootstrapEtag();
@@ -126,15 +131,9 @@ export class FarmaciasService {
   }
 
   async getCalendar() {
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const dayAfterTomorrow = new Date(today);
-    dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2);
-
-    const todayISO = this.toISODateOnly(today);
-    const tomorrowISO = this.toISODateOnly(tomorrow);
-    const dayAfterTomorrowISO = this.toISODateOnly(dayAfterTomorrow);
+    const todayISO = this.getCurrentCalendarDateISO();
+    const tomorrowISO = this.addDaysToISODate(todayISO, 1);
+    const dayAfterTomorrowISO = this.addDaysToISODate(todayISO, 2);
 
     const [todaySchedule, tomorrowSchedule, dayAfterTomorrowSchedule] =
       await Promise.all([
@@ -154,6 +153,10 @@ export class FarmaciasService {
         ? { date: dayAfterTomorrowISO, schedule: dayAfterTomorrowSchedule }
         : { date: dayAfterTomorrowISO, schedule: null },
     };
+  }
+
+  getCurrentCalendarDateISO() {
+    return this.toISODateOnlyInTimeZone(new Date(), this.calendarTimeZone);
   }
 
   private invalidateBootstrapEtag() {
@@ -182,10 +185,45 @@ export class FarmaciasService {
     return [...byCode.values()].sort((a, b) => a.code.localeCompare(b.code));
   }
 
-  private toISODateOnly(d: Date) {
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd}`;
+  private addDaysToISODate(baseISODate: string, days: number) {
+    const [year, month, day] = baseISODate.split('-').map(Number);
+    if (
+      !Number.isFinite(year) ||
+      !Number.isFinite(month) ||
+      !Number.isFinite(day)
+    ) {
+      return baseISODate;
+    }
+
+    const nextUtc = new Date(Date.UTC(year, month - 1, day + days));
+    return nextUtc.toISOString().slice(0, 10);
+  }
+
+  private toISODateOnlyInTimeZone(date: Date, timeZone: string) {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).formatToParts(date);
+
+    const getPart = (type: 'year' | 'month' | 'day') =>
+      parts.find((part) => part.type === type)?.value;
+
+    const year = getPart('year');
+    const month = getPart('month');
+    const day = getPart('day');
+
+    if (year && month && day) {
+      return `${year}-${month}-${day}`;
+    }
+
+    return date.toISOString().slice(0, 10);
+  }
+
+  private getYearFromISODate(date: string) {
+    const year = Number.parseInt(date.slice(0, 4), 10);
+    if (Number.isFinite(year)) return year;
+    return new Date(date).getUTCFullYear();
   }
 }
