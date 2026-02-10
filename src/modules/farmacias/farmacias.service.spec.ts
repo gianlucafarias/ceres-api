@@ -221,6 +221,24 @@ describe('FarmaciasService', () => {
     }
   });
 
+  it('getCalendar usa la fecha de Argentina para hoy/manana/pasado', async () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-02-10T01:30:00.000Z'));
+    dutyRepo.findOne.mockResolvedValue(null);
+
+    try {
+      await service.getCalendar();
+
+      const queriedDates = dutyRepo.findOne.mock.calls.map(
+        ([options]) => (options as { where?: { date?: string } })?.where?.date,
+      );
+
+      expect(queriedDates).toEqual(['2026-02-09', '2026-02-10', '2026-02-11']);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('getDutyByPharmacy limita resultados', async () => {
     const res = await service.getDutyByPharmacy('ABC', '2026-02-01', 5);
     expect(qb.leftJoinAndSelect).toHaveBeenCalledWith(
