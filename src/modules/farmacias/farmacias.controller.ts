@@ -7,10 +7,14 @@ import {
   Param,
   Put,
   Query,
+  Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
+import type { Request, Response } from 'express';
 import { AdminApiKeyGuard } from '../../common/guards/admin-api-key.guard';
 import { toErrorMessage } from '../../common/utils/error-message';
+import { applyHttpEtag } from '../../common/utils/http-etag';
 import {
   DutyByPharmacyQueryDto,
   DutyDateParamsDto,
@@ -115,6 +119,26 @@ export class FarmaciasController {
     }
     const rows = await this.service.getDutyRange(query.from, query.to);
     return { from: query.from, to: query.to, count: rows.length, rows };
+  }
+
+  // Public
+  @Get('farmaciadeturno/bootstrap')
+  async getBootstrap(
+    @Query() query: DutyRangeQueryDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    if (query.from > query.to) {
+      throw new HttpException(
+        { message: 'from no puede ser mayor que to' },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const payload = await this.service.getBootstrap(query.from, query.to);
+    const etagSeed = this.service.getBootstrapEtagSeed(query.from, query.to);
+    if (applyHttpEtag(req, res, payload, { seed: etagSeed })) return;
+    return payload;
   }
 
   // Public

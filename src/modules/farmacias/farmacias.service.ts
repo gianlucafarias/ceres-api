@@ -4,8 +4,16 @@ import { Repository } from 'typeorm';
 import { DutySchedule } from '../../entities/duty-schedule.entity';
 import { Pharmacy } from '../../entities/pharmacy.entity';
 
+type DutyCalendarPreview = {
+  today: { date: string; schedule: DutySchedule | null };
+  tomorrow: { date: string; schedule: DutySchedule | null };
+  dayAfterTomorrow: { date: string; schedule: DutySchedule | null };
+};
+
 @Injectable()
 export class FarmaciasService {
+  private bootstrapEtagRevision = 0;
+
   constructor(
     @InjectRepository(Pharmacy)
     private readonly pharmacyRepo: Repository<Pharmacy>,
@@ -28,7 +36,9 @@ export class FarmaciasService {
     }
 
     Object.assign(pharmacy, updates);
-    return this.pharmacyRepo.save(pharmacy);
+    const saved = await this.pharmacyRepo.save(pharmacy);
+    this.invalidateBootstrapEtag();
+    return saved;
   }
 
   async getDutyToday() {
@@ -37,13 +47,17 @@ export class FarmaciasService {
   }
 
   async getDutyByDate(date: string) {
-    const row = await this.dutyRepo.findOne({ where: { date } });
+    const row = await this.dutyRepo.findOne({
+      where: { date },
+      relations: { pharmacy: true },
+    });
     return row;
   }
 
   async getDutyRange(from: string, to: string) {
     return this.dutyRepo
       .createQueryBuilder('ds')
+      .leftJoinAndSelect('ds.pharmacy', 'pharmacy')
       .where('ds.date >= :from AND ds.date <= :to', { from, to })
       .orderBy('ds.date', 'ASC')
       .getMany();
@@ -66,24 +80,49 @@ export class FarmaciasService {
         scheduleYear: new Date(date).getFullYear(),
         source: 'manual-override',
       });
-      return this.dutyRepo.save(row);
+      const saved = await this.dutyRepo.save(row);
+      this.invalidateBootstrapEtag();
+      return saved;
     }
 
     existing.pharmacyCode = pharmacy.code;
     existing.pharmacy = pharmacy;
     existing.scheduleYear = new Date(date).getFullYear();
     existing.source = 'manual-override';
-    return this.dutyRepo.save(existing);
+    const saved = await this.dutyRepo.save(existing);
+    this.invalidateBootstrapEtag();
+    return saved;
   }
 
   async getDutyByPharmacy(code: string, from: string, limit: number) {
     return this.dutyRepo
       .createQueryBuilder('ds')
+      .leftJoinAndSelect('ds.pharmacy', 'pharmacy')
       .where('ds.pharmacy_code = :code', { code })
       .andWhere('ds.date >= :from', { from })
       .orderBy('ds.date', 'ASC')
       .limit(limit)
       .getMany();
+  }
+
+  async getBootstrap(from: string, to: string) {
+    const [quickPreview, rows] = await Promise.all([
+      this.getCalendar(),
+      this.getDutyRange(from, to),
+    ]);
+
+    return {
+      from,
+      to,
+      count: rows.length,
+      quickPreview,
+      rows,
+      pharmacies: this.collectUniquePharmacies(rows, quickPreview),
+    };
+  }
+
+  getBootstrapEtagSeed(from: string, to: string) {
+    return `${from}:${to}:rev:${this.bootstrapEtagRevision}`;
   }
 
   async getCalendar() {
@@ -115,6 +154,32 @@ export class FarmaciasService {
         ? { date: dayAfterTomorrowISO, schedule: dayAfterTomorrowSchedule }
         : { date: dayAfterTomorrowISO, schedule: null },
     };
+  }
+
+  private invalidateBootstrapEtag() {
+    this.bootstrapEtagRevision += 1;
+  }
+
+  private collectUniquePharmacies(
+    rows: DutySchedule[],
+    quickPreview: DutyCalendarPreview,
+  ) {
+    const byCode = new Map<string, Pharmacy>();
+    const addSchedulePharmacy = (schedule: DutySchedule | null) => {
+      if (schedule?.pharmacy) {
+        byCode.set(schedule.pharmacy.code, schedule.pharmacy);
+      }
+    };
+
+    for (const row of rows) {
+      addSchedulePharmacy(row);
+    }
+
+    addSchedulePharmacy(quickPreview.today.schedule);
+    addSchedulePharmacy(quickPreview.tomorrow.schedule);
+    addSchedulePharmacy(quickPreview.dayAfterTomorrow.schedule);
+
+    return [...byCode.values()].sort((a, b) => a.code.localeCompare(b.code));
   }
 
   private toISODateOnly(d: Date) {
