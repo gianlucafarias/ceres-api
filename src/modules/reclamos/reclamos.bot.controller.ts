@@ -1,8 +1,17 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { BotApiKeyGuard } from '../../common/guards/bot-api-key.guard';
 import {
   EstadoReclamoBotParamsDto,
   CrearReclamoBotDto,
+  UltimoReclamoBotQueryDto,
 } from './dto/reclamos-bot.dto';
 import { ReclamosService } from './reclamos.service';
 
@@ -14,6 +23,16 @@ export class ReclamosBotController {
   @Post()
   crear(@Body() dto: CrearReclamoBotDto) {
     return this.service.crearDesdeBot(dto);
+  }
+
+  @Get('tipos')
+  tipos() {
+    return this.service.tiposParaBot();
+  }
+
+  @Get('bot/ultimo')
+  ultimo(@Query() query: UltimoReclamoBotQueryDto) {
+    return this.service.ultimoPorTelefonoParaBot(query.telefono);
   }
 
   @Get(':id/estado')

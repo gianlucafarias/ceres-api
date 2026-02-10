@@ -18,6 +18,8 @@
 
 - `POST /api/v1/reclamos` (crear) → id, estado, fecha, reclamo, barrio, ubicacion (sin teléfono).
 - `GET /api/v1/reclamos/:id/estado` → estado y datos básicos (sin teléfono).
+- `GET /api/v1/reclamos/tipos` → catálogo de tipos (`[{ id, nombre }]`).
+- `GET /api/v1/reclamos/bot/ultimo?telefono=...` → último reclamo del teléfono (sin PII de contacto).
 
 ### Dashboard (`ADMIN_API_KEY`)
 
