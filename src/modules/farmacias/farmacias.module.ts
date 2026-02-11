@@ -7,7 +7,10 @@ import { FarmaciasController } from './farmacias.controller';
 import { FarmaciasService } from './farmacias.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Pharmacy, DutySchedule]), ActivityLogModule],
+  imports: [
+    TypeOrmModule.forFeature([Pharmacy, DutySchedule]),
+    ActivityLogModule,
+  ],
   controllers: [FarmaciasController],
   providers: [FarmaciasService],
 })

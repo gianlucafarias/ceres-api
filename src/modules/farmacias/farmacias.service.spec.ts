@@ -28,7 +28,9 @@ describe('FarmaciasService', () => {
     createQueryBuilder: jest.MockedFunction<() => QueryBuilderMock>;
   };
   let qb: QueryBuilderMock;
-  let activityLog: { logActivity: jest.MockedFunction<(params: unknown) => Promise<void>> };
+  let activityLog: {
+    logActivity: jest.MockedFunction<(params: unknown) => Promise<void>>;
+  };
 
   type QueryBuilderMock = {
     leftJoinAndSelect: jest.MockedFunction<
@@ -90,7 +92,7 @@ describe('FarmaciasService', () => {
         {
           provide: ActivityLogService,
           useValue: {
-            logActivity: jest.fn(async () => undefined),
+            logActivity: jest.fn(() => Promise.resolve()),
           },
         },
       ],

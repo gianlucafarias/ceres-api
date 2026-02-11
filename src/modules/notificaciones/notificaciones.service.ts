@@ -216,25 +216,28 @@ export class NotificacionesService {
     }
 
     try {
-      await this.enviarTemplate({
-        number: telefono,
-        template: templateName,
-        languageCode: 'es_AR',
-        components: [
-          {
-            type: 'BODY',
-            parameters,
-          },
-        ],
-      }, {
-        userId: usuarioId,
-        source: 'residuos_diarios',
-        metadata: {
-          tipoResiduo,
-          horaEnvio,
-          seccion: seccion ?? null,
+      await this.enviarTemplate(
+        {
+          number: telefono,
+          template: templateName,
+          languageCode: 'es_AR',
+          components: [
+            {
+              type: 'BODY',
+              parameters,
+            },
+          ],
         },
-      });
+        {
+          userId: usuarioId,
+          source: 'residuos_diarios',
+          metadata: {
+            tipoResiduo,
+            horaEnvio,
+            seccion: seccion ?? null,
+          },
+        },
+      );
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Error desconocido';

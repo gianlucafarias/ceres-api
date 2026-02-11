@@ -16,7 +16,7 @@ describe('ActivityService', () => {
       create: jest.fn(
         (input: Partial<ActivityLog>) => input as unknown as ActivityLog,
       ),
-      save: jest.fn(async (input: ActivityLog) => input),
+      save: jest.fn((input: ActivityLog) => Promise.resolve(input)),
       find: jest.fn(),
     };
 
