@@ -2,6 +2,7 @@ import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { DutySchedule } from '../../entities/duty-schedule.entity';
 import { Pharmacy } from '../../entities/pharmacy.entity';
+import { ActivityLogService } from '../../shared/activity-log/activity-log.service';
 import { FarmaciasService } from './farmacias.service';
 
 describe('FarmaciasService', () => {
@@ -27,6 +28,7 @@ describe('FarmaciasService', () => {
     createQueryBuilder: jest.MockedFunction<() => QueryBuilderMock>;
   };
   let qb: QueryBuilderMock;
+  let activityLog: { logActivity: jest.MockedFunction<(params: unknown) => Promise<void>> };
 
   type QueryBuilderMock = {
     leftJoinAndSelect: jest.MockedFunction<
@@ -85,10 +87,17 @@ describe('FarmaciasService', () => {
         FarmaciasService,
         { provide: getRepositoryToken(Pharmacy), useValue: pharmacyRepo },
         { provide: getRepositoryToken(DutySchedule), useValue: dutyRepo },
+        {
+          provide: ActivityLogService,
+          useValue: {
+            logActivity: jest.fn(async () => undefined),
+          },
+        },
       ],
     }).compile();
 
     service = module.get(FarmaciasService);
+    activityLog = module.get(ActivityLogService);
   });
 
   it('updateDutyByDate crea cuando no existe', async () => {
@@ -99,6 +108,7 @@ describe('FarmaciasService', () => {
 
     expect(res.pharmacyCode).toBe('ABC');
     expect(res.source).toBe('manual-override');
+    expect(activityLog.logActivity).toHaveBeenCalled();
   });
 
   it('actualiza seed de bootstrap ETag al modificar turno o farmacia', async () => {

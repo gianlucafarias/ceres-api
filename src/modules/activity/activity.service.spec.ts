@@ -6,11 +6,17 @@ import { ActivityService } from './activity.service';
 describe('ActivityService', () => {
   let service: ActivityService;
   let repo: {
+    create: jest.MockedFunction<(input: Partial<ActivityLog>) => ActivityLog>;
+    save: jest.MockedFunction<(input: ActivityLog) => Promise<ActivityLog>>;
     find: jest.MockedFunction<(options?: unknown) => Promise<ActivityLog[]>>;
   };
 
   beforeEach(async () => {
     repo = {
+      create: jest.fn(
+        (input: Partial<ActivityLog>) => input as unknown as ActivityLog,
+      ),
+      save: jest.fn(async (input: ActivityLog) => input),
       find: jest.fn(),
     };
 
@@ -59,5 +65,42 @@ describe('ActivityService', () => {
       order: { createdAt: 'DESC' },
       take: 5,
     });
+  });
+
+  it('crea actividad y devuelve respuesta con timeAgo', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-02-05T12:00:00Z'));
+
+    repo.save.mockResolvedValue({
+      id: 99,
+      type: 'CONTACTO',
+      action: 'CREACION',
+      description: 'Nuevo contacto',
+      entityId: 7,
+      userId: null,
+      createdAt: new Date('2026-02-05T11:59:00Z'),
+      metadata: { phone: '549...' },
+    } as ActivityLog);
+
+    const result = await service.createActivity({
+      type: 'CONTACTO',
+      action: 'CREACION',
+      description: 'Nuevo contacto',
+      entityId: 7,
+      metadata: { phone: '549...' },
+    });
+
+    expect(repo.create).toHaveBeenCalledWith({
+      type: 'CONTACTO',
+      action: 'CREACION',
+      description: 'Nuevo contacto',
+      entityId: 7,
+      userId: undefined,
+      metadata: { phone: '549...' },
+    });
+    expect(repo.save).toHaveBeenCalled();
+    expect(result.id).toBe(99);
+    expect(result.timeAgo).toBe('Hace 1 minuto');
+
+    jest.useRealTimers();
   });
 });

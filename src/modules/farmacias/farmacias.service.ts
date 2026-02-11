@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DutySchedule } from '../../entities/duty-schedule.entity';
 import { Pharmacy } from '../../entities/pharmacy.entity';
+import { ActivityLogService } from '../../shared/activity-log/activity-log.service';
 
 const DEFAULT_CALENDAR_TIME_ZONE = 'America/Argentina/Buenos_Aires';
 
@@ -14,6 +15,7 @@ type DutyCalendarPreview = {
 
 @Injectable()
 export class FarmaciasService {
+  private readonly logger = new Logger(FarmaciasService.name);
   private bootstrapEtagRevision = 0;
   private readonly calendarTimeZone =
     process.env.FARMACIAS_CALENDAR_TIME_ZONE?.trim() ||
@@ -24,6 +26,7 @@ export class FarmaciasService {
     private readonly pharmacyRepo: Repository<Pharmacy>,
     @InjectRepository(DutySchedule)
     private readonly dutyRepo: Repository<DutySchedule>,
+    private readonly activityLog: ActivityLogService,
   ) {}
 
   async getPharmacyByCode(code: string) {
@@ -48,7 +51,13 @@ export class FarmaciasService {
 
   async getDutyToday() {
     const today = this.getCurrentCalendarDateISO();
-    return this.getDutyByDate(today);
+    const row = await this.getDutyByDate(today);
+
+    if (row) {
+      await this.logDutyConsulted(row, today);
+    }
+
+    return row;
   }
 
   async getDutyByDate(date: string) {
@@ -87,15 +96,18 @@ export class FarmaciasService {
       });
       const saved = await this.dutyRepo.save(row);
       this.invalidateBootstrapEtag();
+      await this.logDutyUpdated(date, null, saved.pharmacyCode);
       return saved;
     }
 
+    const previousPharmacyCode = existing.pharmacyCode || null;
     existing.pharmacyCode = pharmacy.code;
     existing.pharmacy = pharmacy;
     existing.scheduleYear = this.getYearFromISODate(date);
     existing.source = 'manual-override';
     const saved = await this.dutyRepo.save(existing);
     this.invalidateBootstrapEtag();
+    await this.logDutyUpdated(date, previousPharmacyCode, saved.pharmacyCode);
     return saved;
   }
 
@@ -225,5 +237,47 @@ export class FarmaciasService {
     const year = Number.parseInt(date.slice(0, 4), 10);
     if (Number.isFinite(year)) return year;
     return new Date(date).getUTCFullYear();
+  }
+
+  private async logDutyConsulted(row: DutySchedule, date: string) {
+    try {
+      await this.activityLog.logActivity({
+        type: 'FARMACIA_TURNO',
+        action: 'CONSULTA',
+        description: `Consulta de farmacia de turno para ${date} - ${row.pharmacyCode}`,
+        metadata: {
+          date,
+          pharmacyCode: row.pharmacyCode,
+          source: row.source,
+        },
+      });
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Error desconocido';
+      this.logger.warn(`Activity log error: ${message}`);
+    }
+  }
+
+  private async logDutyUpdated(
+    date: string,
+    previousPharmacyCode: string | null,
+    newPharmacyCode: string,
+  ) {
+    try {
+      await this.activityLog.logActivity({
+        type: 'FARMACIA_TURNO',
+        action: 'DIA_ACTUALIZADO',
+        description: `Farmacia de turno actualizada para ${date}: ${previousPharmacyCode ?? 'N/A'} -> ${newPharmacyCode}`,
+        metadata: {
+          date,
+          previousPharmacyCode,
+          newPharmacyCode,
+        },
+      });
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Error desconocido';
+      this.logger.warn(`Activity log error: ${message}`);
+    }
   }
 }

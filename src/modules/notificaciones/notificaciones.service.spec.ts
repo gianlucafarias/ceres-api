@@ -3,6 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Contact } from '../../entities/contact.entity';
 import { Notificaciones } from '../../entities/notificaciones.entity';
 import { PreferenciasUsuario } from '../../entities/preferencias-usuario.entity';
+import { ActivityLogService } from '../../shared/activity-log/activity-log.service';
 import { WhatsappTemplateService } from '../../shared/whatsapp/whatsapp-template.service';
 import { WhatsappTemplatePayload } from '../../shared/whatsapp/whatsapp.types';
 import { OpsNotificationsService } from '../observability/ops-notifications.service';
@@ -23,6 +24,9 @@ describe('NotificacionesService', () => {
   let whatsapp: {
     sendTemplate: jest.Mock<Promise<void>, [WhatsappTemplatePayload]>;
   };
+  let activityLog: {
+    logActivity: jest.Mock<Promise<void>, [unknown]>;
+  };
   let opsNotifications: {
     emitInternalEvent: jest.Mock<void, [unknown]>;
   };
@@ -35,6 +39,9 @@ describe('NotificacionesService', () => {
       sendTemplate: jest
         .fn<Promise<void>, [WhatsappTemplatePayload]>()
         .mockResolvedValue(undefined),
+    };
+    activityLog = {
+      logActivity: jest.fn<Promise<void>, [unknown]>().mockResolvedValue(),
     };
     opsNotifications = {
       emitInternalEvent: jest.fn<void, [unknown]>(),
@@ -49,6 +56,7 @@ describe('NotificacionesService', () => {
           useValue: prefRepo,
         },
         { provide: getRepositoryToken(Notificaciones), useValue: notifRepo },
+        { provide: ActivityLogService, useValue: activityLog },
         { provide: WhatsappTemplateService, useValue: whatsapp },
         { provide: OpsNotificationsService, useValue: opsNotifications },
       ],
@@ -108,6 +116,13 @@ describe('NotificacionesService', () => {
       languageCode: 'es_AR',
       components: [],
     });
+    expect(activityLog.logActivity).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'NOTIFICACION',
+        action: 'ENVIADA',
+        description: 'Notificacion enviada: r_asignado',
+      }),
+    );
   });
 });
 
