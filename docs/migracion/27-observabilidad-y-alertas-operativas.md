@@ -84,3 +84,26 @@ Se agrega middleware global:
 - `src/common/guards/ops-api-key.guard.ts`
 - `src/common/guards/ops-events-api-key.guard.ts`
 - `docker-compose.observability.yml`
+
+## Pendiente acordado: resumen diario de metricas a Slack
+
+Se deja acordado para una fase siguiente:
+
+- envio diario a las 23:00 con resumen operativo legible para equipo.
+- datos minimos: requests, errores 5xx, disponibilidad `up`, latencia p95.
+- reutilizar `POST /api/v1/ops/notifications/events` para mantener un unico canal
+  backend de notificaciones.
+
+Propuesta tecnica:
+
+1. `cron` en VPS (23:00).
+2. consulta a Prometheus (`/api/v1/query`) con ventana 24h.
+3. armado de mensaje de resumen.
+4. envio como evento `source=backend`, `type=daily_summary`.
+
+PromQL base:
+
+- `sum(increase(ceres_api_http_requests_total[24h]))`
+- `sum(increase(ceres_api_http_requests_total{status_code=~"5.."}[24h]))`
+- `avg_over_time(up{job="ceres-api"}[24h]) * 100`
+- `histogram_quantile(0.95, sum by (le) (increase(ceres_api_http_request_duration_ms_bucket[24h])))`

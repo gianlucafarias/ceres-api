@@ -28,6 +28,20 @@
     ]
     ```
 
+- `POST /api/v1/activity`
+  - **Auth**: `x-api-key` (`BOT_API_KEY`)
+  - **Body**:
+    ```json
+    {
+      "type": "CONTACTO",
+      "action": "CREACION",
+      "description": "Nuevo contacto registrado en bot",
+      "entityId": 123,
+      "metadata": { "telefono": "549..." }
+    }
+    ```
+  - **Response**: mismo contrato de un item de `GET /recent` (incluye `timeAgo`).
+
 ## Postman
 Coleccion: `Activity > GET /v1/activity/recent`.
 

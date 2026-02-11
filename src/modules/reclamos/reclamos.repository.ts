@@ -10,6 +10,8 @@ import {
 import { Reclamo } from '../../entities/reclamo.entity';
 import { ReclamosFiltroAdminDto } from './dto/reclamos-admin.dto';
 
+type RawTipoRow = { nombre: string };
+
 @Injectable()
 export class ReclamosRepository {
   constructor(
@@ -34,6 +36,30 @@ export class ReclamosRepository {
       where: { telefono },
       order: { fecha: 'DESC' },
     });
+  }
+
+  findLatestByTelefono(telefono: string): Promise<Reclamo | null> {
+    return this.repo.findOne({
+      where: { telefono },
+      order: { fecha: 'DESC', id: 'DESC' },
+    });
+  }
+
+  async findDistinctTipos(): Promise<string[]> {
+    const rows = (await this.repo.query(`
+      SELECT DISTINCT TRIM(reclamo) AS nombre
+      FROM reclamos
+      WHERE reclamo IS NOT NULL
+        AND TRIM(reclamo) <> ''
+      ORDER BY nombre ASC
+    `)) as RawTipoRow[];
+
+    return rows
+      .map((row) => row.nombre)
+      .filter(
+        (nombre): nombre is string =>
+          typeof nombre === 'string' && nombre.length > 0,
+      );
   }
 
   findAndCountForAdmin(

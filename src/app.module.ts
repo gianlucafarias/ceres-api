@@ -21,10 +21,12 @@ import { ImpuestosModule } from './modules/impuestos/impuestos.module';
 import { AmeliaModule } from './modules/amelia/amelia.module';
 import { FarmaciasModule } from './modules/farmacias/farmacias.module';
 import { BotConfigModule } from './modules/bot-config/bot-config.module';
+import { CertificadosModule } from './modules/certificados/certificados.module';
 import { FeedbackModule } from './modules/feedback/feedback.module';
 import { ConversacionesModule } from './modules/conversaciones/conversaciones.module';
 import { DashboardCeresitoModule } from './modules/dashboard-ceresito/dashboard-ceresito.module';
 import { AdminBootstrapModule } from './modules/admin-bootstrap/admin-bootstrap.module';
+import { VotanteModule } from './modules/votante/votante.module';
 import { ObservabilityMiddleware } from './modules/observability/observability.middleware';
 import { ObservabilityModule } from './modules/observability/observability.module';
 
@@ -66,10 +68,12 @@ import { ObservabilityModule } from './modules/observability/observability.modul
     AmeliaModule,
     FarmaciasModule,
     BotConfigModule,
+    CertificadosModule,
     FeedbackModule,
     ConversacionesModule,
     DashboardCeresitoModule,
     AdminBootstrapModule,
+    VotanteModule,
   ],
   controllers: [AppController],
   providers: [AppService, ObservabilityMiddleware],

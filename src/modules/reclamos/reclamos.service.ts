@@ -12,6 +12,7 @@ import { ReclamosRepository } from './reclamos.repository';
 import { ReclamosStatsService } from './reclamos-stats.service';
 
 type ReclamoSafe = Omit<Reclamo, 'telefono'> & { telefono?: string };
+type ReclamoTipoBot = { id: number; nombre: string };
 type ReclamoRelacionadoAdmin = Pick<
   Reclamo,
   'id' | 'fecha' | 'reclamo' | 'estado' | 'barrio' | 'ubicacion' | 'detalle'
@@ -57,6 +58,21 @@ export class ReclamosService {
 
   async estadoParaBot(id: number): Promise<ReclamoSafe | null> {
     const rec = await this.reclamosRepo.findById(id);
+    return rec ? this.toBotDto(rec) : null;
+  }
+
+  async tiposParaBot(): Promise<ReclamoTipoBot[]> {
+    const tipos = await this.reclamosRepo.findDistinctTipos();
+    return tipos.map((nombre, index) => ({
+      id: index + 1,
+      nombre,
+    }));
+  }
+
+  async ultimoPorTelefonoParaBot(
+    telefono: string,
+  ): Promise<ReclamoSafe | null> {
+    const rec = await this.reclamosRepo.findLatestByTelefono(telefono);
     return rec ? this.toBotDto(rec) : null;
   }
 
