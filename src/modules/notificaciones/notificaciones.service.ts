@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Contact } from '../../entities/contact.entity';
 import { Notificaciones } from '../../entities/notificaciones.entity';
 import { PreferenciasUsuario } from '../../entities/preferencias-usuario.entity';
+import { ActivityLogService } from '../../shared/activity-log/activity-log.service';
 import { WhatsappTemplateService } from '../../shared/whatsapp/whatsapp-template.service';
 import { WhatsappComponent } from '../../shared/whatsapp/whatsapp.types';
 import { OpsNotificationsService } from '../observability/ops-notifications.service';
@@ -15,6 +16,8 @@ import {
 
 @Injectable()
 export class NotificacionesService {
+  private readonly logger = new Logger(NotificacionesService.name);
+
   constructor(
     @InjectRepository(Contact)
     private readonly contactRepo: Repository<Contact>,
@@ -22,6 +25,7 @@ export class NotificacionesService {
     private readonly prefRepo: Repository<PreferenciasUsuario>,
     @InjectRepository(Notificaciones)
     private readonly notifRepo: Repository<Notificaciones>,
+    private readonly activityLog: ActivityLogService,
     private readonly whatsapp: WhatsappTemplateService,
     private readonly opsNotifications: OpsNotificationsService,
   ) {}
@@ -212,17 +216,28 @@ export class NotificacionesService {
     }
 
     try {
-      await this.enviarTemplate({
-        number: telefono,
-        template: templateName,
-        languageCode: 'es_AR',
-        components: [
-          {
-            type: 'BODY',
-            parameters,
+      await this.enviarTemplate(
+        {
+          number: telefono,
+          template: templateName,
+          languageCode: 'es_AR',
+          components: [
+            {
+              type: 'BODY',
+              parameters,
+            },
+          ],
+        },
+        {
+          userId: usuarioId,
+          source: 'residuos_diarios',
+          metadata: {
+            tipoResiduo,
+            horaEnvio,
+            seccion: seccion ?? null,
           },
-        ],
-      });
+        },
+      );
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Error desconocido';
@@ -241,7 +256,14 @@ export class NotificacionesService {
     }
   }
 
-  async enviarTemplate(dto: EnviarTemplateDto): Promise<void> {
+  async enviarTemplate(
+    dto: EnviarTemplateDto,
+    activityContext?: {
+      userId?: number;
+      source?: string;
+      metadata?: Record<string, unknown>;
+    },
+  ): Promise<void> {
     const components: WhatsappComponent[] | undefined = dto.components?.map(
       (component) => ({
         type: component.type,
@@ -261,5 +283,35 @@ export class NotificacionesService {
     };
 
     await this.whatsapp.sendTemplate(payload);
+    await this.logNotificacionEnviada(dto, activityContext);
+  }
+
+  private async logNotificacionEnviada(
+    dto: EnviarTemplateDto,
+    activityContext?: {
+      userId?: number;
+      source?: string;
+      metadata?: Record<string, unknown>;
+    },
+  ): Promise<void> {
+    try {
+      await this.activityLog.logActivity({
+        type: 'NOTIFICACION',
+        action: 'ENVIADA',
+        description: `Notificacion enviada: ${dto.template}`,
+        userId: activityContext?.userId,
+        metadata: {
+          number: dto.number,
+          template: dto.template,
+          languageCode: dto.languageCode ?? 'es_AR',
+          source: activityContext?.source ?? 'notificaciones',
+          ...(activityContext?.metadata ?? {}),
+        },
+      });
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Error desconocido';
+      this.logger.warn(`Activity log error: ${message}`);
+    }
   }
 }

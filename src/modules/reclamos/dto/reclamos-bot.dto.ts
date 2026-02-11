@@ -1,4 +1,11 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 export class CrearReclamoBotDto {
   @IsString()
@@ -33,4 +40,12 @@ export class CrearReclamoBotDto {
 export class EstadoReclamoBotParamsDto {
   @IsNumber()
   id!: number;
+}
+
+export class UltimoReclamoBotQueryDto {
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(6)
+  @MaxLength(40)
+  telefono!: string;
 }

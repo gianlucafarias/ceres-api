@@ -17,6 +17,10 @@ describe('ReclamosService', () => {
     findByTelefono: jest.MockedFunction<
       (telefono: string) => Promise<Reclamo[]>
     >;
+    findLatestByTelefono: jest.MockedFunction<
+      (telefono: string) => Promise<Reclamo | null>
+    >;
+    findDistinctTipos: jest.MockedFunction<() => Promise<string[]>>;
     findAndCountForAdmin: jest.MockedFunction<
       (filters: unknown) => Promise<[Reclamo[], number]>
     >;
@@ -74,6 +78,8 @@ describe('ReclamosService', () => {
       save: jest.fn(),
       findById: jest.fn(),
       findByTelefono: jest.fn(),
+      findLatestByTelefono: jest.fn(),
+      findDistinctTipos: jest.fn(),
       findAndCountForAdmin: jest.fn(),
     };
     historialService = {
@@ -147,6 +153,35 @@ describe('ReclamosService', () => {
 
     expect(res).not.toBeNull();
     expect(res && 'telefono' in res).toBe(false);
+  });
+
+  it('tiposParaBot devuelve lista con id y nombre', async () => {
+    reclamosRepo.findDistinctTipos.mockResolvedValue(['Bache', 'Luminaria']);
+
+    const result = await service.tiposParaBot();
+
+    expect(result).toEqual([
+      { id: 1, nombre: 'Bache' },
+      { id: 2, nombre: 'Luminaria' },
+    ]);
+  });
+
+  it('ultimoPorTelefonoParaBot devuelve reclamo sin telefono', async () => {
+    reclamosRepo.findLatestByTelefono.mockResolvedValue(
+      buildReclamo({
+        id: 42,
+        telefono: '3491123456',
+      }),
+    );
+
+    const result = await service.ultimoPorTelefonoParaBot('3491123456');
+
+    expect(reclamosRepo.findLatestByTelefono).toHaveBeenCalledWith(
+      '3491123456',
+    );
+    expect(result).not.toBeNull();
+    expect(result && 'telefono' in result).toBe(false);
+    expect(result?.id).toBe(42);
   });
 
   it('relacionadosAdmin devuelve relacionados del mismo solicitante sin PII', async () => {

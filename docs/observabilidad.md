@@ -98,3 +98,36 @@ Luego abrir local:
 ```
 
 La API responde `202` y procesa Slack en segundo plano.
+
+## Pendiente: resumen diario a Slack (23:00)
+
+Queda definido para una etapa siguiente un resumen operativo diario a las 23:00
+con foco ejecutivo para el equipo:
+
+- requests totales del dia.
+- errores HTTP 5xx del dia.
+- disponibilidad (up/down) del job `ceres-api`.
+- latencia p95 del dia.
+- top de rutas con errores (si aplica).
+
+Diseno recomendado (bajo impacto):
+
+1. Cron diario en VPS a las 23:00 (zona horaria del servidor).
+2. Script liviano que consulte Prometheus por HTTP API.
+3. Publicacion al endpoint interno `POST /api/v1/ops/notifications/events`.
+4. Envio final a Slack usando el flujo existente (throttle/severity/sanitizacion).
+
+Consultas PromQL sugeridas para ventana de 24h:
+
+- `sum(increase(ceres_api_http_requests_total[24h]))`
+- `sum(increase(ceres_api_http_requests_total{status_code=~"5.."}[24h]))`
+- `avg_over_time(up{job="ceres-api"}[24h]) * 100`
+- `histogram_quantile(0.95, sum by (le) (increase(ceres_api_http_request_duration_ms_bucket[24h])))`
+
+Notas operativas:
+
+- si el resumen se envia con severidad `info`, usar `OPS_ALERT_MIN_SEVERITY=info`.
+- si se mantiene `OPS_ALERT_MIN_SEVERITY=error`, el resumen debe enviarse como
+  `error/critical` o no llegara a Slack por diseno.
+- evitar multiples resumentes diarios duplicados usando fingerprint fijo por fecha
+  (ejemplo: `daily-summary-YYYY-MM-DD`).
