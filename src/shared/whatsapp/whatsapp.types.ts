@@ -1,4 +1,4 @@
-export type WhatsappComponentType = 'BODY' | 'body';
+export type WhatsappComponentType = 'HEADER' | 'header' | 'BODY' | 'body';
 
 export interface WhatsappComponentParameter {
   type: 'text';

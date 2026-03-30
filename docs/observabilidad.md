@@ -62,7 +62,11 @@ Los puertos son configurables con:
 - `OBS_PROMETHEUS_HOST_PORT`
 - `OBS_GRAFANA_HOST_PORT`
 
-El scrape de Prometheus usa `host.docker.internal:3022` y autentica con `OPS_API_KEY`.
+El scrape de Prometheus usa:
+
+- `host.docker.internal:3022` para `ceres-api` con autenticacion por `OPS_API_KEY`.
+- `host.docker.internal:3012` para `plataforma-servicios-ceres`.
+
 Las imagenes de Prometheus/Grafana se consumen desde GHCR para evitar rate-limit de Docker Hub en el VPS.
 El archivo de scrape (`.deploy/prometheus.yml`) se genera en cada deploy usando los valores de `.env`.
 

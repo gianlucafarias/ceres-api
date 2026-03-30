@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsDateString,
   IsIn,
   IsInt,
@@ -97,4 +98,8 @@ export class ActualizarReclamoAdminDto {
   @IsOptional()
   @IsNumber()
   usuarioId?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  notificar?: boolean;
 }

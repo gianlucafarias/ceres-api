@@ -22,8 +22,8 @@ class WhatsappComponentParameterDto {
 }
 
 class WhatsappComponentDto {
-  @IsIn(['BODY', 'body'])
-  type!: 'BODY' | 'body';
+  @IsIn(['HEADER', 'header', 'BODY', 'body'])
+  type!: 'HEADER' | 'header' | 'BODY' | 'body';
 
   @IsOptional()
   @IsArray()

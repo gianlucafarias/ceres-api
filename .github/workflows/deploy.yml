@@ -153,6 +153,10 @@ jobs:
                   api_key: ["${ops_api_key}"]
                 static_configs:
                   - targets: ["host.docker.internal:3022"]
+              - job_name: "plataforma-servicios-ceres"
+                metrics_path: "/api/ops/metrics"
+                static_configs:
+                  - targets: ["host.docker.internal:3012"]
             EOF
             }
 

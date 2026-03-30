@@ -22,6 +22,8 @@ services:
     volumes:
       - grafana-data:/var/lib/grafana
       - ./grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+      - ./grafana-dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
+      - ./dashboards:/var/lib/grafana/dashboards:ro
     ports:
       - "3001:3000"
     depends_on:
