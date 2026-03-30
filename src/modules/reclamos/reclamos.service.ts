@@ -7,6 +7,7 @@ import {
 } from './dto/reclamos-admin.dto';
 import { GeocodeService } from '../../shared/geocode/geocode.service';
 import { ActivityLogService } from '../../shared/activity-log/activity-log.service';
+import { NotificacionesService } from '../notificaciones/notificaciones.service';
 import { ReclamosHistorialService } from './reclamos-historial.service';
 import { ReclamosRepository } from './reclamos.repository';
 import { ReclamosStatsService } from './reclamos-stats.service';
@@ -28,6 +29,7 @@ export class ReclamosService {
     private readonly statsService: ReclamosStatsService,
     private readonly geocodeService: GeocodeService,
     private readonly activityLog: ActivityLogService,
+    private readonly notificaciones: NotificacionesService,
   ) {}
 
   // --- Bot ---
@@ -150,6 +152,8 @@ export class ReclamosService {
 
     const saved = await this.reclamosRepo.save(rec);
 
+    const shouldNotify = dto.notificar !== false;
+
     // Historial
     if (dto.estado !== undefined && dto.estado !== prevEstado) {
       await this.historialService.registrarCambioEstado(
@@ -164,6 +168,9 @@ export class ReclamosService {
         dto.estado,
         dto.usuarioId,
       );
+      if (shouldNotify) {
+        await this.notificarCambioEstado(saved, dto.estado);
+      }
     }
     if (dto.prioridad !== undefined && dto.prioridad !== prevPrioridad) {
       await this.historialService.registrarCambioPrioridad(
@@ -280,5 +287,73 @@ export class ReclamosService {
         error instanceof Error ? error.message : 'Error desconocido';
       this.logger.warn(`Activity log error: ${message}`);
     }
+  }
+
+  private async notificarCambioEstado(
+    reclamo: Reclamo,
+    estadoNuevo: string,
+  ): Promise<void> {
+    const phoneNumber = this.normalizeWhatsappNumber(reclamo.telefono);
+    if (!phoneNumber) return;
+
+    const templateName = this.resolveTemplateByEstado(estadoNuevo);
+    const fechaActual = new Intl.DateTimeFormat('es-AR').format(new Date());
+    const nombreSolicitante = reclamo.nombre?.trim() || 'Usuario';
+
+    try {
+      await this.notificaciones.enviarTemplate(
+        {
+          number: phoneNumber,
+          template: templateName,
+          languageCode: 'es_AR',
+          components: [
+            {
+              type: 'HEADER',
+              parameters: [{ type: 'text', text: String(reclamo.id) }],
+            },
+            {
+              type: 'BODY',
+              parameters: [
+                { type: 'text', text: nombreSolicitante },
+                { type: 'text', text: fechaActual },
+              ],
+            },
+          ],
+        },
+        {
+          source: 'reclamos_estado',
+          metadata: {
+            reclamoId: reclamo.id,
+            estadoNuevo,
+          },
+        },
+      );
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Error desconocido';
+      this.logger.warn(`Notification error: ${message}`);
+    }
+  }
+
+  private resolveTemplateByEstado(estado: string): string {
+    switch (estado) {
+      case 'COMPLETADO':
+        return 'r_completado';
+      case 'PENDIENTE':
+      case 'ASIGNADO':
+      case 'EN_PROCESO':
+      default:
+        return 'r_asignado';
+    }
+  }
+
+  private normalizeWhatsappNumber(telefono?: string | null): string | null {
+    if (!telefono) return null;
+
+    const digits = telefono.replace(/\D/g, '');
+    if (!digits) return null;
+    if (digits.startsWith('54')) return digits;
+
+    return `54${digits}`;
   }
 }

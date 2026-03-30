@@ -16,5 +16,6 @@ import { NotificacionesService } from './notificaciones.service';
   ],
   controllers: [NotificacionesController],
   providers: [NotificacionesService],
+  exports: [NotificacionesService],
 })
 export class NotificacionesModule {}

@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 import { Reclamo } from '../../entities/reclamo.entity';
 import { ActivityLogService } from '../../shared/activity-log/activity-log.service';
 import { GeocodeService } from '../../shared/geocode/geocode.service';
+import { NotificacionesService } from '../notificaciones/notificaciones.service';
 import { ReclamosHistorialService } from './reclamos-historial.service';
 import { ReclamosRepository } from './reclamos.repository';
 import { ReclamosService } from './reclamos.service';
@@ -71,6 +72,11 @@ describe('ReclamosService', () => {
   let activityLog: {
     logActivity: jest.MockedFunction<(params: unknown) => Promise<unknown>>;
   };
+  let notificaciones: {
+    enviarTemplate: jest.MockedFunction<
+      (dto: unknown, activityContext?: unknown) => Promise<void>
+    >;
+  };
 
   beforeEach(async () => {
     reclamosRepo = {
@@ -103,6 +109,9 @@ describe('ReclamosService', () => {
     activityLog = {
       logActivity: jest.fn(),
     };
+    notificaciones = {
+      enviarTemplate: jest.fn(),
+    };
 
     const module = await Test.createTestingModule({
       providers: [
@@ -112,6 +121,7 @@ describe('ReclamosService', () => {
         { provide: ReclamosStatsService, useValue: statsService },
         { provide: GeocodeService, useValue: geocodeService },
         { provide: ActivityLogService, useValue: activityLog },
+        { provide: NotificacionesService, useValue: notificaciones },
       ],
     }).compile();
 
@@ -237,6 +247,72 @@ describe('ReclamosService', () => {
     const res = await service.relacionadosAdmin(10);
 
     expect(res).toEqual({ data: [], total: 0 });
+  });
+
+  it('actualizarAdmin envia notificacion cuando cambia estado', async () => {
+    const current = buildReclamo({
+      id: 99,
+      estado: 'PENDIENTE',
+      telefono: '3491123456',
+      nombre: 'Ana',
+    });
+
+    reclamosRepo.findById.mockResolvedValue(current);
+    reclamosRepo.save.mockImplementation((input) =>
+      Promise.resolve(input as unknown as Reclamo),
+    );
+
+    await service.actualizarAdmin(99, { estado: 'ASIGNADO' });
+
+    expect(historialService.registrarCambioEstado).toHaveBeenCalledWith(
+      99,
+      'PENDIENTE',
+      'ASIGNADO',
+      undefined,
+    );
+    expect(notificaciones.enviarTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        number: '543491123456',
+        template: 'r_asignado',
+        languageCode: 'es_AR',
+      }),
+      expect.objectContaining({
+        source: 'reclamos_estado',
+      }),
+    );
+
+    const activityContext = notificaciones.enviarTemplate.mock.calls[0]?.[1] as
+      | {
+          metadata?: {
+            reclamoId?: number;
+            estadoNuevo?: string;
+          };
+        }
+      | undefined;
+
+    expect(activityContext?.metadata?.reclamoId).toBe(99);
+    expect(activityContext?.metadata?.estadoNuevo).toBe('ASIGNADO');
+  });
+
+  it('actualizarAdmin no envia notificacion cuando notificar=false', async () => {
+    const current = buildReclamo({
+      id: 100,
+      estado: 'ASIGNADO',
+      telefono: '3491123456',
+      nombre: 'Ana',
+    });
+
+    reclamosRepo.findById.mockResolvedValue(current);
+    reclamosRepo.save.mockImplementation((input) =>
+      Promise.resolve(input as unknown as Reclamo),
+    );
+
+    await service.actualizarAdmin(100, {
+      estado: 'COMPLETADO',
+      notificar: false,
+    });
+
+    expect(notificaciones.enviarTemplate).not.toHaveBeenCalled();
   });
 });
 

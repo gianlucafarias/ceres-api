@@ -34,6 +34,8 @@ services:
     volumes:
       - grafana-data:/var/lib/grafana
       - ./ops/observability/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+      - ./ops/observability/grafana-dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
+      - ./ops/observability/dashboards:/var/lib/grafana/dashboards:ro
     ports:
       - "127.0.0.1:${OBS_GRAFANA_HOST_PORT:-3003}:3000"
 

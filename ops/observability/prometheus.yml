@@ -9,4 +9,9 @@ scrape_configs:
       api_key: ["CHANGE_ME_OPS_API_KEY"]
     static_configs:
       # En Linux/VPS usar host o IP real del backend
+      - targets: ["host.docker.internal:3022"]
+  - job_name: "plataforma-servicios-ceres"
+    metrics_path: "/api/ops/metrics"
+    static_configs:
+      # La plataforma de servicios corre en host-mode sobre 3012
       - targets: ["host.docker.internal:3012"]

@@ -6,6 +6,7 @@ import { Reclamo } from '../../entities/reclamo.entity';
 import { ReclamoHistorial } from '../../entities/reclamo-historial.entity';
 import { ActivityLogModule } from '../../shared/activity-log/activity-log.module';
 import { GeocodeModule } from '../../shared/geocode/geocode.module';
+import { NotificacionesModule } from '../notificaciones/notificaciones.module';
 import { ReclamosAdminController } from './reclamos.admin.controller';
 import { ReclamosBotController } from './reclamos.bot.controller';
 import { ReclamosHistorialService } from './reclamos-historial.service';
@@ -18,6 +19,7 @@ import { ReclamosStatsService } from './reclamos-stats.service';
     TypeOrmModule.forFeature([Reclamo, ReclamoHistorial]),
     GeocodeModule,
     ActivityLogModule,
+    NotificacionesModule,
   ],
   controllers: [ReclamosAdminController, ReclamosBotController],
   providers: [
