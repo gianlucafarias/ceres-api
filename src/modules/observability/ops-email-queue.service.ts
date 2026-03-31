@@ -43,7 +43,7 @@ export class OpsEmailQueueService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  async onModuleDestroy(): Promise<void> {
+  onModuleDestroy(): void {
     if (this.timer) {
       clearInterval(this.timer);
       this.timer = null;
@@ -97,7 +97,12 @@ export class OpsEmailQueueService implements OnModuleInit, OnModuleDestroy {
           reason: 'duplicate_idempotency_key',
         },
       });
-      this.metrics.recordEmailJob(job.source, job.templateKey, 'skipped', 'queue');
+      this.metrics.recordEmailJob(
+        job.source,
+        job.templateKey,
+        'skipped',
+        'queue',
+      );
       return {
         accepted: true,
         duplicate: true,
@@ -125,7 +130,12 @@ export class OpsEmailQueueService implements OnModuleInit, OnModuleDestroy {
         ...(job.metadata ?? {}),
       },
     });
-    this.metrics.recordEmailJob(job.source, job.templateKey, 'requested', 'queue');
+    this.metrics.recordEmailJob(
+      job.source,
+      job.templateKey,
+      'requested',
+      'queue',
+    );
 
     if (this.redis.isEnabled()) {
       await this.redis.lPush(QUEUE_PENDING_KEY, JSON.stringify(job));
@@ -191,7 +201,10 @@ export class OpsEmailQueueService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  private async processJob(job: StoredEmailJob, rawJob?: string): Promise<void> {
+  private async processJob(
+    job: StoredEmailJob,
+    rawJob?: string,
+  ): Promise<void> {
     const prepared = prepareEmailTemplate(job.templateKey, {
       entityId: job.entityId,
       recipient: job.recipient,
@@ -255,7 +268,12 @@ export class OpsEmailQueueService implements OnModuleInit, OnModuleDestroy {
             reason: error.reason,
           },
         });
-        this.metrics.recordEmailJob(job.source, job.templateKey, 'skipped', 'none');
+        this.metrics.recordEmailJob(
+          job.source,
+          job.templateKey,
+          'skipped',
+          'none',
+        );
 
         if (rawJob && this.redis.isEnabled()) {
           await this.redis.lRem(QUEUE_PROCESSING_KEY, 1, rawJob);
@@ -282,7 +300,12 @@ export class OpsEmailQueueService implements OnModuleInit, OnModuleDestroy {
           willRetry,
         },
       });
-      this.metrics.recordEmailJob(job.source, job.templateKey, 'failed', 'queue');
+      this.metrics.recordEmailJob(
+        job.source,
+        job.templateKey,
+        'failed',
+        'queue',
+      );
 
       if (rawJob && this.redis.isEnabled()) {
         await this.redis.lRem(QUEUE_PROCESSING_KEY, 1, rawJob);
@@ -313,7 +336,11 @@ export class OpsEmailQueueService implements OnModuleInit, OnModuleDestroy {
     const now = Date.now();
 
     if (this.redis.isEnabled()) {
-      return this.redis.setNxEx(`ops:email:idempotency:${key}`, ttlSeconds, '1');
+      return this.redis.setNxEx(
+        `ops:email:idempotency:${key}`,
+        ttlSeconds,
+        '1',
+      );
     }
 
     const existing = this.memoryIdempotency.get(key);

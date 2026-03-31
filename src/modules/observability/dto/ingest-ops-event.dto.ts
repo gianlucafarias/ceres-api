@@ -21,6 +21,15 @@ const normalizeString = (value: unknown) =>
 const normalizeLower = (value: unknown) =>
   typeof value === 'string' ? value.trim().toLowerCase() : value;
 
+const normalizeUpper = (value: unknown) =>
+  typeof value === 'string' ? value.trim().toUpperCase() : value;
+
+const normalizeOptionalNumber = (value: unknown): number | undefined => {
+  const parsed =
+    typeof value === 'string' ? Number.parseInt(value, 10) : Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+
 export class IngestOpsEventDto {
   @IsString()
   @MaxLength(64)
@@ -103,9 +112,7 @@ export class IngestOpsEventDto {
   @IsOptional()
   @IsString()
   @MaxLength(16)
-  @Transform(({ value }) =>
-    typeof value === 'string' ? value.trim().toUpperCase() : value,
-  )
+  @Transform(({ value }: { value: unknown }) => normalizeUpper(value))
   method?: string;
 
   @IsEnum(OBS_EVENT_STATUSES)
@@ -115,11 +122,7 @@ export class IngestOpsEventDto {
   @IsOptional()
   @IsNumber()
   @Min(0)
-  @Transform(({ value }) => {
-    const parsed =
-      typeof value === 'string' ? Number.parseInt(value, 10) : Number(value);
-    return Number.isFinite(parsed) ? parsed : value;
-  })
+  @Transform(({ value }: { value: unknown }) => normalizeOptionalNumber(value))
   durationMs?: number;
 
   @IsString()

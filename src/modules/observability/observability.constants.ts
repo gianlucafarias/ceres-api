@@ -18,8 +18,7 @@ export const EMAIL_PROVIDER_STRATEGIES = [
   'resend-only',
   'smtp-only',
 ] as const;
-export type EmailProviderStrategy =
-  (typeof EMAIL_PROVIDER_STRATEGIES)[number];
+export type EmailProviderStrategy = (typeof EMAIL_PROVIDER_STRATEGIES)[number];
 
 export const EMAIL_TEMPLATE_KEYS = [
   'services.email_verification',

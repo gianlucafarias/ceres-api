@@ -20,7 +20,9 @@ type HttpRequestDurationMetric = Histogram<'method' | 'route' | 'status_code'>;
 type OpsEventsMetric = Counter<'source' | 'type' | 'severity' | 'result'>;
 type OpsSlackMetric = Counter<'result'>;
 type OpsCentralEventsMetric = Counter<'source' | 'kind' | 'status'>;
-type OpsEmailJobsMetric = Counter<'source' | 'template' | 'result' | 'provider'>;
+type OpsEmailJobsMetric = Counter<
+  'source' | 'template' | 'result' | 'provider'
+>;
 
 type OpsEventResult =
   | 'accepted'

@@ -138,7 +138,8 @@ export class OpsEventsService {
       ),
       status: sanitizeToken(input.status, 16) ?? 'success',
       durationMs:
-        typeof input.durationMs === 'number' && Number.isFinite(input.durationMs)
+        typeof input.durationMs === 'number' &&
+        Number.isFinite(input.durationMs)
           ? Math.round(input.durationMs)
           : null,
       summary: sanitizeText(input.summary, 500) ?? 'Evento sin resumen',
@@ -383,7 +384,9 @@ export class OpsEventsService {
       });
     }
     if (query.entityId) {
-      builder.andWhere('event.entityId = :entityId', { entityId: query.entityId });
+      builder.andWhere('event.entityId = :entityId', {
+        entityId: query.entityId,
+      });
     }
     if (query.requestId) {
       builder.andWhere('event.requestId = :requestId', {

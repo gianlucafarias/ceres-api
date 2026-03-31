@@ -13,12 +13,6 @@ import {
   OBS_ACTOR_TYPES,
 } from '../observability.constants';
 
-const normalizeString = (value: unknown) =>
-  typeof value === 'string' ? value.trim() : value;
-
-const normalizeLower = (value: unknown) =>
-  typeof value === 'string' ? value.trim().toLowerCase() : value;
-
 export class EmailJobActorDto {
   @IsOptional()
   @IsIn(OBS_ACTOR_TYPES)

@@ -104,7 +104,7 @@ export class OpsEmailService {
       );
     }
 
-    const info = await transporter.sendMail({
+    const rawInfo: unknown = await transporter.sendMail({
       from,
       to: recipient,
       subject: prepared.subject,
@@ -114,7 +114,7 @@ export class OpsEmailService {
 
     return {
       provider: 'smtp',
-      messageId: info.messageId ?? null,
+      messageId: extractMessageId(rawInfo),
     };
   }
 
@@ -199,4 +199,13 @@ export class OpsEmailService {
 
     return this.smtpTransporter;
   }
+}
+
+function extractMessageId(value: unknown): string | null {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const candidate = (value as { messageId?: unknown }).messageId;
+  return typeof candidate === 'string' ? candidate : null;
 }

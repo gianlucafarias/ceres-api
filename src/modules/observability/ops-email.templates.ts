@@ -20,9 +20,9 @@ export function prepareEmailTemplate(
       return renderPasswordReset(input);
     case 'services.verification_resend':
       return renderVerificationResend(input);
-    default:
-      throw new Error(`Template no soportado: ${templateKey satisfies never}`);
   }
+
+  throw new Error('Template no soportado');
 }
 
 function renderEmailVerification(input: TemplateInput): PreparedEmailTemplate {
@@ -57,7 +57,9 @@ function renderEmailVerification(input: TemplateInput): PreparedEmailTemplate {
   };
 }
 
-function renderProfessionalApproved(input: TemplateInput): PreparedEmailTemplate {
+function renderProfessionalApproved(
+  input: TemplateInput,
+): PreparedEmailTemplate {
   const loginUrl = requiredString(
     input.payload,
     'loginUrl',

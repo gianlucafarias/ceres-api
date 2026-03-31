@@ -50,7 +50,10 @@ export function sanitizeForStorage(value: unknown): unknown {
           return [key, '[REDACTED]'];
         }
 
-        if (key.toLowerCase().includes('email') && typeof current === 'string') {
+        if (
+          key.toLowerCase().includes('email') &&
+          typeof current === 'string'
+        ) {
           return [key, maskEmail(current)];
         }
 

@@ -20,6 +20,11 @@ const normalizeString = (value: unknown) =>
 const normalizeLower = (value: unknown) =>
   typeof value === 'string' ? value.trim().toLowerCase() : value;
 
+const normalizeOptionalInteger = (value: unknown): number | undefined => {
+  const parsed = Number.parseInt(String(value), 10);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+
 export class QueryOpsEventsDto {
   @IsOptional()
   @IsString()
@@ -84,20 +89,14 @@ export class QueryOpsEventsDto {
   @IsOptional()
   @IsInt()
   @Min(1)
-  @Transform(({ value }) => {
-    const parsed = Number.parseInt(String(value), 10);
-    return Number.isFinite(parsed) ? parsed : value;
-  })
+  @Transform(({ value }: { value: unknown }) => normalizeOptionalInteger(value))
   page?: number;
 
   @IsOptional()
   @IsInt()
   @Min(1)
   @Max(100)
-  @Transform(({ value }) => {
-    const parsed = Number.parseInt(String(value), 10);
-    return Number.isFinite(parsed) ? parsed : value;
-  })
+  @Transform(({ value }: { value: unknown }) => normalizeOptionalInteger(value))
   limit?: number;
 }
 
