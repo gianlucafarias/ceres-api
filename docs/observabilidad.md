@@ -10,6 +10,19 @@ Esta API ahora expone observabilidad nativa con enfoque de bajo impacto:
 
 - `GET /api/v1/ops/metrics` (protegido por `OPS_API_KEY` o `ADMIN_API_KEY` fallback).
 - `POST /api/v1/ops/notifications/events` (protegido por `OPS_EVENTS_API_KEYS` o fallback keys).
+- `POST /api/v1/ops/events` (timeline auditable multi-servicio).
+- `GET /api/v1/ops/events`
+- `GET /api/v1/ops/events/:id`
+- `GET /api/v1/ops/summary`
+- `POST /api/v1/ops/jobs/email` (cola central de emails template-based).
+
+## Observabilidad central
+
+La capa operativa ahora convive con una capa nueva de observabilidad central
+multi-servicio y servicio general de emails. El detalle de arquitectura,
+ownership y contratos vive en:
+
+- [`docs/migracion/29-central-observability-services.md`](./migracion/29-central-observability-services.md)
 
 ## Variables
 

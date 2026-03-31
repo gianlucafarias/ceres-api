@@ -134,7 +134,21 @@ jobs:
               echo "${line#*=}"
             }
 
+            if [ ! -f .env ]; then
+              echo "No existe /var/www/ceres-api/.env en el VPS."
+              exit 1
+            fi
+
             OBS_STACK_ENABLED="$(get_env_var OBS_STACK_ENABLED false)"
+
+            run_migrations() {
+              echo "Running TypeORM migrations with image ${NEW_TAG}..."
+              docker run --rm \
+                --network host \
+                --env-file .env \
+                "${{ env.IMAGE_NAME }}:${NEW_TAG}" \
+                npm run migration:run:dist
+            }
 
             write_prometheus_config() {
               local scrape_interval
@@ -172,6 +186,11 @@ jobs:
                 --profile observability \
                 up -d --remove-orphans api prometheus grafana
             }
+
+            if ! run_migrations; then
+              echo "Database migration failed. Aborting deploy before replacing the running container."
+              exit 1
+            fi
 
             if [ "${OBS_STACK_ENABLED}" = "true" ]; then
               set +e
