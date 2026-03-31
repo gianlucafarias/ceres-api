@@ -70,6 +70,64 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     await this.client!.setEx(key, ttlSeconds, value);
   }
 
+  async setNxEx(
+    key: string,
+    ttlSeconds: number,
+    value: string,
+  ): Promise<boolean> {
+    if (!this.isEnabled()) return false;
+    if (!this.client) {
+      await this.connect();
+    }
+
+    const result = await this.client!.set(key, value, {
+      NX: true,
+      EX: ttlSeconds,
+    });
+
+    return result === 'OK';
+  }
+
+  async del(key: string): Promise<void> {
+    if (!this.isEnabled()) return;
+    if (!this.client) {
+      await this.connect();
+    }
+    await this.client!.del(key);
+  }
+
+  async lPush(key: string, value: string): Promise<number> {
+    if (!this.isEnabled()) return 0;
+    if (!this.client) {
+      await this.connect();
+    }
+    return this.client!.lPush(key, value);
+  }
+
+  async lRange(key: string, start: number, stop: number): Promise<string[]> {
+    if (!this.isEnabled()) return [];
+    if (!this.client) {
+      await this.connect();
+    }
+    return this.client!.lRange(key, start, stop);
+  }
+
+  async lRem(key: string, count: number, value: string): Promise<number> {
+    if (!this.isEnabled()) return 0;
+    if (!this.client) {
+      await this.connect();
+    }
+    return this.client!.lRem(key, count, value);
+  }
+
+  async rPopLPush(source: string, destination: string): Promise<string | null> {
+    if (!this.isEnabled()) return null;
+    if (!this.client) {
+      await this.connect();
+    }
+    return this.client!.rPopLPush(source, destination);
+  }
+
   async info(section?: string): Promise<string> {
     if (!this.isEnabled()) return '';
     if (!this.client) {

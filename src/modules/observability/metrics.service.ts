@@ -12,11 +12,15 @@ const HTTP_REQUESTS_TOTAL = 'ceres_api_http_requests_total';
 const HTTP_REQUEST_DURATION_MS = 'ceres_api_http_request_duration_ms';
 const OPS_EVENTS_TOTAL = 'ceres_api_ops_events_total';
 const OPS_SLACK_NOTIFICATIONS_TOTAL = 'ceres_api_ops_slack_notifications_total';
+const OPS_CENTRAL_EVENTS_TOTAL = 'ceres_api_ops_central_events_total';
+const OPS_EMAIL_JOBS_TOTAL = 'ceres_api_ops_email_jobs_total';
 
 type HttpRequestsTotalMetric = Counter<'method' | 'route' | 'status_code'>;
 type HttpRequestDurationMetric = Histogram<'method' | 'route' | 'status_code'>;
 type OpsEventsMetric = Counter<'source' | 'type' | 'severity' | 'result'>;
 type OpsSlackMetric = Counter<'result'>;
+type OpsCentralEventsMetric = Counter<'source' | 'kind' | 'status'>;
+type OpsEmailJobsMetric = Counter<'source' | 'template' | 'result' | 'provider'>;
 
 type OpsEventResult =
   | 'accepted'
@@ -34,6 +38,8 @@ export class MetricsService {
   private readonly requestDurationMs: HttpRequestDurationMetric;
   private readonly opsEventsTotal: OpsEventsMetric;
   private readonly slackNotificationsTotal: OpsSlackMetric;
+  private readonly centralEventsTotal: OpsCentralEventsMetric;
+  private readonly emailJobsTotal: OpsEmailJobsMetric;
 
   constructor(private readonly config: ConfigService) {
     this.requestTotal =
@@ -73,6 +79,24 @@ export class MetricsService {
         name: OPS_SLACK_NOTIFICATIONS_TOTAL,
         help: 'Intentos de envio de alertas a Slack',
         labelNames: ['result'],
+      });
+
+    this.centralEventsTotal =
+      (register.getSingleMetric(
+        OPS_CENTRAL_EVENTS_TOTAL,
+      ) as OpsCentralEventsMetric) ||
+      new Counter({
+        name: OPS_CENTRAL_EVENTS_TOTAL,
+        help: 'Eventos auditables centralizados por servicio',
+        labelNames: ['source', 'kind', 'status'],
+      });
+
+    this.emailJobsTotal =
+      (register.getSingleMetric(OPS_EMAIL_JOBS_TOTAL) as OpsEmailJobsMetric) ||
+      new Counter({
+        name: OPS_EMAIL_JOBS_TOTAL,
+        help: 'Jobs de email procesados por el backend central',
+        labelNames: ['source', 'template', 'result', 'provider'],
       });
 
     this.startDefaultMetrics();
@@ -118,6 +142,19 @@ export class MetricsService {
 
   recordSlackNotification(result: 'sent' | 'failed' | 'throttled' | 'skipped') {
     this.slackNotificationsTotal.inc({ result });
+  }
+
+  recordCentralEvent(source: string, kind: string, status: string): void {
+    this.centralEventsTotal.inc({ source, kind, status });
+  }
+
+  recordEmailJob(
+    source: string,
+    template: string,
+    result: string,
+    provider: string,
+  ): void {
+    this.emailJobsTotal.inc({ source, template, result, provider });
   }
 
   private startDefaultMetrics(): void {

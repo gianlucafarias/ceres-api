@@ -9,6 +9,7 @@ import { Feedback } from './feedback.entity';
 import { Flow } from './flow.entity';
 import { History } from './history.entity';
 import { Notificaciones } from './notificaciones.entity';
+import { OpsEventLog } from './ops-event-log.entity';
 import { Pharmacy } from './pharmacy.entity';
 import { PreferenciasUsuario } from './preferencias-usuario.entity';
 import { Reclamo } from './reclamo.entity';
@@ -27,6 +28,7 @@ export const entities = [
   Flow,
   History,
   Notificaciones,
+  OpsEventLog,
   Pharmacy,
   PreferenciasUsuario,
   Reclamo,
@@ -46,6 +48,7 @@ export {
   Flow,
   History,
   Notificaciones,
+  OpsEventLog,
   Pharmacy,
   PreferenciasUsuario,
   Reclamo,
