@@ -34,7 +34,8 @@ export class QrTrackingIdParamDto {
 
 export class QrTrackingSlugParamDto {
   @IsString()
-  @Matches(/^[a-f0-9]{12}$/i, {
+  @Length(1, 160)
+  @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/i, {
     message: 'slug invalido',
   })
   slug!: string;

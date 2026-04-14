@@ -97,17 +97,26 @@ function buildRedirectUrl(
   req: Request,
   config: ConfigService,
 ): string {
-  const configuredOrigin = config
-    .get<string>('QR_TRACKING_PUBLIC_ORIGIN')
-    ?.trim();
+  const configuredOrigin =
+    getFirstForwardedValue(req.headers['x-public-origin']) ||
+    config.get<string>('QR_TRACKING_PUBLIC_ORIGIN')?.trim();
   const forwardedProto = req.headers['x-forwarded-proto'];
+  const forwardedHost = req.headers['x-forwarded-host'];
   const protocol =
     typeof forwardedProto === 'string'
       ? forwardedProto.split(',')[0].trim()
       : req.protocol;
-  const host = req.get('host') ?? 'localhost';
+  const host =
+    getFirstForwardedValue(forwardedHost) || req.get('host') || 'localhost';
   const origin =
     configuredOrigin?.replace(/\/+$/g, '') || `${protocol}://${host}`;
 
-  return `${origin}/api/v1/qr/${slug}`;
+  return `${origin}/${slug}`;
+}
+
+function getFirstForwardedValue(
+  value: string | string[] | undefined,
+): string | undefined {
+  const rawValue = Array.isArray(value) ? value[0] : value;
+  return rawValue?.split(',')[0]?.trim() || undefined;
 }
