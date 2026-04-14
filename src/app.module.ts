@@ -29,6 +29,7 @@ import { AdminBootstrapModule } from './modules/admin-bootstrap/admin-bootstrap.
 import { VotanteModule } from './modules/votante/votante.module';
 import { ObservabilityMiddleware } from './modules/observability/observability.middleware';
 import { ObservabilityModule } from './modules/observability/observability.module';
+import { QrTrackingModule } from './modules/qr-tracking/qr-tracking.module';
 
 @Module({
   imports: [
@@ -74,6 +75,7 @@ import { ObservabilityModule } from './modules/observability/observability.modul
     DashboardCeresitoModule,
     AdminBootstrapModule,
     VotanteModule,
+    QrTrackingModule,
   ],
   controllers: [AppController],
   providers: [AppService, ObservabilityMiddleware],

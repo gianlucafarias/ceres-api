@@ -12,6 +12,7 @@ import { Notificaciones } from './notificaciones.entity';
 import { OpsEventLog } from './ops-event-log.entity';
 import { Pharmacy } from './pharmacy.entity';
 import { PreferenciasUsuario } from './preferencias-usuario.entity';
+import { QrTracking } from './qr-tracking.entity';
 import { Reclamo } from './reclamo.entity';
 import { ReclamoHistorial } from './reclamo-historial.entity';
 import { Votante } from './votante.entity';
@@ -31,6 +32,7 @@ export const entities = [
   OpsEventLog,
   Pharmacy,
   PreferenciasUsuario,
+  QrTracking,
   Reclamo,
   ReclamoHistorial,
   Votante,
@@ -51,6 +53,7 @@ export {
   OpsEventLog,
   Pharmacy,
   PreferenciasUsuario,
+  QrTracking,
   Reclamo,
   ReclamoHistorial,
   Votante,
