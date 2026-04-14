@@ -31,7 +31,10 @@ describe('QrTrackingService', () => {
       ) => Promise<unknown>
     >;
     update: jest.MockedFunction<
-      (criteria: unknown, partialEntity: Partial<QrTracking>) => Promise<unknown>
+      (
+        criteria: unknown,
+        partialEntity: Partial<QrTracking>,
+      ) => Promise<unknown>
     >;
   };
 
@@ -73,13 +76,16 @@ describe('QrTrackingService', () => {
       'scanCount',
       1,
     );
-    expect(repo.update).toHaveBeenCalledWith(
-      { id: 'tracking-id' },
-      expect.objectContaining({
-        lastScannedAt: expect.any(Date),
-        updatedAt: expect.any(Date),
-      }),
-    );
+    expect(repo.update).toHaveBeenCalledTimes(1);
+
+    const [updateCriteria, updatePayload] = repo.update.mock.calls[0] as [
+      unknown,
+      Partial<QrTracking>,
+    ];
+
+    expect(updateCriteria).toEqual({ id: 'tracking-id' });
+    expect(updatePayload.lastScannedAt).toBeInstanceOf(Date);
+    expect(updatePayload.updatedAt).toBeInstanceOf(Date);
   });
 
   it('lanza not found si no existe el slug', async () => {
