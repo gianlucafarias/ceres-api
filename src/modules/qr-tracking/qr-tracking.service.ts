@@ -117,10 +117,10 @@ export class QrTrackingService {
           last_scanned_at = NOW(),
           updated_at = NOW()
         WHERE slug = $1
-        RETURNING id, target_url
+        RETURNING id, target_url AS "targetUrl"
       `,
       [slug],
-    )) as Array<{ id: string; target_url: string }>;
+    )) as Array<{ id: string; targetUrl: string | null }>;
 
     const row = result[0];
 
@@ -128,9 +128,15 @@ export class QrTrackingService {
       throw new NotFoundException('QR tracking no encontrado');
     }
 
+    if (!row.targetUrl) {
+      throw new InternalServerErrorException(
+        'QR tracking sin targetUrl configurada',
+      );
+    }
+
     return {
       id: row.id,
-      targetUrl: row.target_url,
+      targetUrl: row.targetUrl,
     };
   }
 }
