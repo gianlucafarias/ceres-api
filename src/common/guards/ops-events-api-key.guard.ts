@@ -28,6 +28,7 @@ export class OpsEventsApiKeyGuard implements CanActivate {
       configuredKeys.length > 0
         ? configuredKeys
         : [
+            this.config.get<string>('CORE_API_ADMIN_KEY'),
             this.config.get<string>('OPS_API_KEY'),
             this.config.get<string>('ADMIN_API_KEY'),
             this.config.get<string>('BOT_API_KEY'),

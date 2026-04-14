@@ -36,14 +36,18 @@ export class AnyApiKeyGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<Request>();
     const provided = getApiKeyFromRequest(request);
+    const coreAdminKey = this.config.get<string>('CORE_API_ADMIN_KEY');
     const adminKey = this.config.get<string>('ADMIN_API_KEY');
     const botKey = this.config.get<string>('BOT_API_KEY');
+    const validKeys = [coreAdminKey, adminKey, botKey].filter(
+      (value): value is string => !!value,
+    );
 
-    if (!provided || (!adminKey && !botKey)) {
+    if (!provided || validKeys.length === 0) {
       throw new UnauthorizedException('Invalid or missing API key');
     }
 
-    if (provided !== adminKey && provided !== botKey) {
+    if (!validKeys.includes(provided)) {
       throw new UnauthorizedException('Invalid or missing API key');
     }
 
