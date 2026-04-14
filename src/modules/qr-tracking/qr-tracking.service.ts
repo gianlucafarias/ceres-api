@@ -109,34 +109,38 @@ export class QrTrackingService {
   async resolveTrackedTarget(
     slug: string,
   ): Promise<ResolveTrackedTargetResult> {
-    const result = (await this.qrTrackingRepo.query(
-      `
-        UPDATE qr_tracking
-        SET
-          scan_count = scan_count + 1,
-          last_scanned_at = NOW(),
-          updated_at = NOW()
-        WHERE slug = $1
-        RETURNING id, target_url AS "targetUrl"
-      `,
-      [slug],
-    )) as Array<{ id: string; targetUrl: string | null }>;
+    const tracking = await this.qrTrackingRepo.findOne({
+      where: { slug },
+      select: {
+        id: true,
+        targetUrl: true,
+      },
+    });
 
-    const row = result[0];
-
-    if (!row) {
+    if (!tracking) {
       throw new NotFoundException('QR tracking no encontrado');
     }
 
-    if (!row.targetUrl) {
+    if (!tracking.targetUrl) {
       throw new InternalServerErrorException(
         'QR tracking sin targetUrl configurada',
       );
     }
 
+    const now = new Date();
+
+    await this.qrTrackingRepo.increment({ id: tracking.id }, 'scanCount', 1);
+    await this.qrTrackingRepo.update(
+      { id: tracking.id },
+      {
+        lastScannedAt: now,
+        updatedAt: now,
+      },
+    );
+
     return {
-      id: row.id,
-      targetUrl: row.targetUrl,
+      id: tracking.id,
+      targetUrl: tracking.targetUrl,
     };
   }
 }
