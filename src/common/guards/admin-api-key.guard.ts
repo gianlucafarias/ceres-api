@@ -36,9 +36,12 @@ export class AdminApiKeyGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<Request>();
     const provided = getApiKeyFromRequest(request);
-    const expected = this.config.get<string>('ADMIN_API_KEY');
+    const validKeys = [
+      this.config.get<string>('CORE_API_ADMIN_KEY'),
+      this.config.get<string>('ADMIN_API_KEY'),
+    ].filter((value): value is string => !!value);
 
-    if (!expected || !provided || provided !== expected) {
+    if (!provided || validKeys.length === 0 || !validKeys.includes(provided)) {
       throw new UnauthorizedException('Invalid or missing API key');
     }
 
