@@ -4,8 +4,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { randomBytes, randomUUID } from 'crypto';
-import { In, Repository } from 'typeorm';
+import { randomUUID } from 'crypto';
+import { In, QueryFailedError, Repository } from 'typeorm';
 import { QrTracking } from '../../entities/qr-tracking.entity';
 import { CreateQrTrackingDto, QrTrackingQueryDto } from './dto/qr-tracking.dto';
 
@@ -14,7 +14,21 @@ type ResolveTrackedTargetResult = {
   targetUrl: string;
 };
 
-const MAX_SLUG_GENERATION_ATTEMPTS = 5;
+const MAX_SLUG_GENERATION_ATTEMPTS = 50;
+const MAX_SLUG_LENGTH = 160;
+const RESERVED_SLUGS = new Set([
+  'api',
+  'admin',
+  'chat',
+  'favicon',
+  'favicon-ico',
+  'health',
+  'media',
+  'qr',
+  'robots-txt',
+  'v1',
+  'webhook',
+]);
 
 @Injectable()
 export class QrTrackingService {
@@ -26,22 +40,14 @@ export class QrTrackingService {
   async create(dto: CreateQrTrackingDto): Promise<QrTracking> {
     const targetUrl = dto.targetUrl.trim();
     const name = dto.name?.trim() || buildTrackingName(targetUrl);
+    const baseSlug = buildTrackingSlugBase(name);
 
     for (
       let attempt = 0;
       attempt < MAX_SLUG_GENERATION_ATTEMPTS;
       attempt += 1
     ) {
-      const slug = createTrackingSlug();
-      const existing = await this.qrTrackingRepo.findOne({
-        where: { slug },
-        select: { id: true },
-      });
-
-      if (existing) {
-        continue;
-      }
-
+      const slug = buildTrackingSlugCandidate(baseSlug, attempt);
       const tracking = this.qrTrackingRepo.create({
         id: randomUUID(),
         slug,
@@ -49,7 +55,15 @@ export class QrTrackingService {
         targetUrl,
       });
 
-      return this.qrTrackingRepo.save(tracking);
+      try {
+        return await this.qrTrackingRepo.save(tracking);
+      } catch (error) {
+        if (isUniqueViolation(error)) {
+          continue;
+        }
+
+        throw error;
+      }
     }
 
     throw new InternalServerErrorException(
@@ -130,8 +144,47 @@ function buildTrackingName(targetUrl: string): string {
   }
 }
 
-function createTrackingSlug(): string {
-  return randomBytes(6).toString('hex');
+function buildTrackingSlugBase(name: string): string {
+  const normalizedBase = name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/-{2,}/g, '-')
+    .slice(0, MAX_SLUG_LENGTH)
+    .replace(/-+$/g, '');
+
+  const safeBase = normalizedBase || 'qr';
+  if (!RESERVED_SLUGS.has(safeBase)) {
+    return safeBase;
+  }
+
+  return truncateSlugBase(`${safeBase}-link`, 0);
+}
+
+function buildTrackingSlugCandidate(baseSlug: string, attempt: number): string {
+  if (attempt === 0) {
+    return baseSlug;
+  }
+
+  const suffix = `-${attempt + 1}`;
+  const truncatedBase = truncateSlugBase(baseSlug, suffix.length);
+  return `${truncatedBase}${suffix}`;
+}
+
+function truncateSlugBase(baseSlug: string, suffixLength: number): string {
+  const maxBaseLength = Math.max(1, MAX_SLUG_LENGTH - suffixLength);
+  return baseSlug.slice(0, maxBaseLength).replace(/-+$/g, '') || 'qr';
+}
+
+function isUniqueViolation(error: unknown): boolean {
+  if (!(error instanceof QueryFailedError)) {
+    return false;
+  }
+
+  const driverError = error.driverError as { code?: string } | undefined;
+  return driverError?.code === '23505';
 }
 
 function parseTrackingIds(rawIds?: string): string[] {

@@ -5,7 +5,7 @@ export class QrTracking {
   @PrimaryColumn({ type: 'uuid' })
   id!: string;
 
-  @Column({ type: 'varchar', length: 32 })
+  @Column({ type: 'varchar', length: 160 })
   slug!: string;
 
   @Column({ type: 'varchar', length: 120 })
