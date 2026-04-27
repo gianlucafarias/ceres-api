@@ -140,13 +140,13 @@ function renderVerificationResend(input: TemplateInput): PreparedEmailTemplate {
   return {
     domain: 'auth.email',
     summary: `Reenvio de verificacion solicitado para usuario ${target}`,
-    subject: 'Reenvio: Confirma tu cuenta - Ceres en Red',
+    subject: 'Recordatorio: Confirma tu cuenta - Ceres en Red',
     html: `
       <p>Para activar tu cuenta, hace clic en el siguiente enlace:</p>
       <p><a href="${verificationUrl}">Confirmar mi cuenta</a></p>
       <p>Este enlace vence en 24 horas.</p>
     `,
-    text: `Confirma tu cuenta ingresando a: ${verificationUrl}`,
+    text: `Te recordamos confirma tu cuenta ingresando a: ${verificationUrl}`,
   };
 }
 
@@ -199,7 +199,8 @@ function renderReminderMissingCriminalRecord(
   return {
     domain: 'professional.documentation',
     summary: `Recordatorio de documentacion para profesional ${target}`,
-    subject: 'Falta cargar tu certificado de antecedentes penales',
+    subject:
+      'Falta cargar tu certificado de antecedentes penales - Ceres en Red',
     html: `
       <p>${greeting}</p>
       <p>Tu perfil profesional en <strong>Ceres en Red</strong> todavia tiene documentacion pendiente.</p>
