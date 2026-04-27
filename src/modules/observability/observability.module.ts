@@ -9,6 +9,7 @@ import { RedisModule } from '../../shared/redis/redis.module';
 import { MetricsService } from './metrics.service';
 import { OpsEmailJobsController } from './ops-email-jobs.controller';
 import { OpsEmailQueueService } from './ops-email-queue.service';
+import { OpsEmailRemindersService } from './ops-email-reminders.service';
 import { OpsEmailService } from './ops-email.service';
 import { OpsEventsController } from './ops-events.controller';
 import { OpsEventsService } from './ops-events.service';
@@ -36,6 +37,7 @@ import { OpsNotificationsService } from './ops-notifications.service';
     OpsEventsService,
     OpsEmailService,
     OpsEmailQueueService,
+    OpsEmailRemindersService,
     OpsApiKeyGuard,
     OpsEventsApiKeyGuard,
   ],
