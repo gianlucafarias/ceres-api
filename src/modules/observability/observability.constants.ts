@@ -25,5 +25,7 @@ export const EMAIL_TEMPLATE_KEYS = [
   'services.professional_approved',
   'services.password_reset',
   'services.verification_resend',
+  'services.reminder_verify_account',
+  'services.reminder_missing_criminal_record',
 ] as const;
 export type EmailTemplateKey = (typeof EMAIL_TEMPLATE_KEYS)[number];

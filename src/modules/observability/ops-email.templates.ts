@@ -20,6 +20,10 @@ export function prepareEmailTemplate(
       return renderPasswordReset(input);
     case 'services.verification_resend':
       return renderVerificationResend(input);
+    case 'services.reminder_verify_account':
+      return renderReminderVerifyAccount(input);
+    case 'services.reminder_missing_criminal_record':
+      return renderReminderMissingCriminalRecord(input);
   }
 
   throw new Error('Template no soportado');
@@ -136,13 +140,82 @@ function renderVerificationResend(input: TemplateInput): PreparedEmailTemplate {
   return {
     domain: 'auth.email',
     summary: `Reenvio de verificacion solicitado para usuario ${target}`,
-    subject: 'Reenvio: Confirma tu cuenta - Ceres en Red',
+    subject: 'Recordatorio: Confirma tu cuenta - Ceres en Red',
     html: `
       <p>Para activar tu cuenta, hace clic en el siguiente enlace:</p>
       <p><a href="${verificationUrl}">Confirmar mi cuenta</a></p>
       <p>Este enlace vence en 24 horas.</p>
     `,
-    text: `Confirma tu cuenta ingresando a: ${verificationUrl}`,
+    text: `Te recordamos confirma tu cuenta ingresando a: ${verificationUrl}`,
+  };
+}
+
+function renderReminderVerifyAccount(
+  input: TemplateInput,
+): PreparedEmailTemplate {
+  const verificationUrl = requiredString(
+    input.payload,
+    'verificationUrl',
+    'verificationUrl es obligatorio para services.reminder_verify_account',
+  );
+  const firstName = optionalString(input.payload, 'firstName');
+  const greeting = firstName ? `Hola ${firstName},` : 'Hola,';
+  const target = input.entityId ?? input.recipient;
+
+  return {
+    domain: 'auth.email',
+    summary: `Recordatorio de verificacion para usuario ${target}`,
+    subject: 'Recordatorio: confirma tu cuenta en Ceres en Red',
+    html: `
+      <p>${greeting}</p>
+      <p>Te recordamos que tu cuenta en <strong>Ceres en Red</strong> aun no esta verificada.</p>
+      <p>Para continuar, hace clic en el siguiente boton:</p>
+      <p>
+        <a
+          href="${verificationUrl}"
+          style="display:inline-block;padding:10px 18px;background:#006F4B;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:bold;"
+        >
+          Verificar mi cuenta
+        </a>
+      </p>
+      <p>Si ya verificaste tu cuenta, podes ignorar este mensaje.</p>
+    `,
+    text: `${greeting} Te recordamos verificar tu cuenta ingresando a ${verificationUrl}`,
+  };
+}
+
+function renderReminderMissingCriminalRecord(
+  input: TemplateInput,
+): PreparedEmailTemplate {
+  const documentsUrl = requiredString(
+    input.payload,
+    'documentsUrl',
+    'documentsUrl es obligatorio para services.reminder_missing_criminal_record',
+  );
+  const firstName = optionalString(input.payload, 'firstName');
+  const greeting = firstName ? `Hola ${firstName},` : 'Hola,';
+  const target = input.entityId ?? input.recipient;
+
+  return {
+    domain: 'professional.documentation',
+    summary: `Recordatorio de documentacion para profesional ${target}`,
+    subject:
+      'Falta cargar tu certificado de antecedentes penales - Ceres en Red',
+    html: `
+      <p>${greeting}</p>
+      <p>Tu perfil profesional en <strong>Ceres en Red</strong> todavia tiene documentacion pendiente.</p>
+      <p>Necesitamos que cargues tu certificado de antecedentes penales para completar el proceso.</p>
+      <p>
+        <a
+          href="${documentsUrl}"
+          style="display:inline-block;padding:10px 18px;background:#006F4B;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:bold;"
+        >
+          Cargar documentacion
+        </a>
+      </p>
+      <p>Si ya cargaste el archivo, podes ignorar este mensaje.</p>
+    `,
+    text: `${greeting} Falta cargar tu certificado de antecedentes. Completa la documentacion en ${documentsUrl}`,
   };
 }
 
