@@ -96,7 +96,7 @@ export class OpsNotificationsService {
       return;
     }
 
-    const minSeverity = this.getMinSeverity();
+    const minSeverity = this.getMinSeverity(event.source);
     if (severityRank[event.severity] < severityRank[minSeverity]) {
       this.metrics.recordOpsEvent(
         event.source,
@@ -108,7 +108,7 @@ export class OpsNotificationsService {
       return;
     }
 
-    const throttleSeconds = this.getThrottleSeconds();
+    const throttleSeconds = this.getThrottleSeconds(event.source);
     const throttled = await this.isThrottled(
       event.fingerprint,
       throttleSeconds,
@@ -256,7 +256,23 @@ export class OpsNotificationsService {
     );
   }
 
-  private getMinSeverity(): OpsEventSeverity {
+  private getMinSeverity(source: string): OpsEventSeverity {
+    if (source === 'bot') {
+      const botRaw = this.config
+        .get<string>('OPS_ALERT_MIN_SEVERITY_BOT', '')
+        .trim()
+        .toLowerCase();
+
+      if (
+        botRaw === 'info' ||
+        botRaw === 'warn' ||
+        botRaw === 'error' ||
+        botRaw === 'critical'
+      ) {
+        return botRaw;
+      }
+    }
+
     const raw = this.config
       .get<string>('OPS_ALERT_MIN_SEVERITY', 'error')
       .trim()
@@ -281,7 +297,17 @@ export class OpsNotificationsService {
     return Number.isFinite(parsed) && parsed > 0 ? parsed : 3000;
   }
 
-  private getThrottleSeconds(): number {
+  private getThrottleSeconds(source: string): number {
+    if (source === 'bot') {
+      const botRaw = this.config.get<string>('OPS_ALERT_THROTTLE_SECONDS_BOT');
+      if (botRaw) {
+        const botParsed = Number.parseInt(botRaw, 10);
+        if (Number.isFinite(botParsed) && botParsed >= 0) {
+          return botParsed;
+        }
+      }
+    }
+
     const raw = this.config.get<string>('OPS_ALERT_THROTTLE_SECONDS', '300');
     const parsed = Number.parseInt(raw, 10);
 
