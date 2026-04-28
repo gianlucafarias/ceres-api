@@ -36,12 +36,12 @@ Cerrar endpoints pendientes para que el bot deje de depender de:
 
 ### Reclamos (bot)
 
-- `GET /api/v1/reclamos/tipos` (`BOT_API_KEY`)
+- `GET /api/v1/reclamos/bot/tipos` (`BOT_API_KEY`)
   - Response:
     - `[{ id, nombre }]` a partir de tipos distintos de `reclamos.reclamo`.
 - `GET /api/v1/reclamos/bot/ultimo?telefono=...` (`BOT_API_KEY`)
   - Response:
-    - mismo shape de `GET /api/v1/reclamos/:id/estado` + `id`
+    - mismo shape de `GET /api/v1/reclamos/bot/:id/estado` + `id`
     - sin exponer `telefono`
 
 ## Implementacion
@@ -68,4 +68,4 @@ Cerrar endpoints pendientes para que el bot deje de depender de:
 
 ## Notas
 
-- Se mantiene pendiente la idempotencia de `POST /api/v1/reclamos` para despliegue multi-instancia (fase siguiente).
+- Se mantiene pendiente la idempotencia de `POST /api/v1/reclamos/bot` para despliegue multi-instancia (fase siguiente).

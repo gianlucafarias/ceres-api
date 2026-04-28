@@ -16,9 +16,9 @@
 
 ### Bot (`BOT_API_KEY`)
 
-- `POST /api/v1/reclamos` (crear) → id, estado, fecha, reclamo, barrio, ubicacion (sin teléfono).
-- `GET /api/v1/reclamos/:id/estado` → estado y datos básicos (sin teléfono).
-- `GET /api/v1/reclamos/tipos` → catálogo de tipos (`[{ id, nombre }]`).
+- `POST /api/v1/reclamos/bot` (crear) → id, estado, fecha, reclamo, barrio, ubicacion (sin teléfono).
+- `GET /api/v1/reclamos/bot/:id/estado` → estado y datos básicos (sin teléfono).
+- `GET /api/v1/reclamos/bot/tipos` → catálogo de tipos (`[{ id, nombre }]`).
 - `GET /api/v1/reclamos/bot/ultimo?telefono=...` → último reclamo del teléfono (sin PII de contacto).
 
 ### Dashboard (`ADMIN_API_KEY`)
@@ -28,6 +28,7 @@
 - `GET /api/v1/reclamos/:id/relacionados` (mismo solicitante, sin PII de contacto).
 - `PATCH /api/v1/reclamos/:id` (estado, prioridad, cuadrilla, detalle, ubicacion).
 - `GET /api/v1/reclamos/:id/historial`
+- `GET/POST/PATCH/DELETE /api/v1/reclamos/admin/tipos[/:id]` (ABM de tipos de reclamo).
 - `GET /api/v1/reclamos/estadisticas/basicas` (por estado, prioridad y tipo).
 
 ### Contrato `GET /api/v1/reclamos/:id/relacionados`

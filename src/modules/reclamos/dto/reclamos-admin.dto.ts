@@ -53,11 +53,6 @@ export class ReclamosFiltroAdminDto {
   order?: 'ASC' | 'DESC' = 'DESC';
 }
 
-export class ReclamoIdParamDto {
-  @IsInt()
-  id!: number;
-}
-
 export class ActualizarReclamoAdminDto {
   @IsOptional()
   @IsString()

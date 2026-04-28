@@ -1,6 +1,5 @@
 import {
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsString,
   MaxLength,
@@ -35,11 +34,6 @@ export class CrearReclamoBotDto {
   @IsOptional()
   @IsString()
   prioridad?: string;
-}
-
-export class EstadoReclamoBotParamsDto {
-  @IsNumber()
-  id!: number;
 }
 
 export class UltimoReclamoBotQueryDto {

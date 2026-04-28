@@ -346,7 +346,7 @@
                      "name":  "Reclamos (Bot)",
                      "item":  [
                                   {
-                                      "name":  "POST /v1/reclamos",
+                                      "name":  "POST /v1/reclamos/bot",
                                       "request":  {
                                                       "method":  "POST",
                                                       "header":  [
@@ -368,11 +368,11 @@
                                                                                            }
                                                                                }
                                                                },
-                                                      "url":  "{{baseUrl}}/v1/reclamos"
+                                                      "url":  "{{baseUrl}}/v1/reclamos/bot"
                                                   }
                                   },
                                   {
-                                      "name":  "GET /v1/reclamos/:id/estado",
+                                      "name":  "GET /v1/reclamos/bot/:id/estado",
                                       "request":  {
                                                       "method":  "GET",
                                                       "header":  [
@@ -381,7 +381,7 @@
                                                                          "value":  "{{botApiKey}}"
                                                                      }
                                                                  ],
-                                                      "url":  "{{baseUrl}}/v1/reclamos/{{reclamoId}}/estado"
+                                                      "url":  "{{baseUrl}}/v1/reclamos/bot/{{reclamoId}}/estado"
                                                   }
                                   }
                               ]
