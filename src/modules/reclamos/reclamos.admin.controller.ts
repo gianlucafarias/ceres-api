@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  ParseIntPipe,
   Param,
   Patch,
   Query,
@@ -10,7 +11,6 @@ import {
 import { AdminApiKeyGuard } from '../../common/guards/admin-api-key.guard';
 import {
   ActualizarReclamoAdminDto,
-  ReclamoIdParamDto,
   ReclamosFiltroAdminDto,
 } from './dto/reclamos-admin.dto';
 import { ReclamosService } from './reclamos.service';
@@ -55,26 +55,26 @@ export class ReclamosAdminController {
     return this.service.countByBarrio();
   }
 
-  @Get(':id(\\d+)/historial')
-  historial(@Param() params: ReclamoIdParamDto) {
-    return this.service.historialAdmin(params.id);
+  @Get(':id/historial')
+  historial(@Param('id', ParseIntPipe) id: number) {
+    return this.service.historialAdmin(id);
   }
 
-  @Get(':id(\\d+)/relacionados')
-  relacionados(@Param() params: ReclamoIdParamDto) {
-    return this.service.relacionadosAdmin(params.id);
+  @Get(':id/relacionados')
+  relacionados(@Param('id', ParseIntPipe) id: number) {
+    return this.service.relacionadosAdmin(id);
   }
 
-  @Get(':id(\\d+)')
-  detalle(@Param() params: ReclamoIdParamDto) {
-    return this.service.detalleAdmin(params.id);
+  @Get(':id')
+  detalle(@Param('id', ParseIntPipe) id: number) {
+    return this.service.detalleAdmin(id);
   }
 
-  @Patch(':id(\\d+)')
+  @Patch(':id')
   actualizar(
-    @Param() params: ReclamoIdParamDto,
+    @Param('id', ParseIntPipe) id: number,
     @Body() dto: ActualizarReclamoAdminDto,
   ) {
-    return this.service.actualizarAdmin(params.id, dto);
+    return this.service.actualizarAdmin(id, dto);
   }
 }

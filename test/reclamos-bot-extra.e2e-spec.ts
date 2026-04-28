@@ -75,15 +75,15 @@ describe('Reclamos bot endpoints extra (e2e)', () => {
     await app.close();
   });
 
-  it('GET /api/v1/reclamos/tipos requiere BOT_API_KEY', async () => {
+  it('GET /api/v1/reclamos/bot/tipos requiere BOT_API_KEY', async () => {
     await request(app.getHttpServer())
-      .get('/api/v1/reclamos/tipos')
+      .get('/api/v1/reclamos/bot/tipos')
       .expect(401);
   });
 
-  it('GET /api/v1/reclamos/tipos devuelve tipos', async () => {
+  it('GET /api/v1/reclamos/bot/tipos devuelve tipos', async () => {
     const response = await request(app.getHttpServer())
-      .get('/api/v1/reclamos/tipos')
+      .get('/api/v1/reclamos/bot/tipos')
       .set('x-api-key', botApiKey)
       .expect(200);
 

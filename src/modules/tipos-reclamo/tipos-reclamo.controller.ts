@@ -16,7 +16,7 @@ import {
 import { TiposReclamoService } from './tipos-reclamo.service';
 
 @UseGuards(AdminApiKeyGuard)
-@Controller({ path: 'reclamos/tipos', version: '1' })
+@Controller({ path: 'reclamos/admin/tipos', version: '1' })
 export class TiposReclamoController {
   constructor(private readonly service: TiposReclamoService) {}
 

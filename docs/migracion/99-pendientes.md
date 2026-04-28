@@ -8,13 +8,13 @@
 - **Certificados PDF**:
   - `POST /api/v1/certificados/crear`
 - **Reclamos para bot**:
-  - `GET /api/v1/reclamos/tipos`
+  - `GET /api/v1/reclamos/bot/tipos`
   - `GET /api/v1/reclamos/bot/ultimo?telefono=...`
 
 ## Pendientes actuales
 
 - **Idempotencia reclamos**:
-  - `POST /api/v1/reclamos` con `Idempotency-Key` para despliegue multi-instancia.
+  - `POST /api/v1/reclamos/bot` con `Idempotency-Key` para despliegue multi-instancia.
 
 ## Compatibilidad legacy a revisar
 
