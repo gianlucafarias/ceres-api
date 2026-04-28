@@ -15,6 +15,7 @@ import { PreferenciasUsuario } from './preferencias-usuario.entity';
 import { QrTracking } from './qr-tracking.entity';
 import { Reclamo } from './reclamo.entity';
 import { ReclamoHistorial } from './reclamo-historial.entity';
+import { TipoReclamo } from './tipo-reclamo.entity';
 import { Votante } from './votante.entity';
 
 export const entities = [
@@ -35,6 +36,7 @@ export const entities = [
   QrTracking,
   Reclamo,
   ReclamoHistorial,
+  TipoReclamo,
   Votante,
 ];
 
@@ -56,5 +58,6 @@ export {
   QrTracking,
   Reclamo,
   ReclamoHistorial,
+  TipoReclamo,
   Votante,
 };

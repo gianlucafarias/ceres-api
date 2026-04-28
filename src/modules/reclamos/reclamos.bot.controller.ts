@@ -25,11 +25,6 @@ export class ReclamosBotController {
     return this.service.crearDesdeBot(dto);
   }
 
-  @Get('tipos')
-  tipos() {
-    return this.service.tiposParaBot();
-  }
-
   @Get('bot/ultimo')
   ultimo(@Query() query: UltimoReclamoBotQueryDto) {
     return this.service.ultimoPorTelefonoParaBot(query.telefono);
