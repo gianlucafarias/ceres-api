@@ -23,9 +23,7 @@ export class TiposReclamoService {
     const nombre = dto.nombre.trim();
     const existente = await this.repo.findOne({ where: { nombre } });
     if (existente) {
-      throw new ConflictException(
-        `El tipo de reclamo "${nombre}" ya existe.`,
-      );
+      throw new ConflictException(`El tipo de reclamo "${nombre}" ya existe.`);
     }
 
     const entity = this.repo.create({ nombre });
@@ -46,9 +44,7 @@ export class TiposReclamoService {
     const nombre = dto.nombre.trim();
     const colision = await this.repo.findOne({ where: { nombre } });
     if (colision && colision.id !== id) {
-      throw new ConflictException(
-        `El tipo de reclamo "${nombre}" ya existe.`,
-      );
+      throw new ConflictException(`El tipo de reclamo "${nombre}" ya existe.`);
     }
 
     actual.nombre = nombre;
