@@ -55,22 +55,22 @@ export class ReclamosAdminController {
     return this.service.countByBarrio();
   }
 
-  @Get(':id/historial')
+  @Get(':id(\\d+)/historial')
   historial(@Param() params: ReclamoIdParamDto) {
     return this.service.historialAdmin(params.id);
   }
 
-  @Get(':id/relacionados')
+  @Get(':id(\\d+)/relacionados')
   relacionados(@Param() params: ReclamoIdParamDto) {
     return this.service.relacionadosAdmin(params.id);
   }
 
-  @Get(':id')
+  @Get(':id(\\d+)')
   detalle(@Param() params: ReclamoIdParamDto) {
     return this.service.detalleAdmin(params.id);
   }
 
-  @Patch(':id')
+  @Patch(':id(\\d+)')
   actualizar(
     @Param() params: ReclamoIdParamDto,
     @Body() dto: ActualizarReclamoAdminDto,
