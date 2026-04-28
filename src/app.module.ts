@@ -30,6 +30,7 @@ import { VotanteModule } from './modules/votante/votante.module';
 import { ObservabilityMiddleware } from './modules/observability/observability.middleware';
 import { ObservabilityModule } from './modules/observability/observability.module';
 import { QrTrackingModule } from './modules/qr-tracking/qr-tracking.module';
+import { TiposReclamoModule } from './modules/tipos-reclamo/tipos-reclamo.module';
 
 @Module({
   imports: [
@@ -76,6 +77,7 @@ import { QrTrackingModule } from './modules/qr-tracking/qr-tracking.module';
     AdminBootstrapModule,
     VotanteModule,
     QrTrackingModule,
+    TiposReclamoModule,
   ],
   controllers: [AppController],
   providers: [AppService, ObservabilityMiddleware],
