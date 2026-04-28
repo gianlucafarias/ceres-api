@@ -30,7 +30,7 @@ export class ReclamosBotController {
     return this.service.ultimoPorTelefonoParaBot(query.telefono);
   }
 
-  @Get(':id/estado')
+  @Get(':id(\\d+)/estado')
   estado(@Param() params: EstadoReclamoBotParamsDto) {
     return this.service.estadoParaBot(params.id);
   }
