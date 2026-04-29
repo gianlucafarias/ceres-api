@@ -71,9 +71,44 @@ function renderProfessionalApproved(
   );
   const firstName = optionalString(input.payload, 'firstName');
   const lastName = optionalString(input.payload, 'lastName');
+  const documentsUrl =
+    optionalString(input.payload, 'documentsUrl') ?? `${loginUrl}/dashboard`;
+  const criminalRecordHelpUrl =
+    optionalString(input.payload, 'criminalRecordHelpUrl') ??
+    'https://www.argentina.gob.ar/justicia/reincidencia/antecedentespenales';
+  const pendingCriminalRecord =
+    optionalBoolean(input.payload, 'pendingCriminalRecord') ??
+    optionalString(input.payload, 'criminalRecordStatus') === 'pending';
   const recipientName = [firstName, lastName].filter(Boolean).join(' ').trim();
   const greeting = recipientName ? `Hola ${recipientName},` : 'Hola,';
   const target = input.entityId ?? input.recipient;
+
+  if (pendingCriminalRecord) {
+    return {
+      domain: 'admin.professionals.email',
+      summary: `Correo de aprobacion parcial solicitado para profesional ${target}`,
+      subject:
+        'Tu perfil fue aprobado (falta antecedentes penales) - Ceres en Red',
+      html: `
+      <p>${greeting}</p>
+      <p>Tu perfil profesional en <strong>Ceres en Red</strong> fue aprobado y ya puede aparecer en la plataforma.</p>
+      <p>Para completar la verificacion y obtener el tilde azul, falta cargar tu certificado de antecedentes penales.</p>
+      <p>
+        <a
+          href="${documentsUrl}"
+          style="display:inline-block;padding:10px 18px;background:#006F4B;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:bold;"
+        >
+          Cargar antecedentes penales
+        </a>
+      </p>
+      <p>Si todavia no lo tenes, podes ver como tramitarlo aca:</p>
+      <p><a href="${criminalRecordHelpUrl}">Como obtener antecedentes penales</a></p>
+      <p>Una vez cargado, nuestro equipo lo revisara manualmente.</p>
+      <p>Si tenes dudas, podes responder a este correo.</p>
+    `,
+      text: `${greeting} Tu perfil ya fue aprobado y puede aparecer en la plataforma. Para completar la verificacion (tilde azul), falta cargar antecedentes penales en ${documentsUrl}. Si no lo tenes, revisa como obtenerlo en ${criminalRecordHelpUrl}.`,
+    };
+  }
 
   return {
     domain: 'admin.professionals.email',
@@ -239,4 +274,12 @@ function optionalString(
   return typeof value === 'string' && value.trim().length > 0
     ? value.trim()
     : null;
+}
+
+function optionalBoolean(
+  payload: Record<string, unknown>,
+  key: string,
+): boolean | null {
+  const value = payload[key];
+  return typeof value === 'boolean' ? value : null;
 }
