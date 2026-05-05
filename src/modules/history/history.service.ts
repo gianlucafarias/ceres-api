@@ -1,22 +1,35 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadGatewayException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Contact } from '../../entities/contact.entity';
 import { History } from '../../entities/history.entity';
+import { HttpClient } from '../../shared/http/http-client.service';
 import {
   ContactHistoryQueryDto,
   ConversationDetailsQueryDto,
   ConversationIdParamDto,
   DateRangeQueryDto,
+  HumanHandoffDto,
+  SendHumanMessageDto,
 } from './dto/history.dto';
 
 @Injectable()
 export class HistoryService {
+  private readonly logger = new Logger(HistoryService.name);
+
   constructor(
     @InjectRepository(History)
     private readonly historyRepo: Repository<History>,
     @InjectRepository(Contact)
     private readonly contactRepo: Repository<Contact>,
+    private readonly http: HttpClient,
+    private readonly config: ConfigService,
   ) {}
 
   async getLastDayInteractions(limit = 10) {
@@ -152,5 +165,149 @@ export class HistoryService {
       where: { conversation_id: conversationId },
       order: { createdAt: 'ASC' },
     });
+  }
+
+  async sendHumanMessage(dto: SendHumanMessageDto) {
+    const contact = await this.contactRepo.findOne({
+      where: { id: dto.contactId },
+      select: { id: true, phone: true },
+    });
+
+    if (!contact || !contact.phone) {
+      throw new NotFoundException('Contacto no encontrado o sin teléfono');
+    }
+
+    const number = contact.phone.trim();
+    const message = dto.message.trim();
+    const botBaseUrl =
+      this.config.get<string>('BOT_BASE_URL')?.trim() ||
+      this.config.get<string>('BOT_API_BASE_URL')?.trim() ||
+      'https://api.ceres.gob.ar';
+    const url = `${botBaseUrl.replace(/\/$/, '')}/v1/messages`;
+
+    try {
+      await this.http.post<string, { number: string; message: string }>(
+        url,
+        { number, message },
+        { headers: { 'Content-Type': 'application/json' } },
+      );
+
+      this.logger.log(
+        JSON.stringify({
+          event: 'human_message_sent',
+          contactId: contact.id,
+          conversationId: dto.conversationId ?? null,
+          phoneMasked: this.maskPhone(number),
+          messageLength: message.length,
+        }),
+      );
+
+      return {
+        success: true,
+        message: 'Mensaje enviado correctamente',
+      };
+    } catch (error) {
+      const statusCode = this.extractStatusCode(error);
+
+      this.logger.error(
+        JSON.stringify({
+          event: 'human_message_send_failed',
+          contactId: contact.id,
+          conversationId: dto.conversationId ?? null,
+          phoneMasked: this.maskPhone(number),
+          messageLength: message.length,
+          statusCode,
+          error: error instanceof Error ? error.message : String(error),
+        }),
+      );
+
+      throw new BadGatewayException(
+        'No se pudo enviar el mensaje al proveedor de bot',
+      );
+    }
+  }
+
+  async humanHandoff(dto: HumanHandoffDto) {
+    const contact = await this.contactRepo.findOne({
+      where: { id: dto.contactId },
+      select: { id: true, phone: true },
+    });
+
+    if (!contact || !contact.phone) {
+      throw new NotFoundException('Contacto no encontrado o sin teléfono');
+    }
+
+    const number = contact.phone.trim();
+    const botBaseUrl =
+      this.config.get<string>('BOT_BASE_URL')?.trim() ||
+      this.config.get<string>('BOT_API_BASE_URL')?.trim() ||
+      'https://api.ceres.gob.ar';
+    const url = `${botBaseUrl.replace(/\/$/, '')}/v1/blacklist`;
+    const intent = dto.action === 'take' ? 'add' : 'remove';
+
+    try {
+      await this.http.post<
+        { status?: string; number?: string; intent?: string },
+        { number: string; intent: 'add' | 'remove' }
+      >(
+        url,
+        { number, intent },
+        { headers: { 'Content-Type': 'application/json' } },
+      );
+
+      this.logger.log(
+        JSON.stringify({
+          event: 'human_handoff_updated',
+          action: dto.action,
+          contactId: contact.id,
+          conversationId: dto.conversationId ?? null,
+          phoneMasked: this.maskPhone(number),
+        }),
+      );
+
+      return {
+        success: true,
+        mode: dto.action === 'take' ? 'human' : 'bot',
+        message:
+          dto.action === 'take'
+            ? 'Conversación tomada por humano'
+            : 'Conversación devuelta al bot',
+      };
+    } catch (error) {
+      const statusCode = this.extractStatusCode(error);
+      this.logger.error(
+        JSON.stringify({
+          event: 'human_handoff_update_failed',
+          action: dto.action,
+          contactId: contact.id,
+          conversationId: dto.conversationId ?? null,
+          phoneMasked: this.maskPhone(number),
+          statusCode,
+          error: error instanceof Error ? error.message : String(error),
+        }),
+      );
+      throw new BadGatewayException(
+        'No se pudo actualizar el estado de handoff en el bot',
+      );
+    }
+  }
+
+  private maskPhone(phone: string): string {
+    const normalized = phone.trim();
+    if (normalized.length <= 4) return '****';
+    return `****${normalized.slice(-4)}`;
+  }
+
+  private extractStatusCode(error: unknown): number | null {
+    if (!error || typeof error !== 'object' || !('response' in error)) {
+      return null;
+    }
+
+    const response = (error as { response?: { status?: unknown } }).response;
+    if (!response || typeof response.status !== 'number') {
+      return null;
+    }
+
+    return response.status;
   }
 }

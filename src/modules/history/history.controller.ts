@@ -1,9 +1,19 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ContactHistoryQueryDto,
   ConversationDetailsQueryDto,
   ConversationIdParamDto,
   DateRangeQueryDto,
+  HumanHandoffDto,
+  SendHumanMessageDto,
 } from './dto/history.dto';
 import { HistoryService } from './history.service';
 import { AdminApiKeyGuard } from '../../common/guards/admin-api-key.guard';
@@ -46,5 +56,15 @@ export class HistoryController {
   @Get('all')
   all() {
     return this.service.getAllInteractions();
+  }
+
+  @Post('human-message')
+  sendHumanMessage(@Body() dto: SendHumanMessageDto) {
+    return this.service.sendHumanMessage(dto);
+  }
+
+  @Post('human-handoff')
+  humanHandoff(@Body() dto: HumanHandoffDto) {
+    return this.service.humanHandoff(dto);
   }
 }

@@ -1,9 +1,11 @@
 import {
   IsDateString,
+  IsIn,
   IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
+  MaxLength,
   Min,
 } from 'class-validator';
 
@@ -53,4 +55,35 @@ export class DateRangeQueryDto {
 
   @IsDateString()
   endDate!: string;
+}
+
+export class SendHumanMessageDto {
+  @IsInt()
+  @Min(1)
+  contactId!: number;
+
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(4000)
+  message!: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  conversationId?: string;
+}
+
+export class HumanHandoffDto {
+  @IsInt()
+  @Min(1)
+  contactId!: number;
+
+  @IsString()
+  @IsIn(['take', 'release'])
+  action!: 'take' | 'release';
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  conversationId?: string;
 }
