@@ -14,6 +14,7 @@ import {
   ContactIdParamDto,
   ContactsQueryDto,
   ConversationsRangeQueryDto,
+  LastInteractionsQueryDto,
 } from './dto/contacts.dto';
 import { ContactsService } from './contacts.service';
 import { AdminApiKeyGuard } from '../../common/guards/admin-api-key.guard';
@@ -28,8 +29,11 @@ export class ContactsController {
   async getLastInteractions(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
+    @Query() query: LastInteractionsQueryDto,
   ) {
-    const payload = await this.service.getLastUserInteractions();
+    const payload = await this.service.getLastUserInteractions(
+      query.limit ?? 50,
+    );
     if (applyHttpEtag(req, res, payload)) return;
     return payload;
   }
