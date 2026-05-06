@@ -39,7 +39,9 @@ describe('HistoryService', () => {
         .fn<Promise<[History[], number]>, [unknown?]>()
         .mockResolvedValue([[], 0]),
       count: jest.fn<Promise<number>, [unknown?]>().mockResolvedValue(0),
-      save: jest.fn<Promise<History>, [unknown?]>().mockResolvedValue({} as History),
+      save: jest
+        .fn<Promise<History>, [unknown?]>()
+        .mockResolvedValue({} as History),
     };
     contactRepo = {
       findOne: jest
