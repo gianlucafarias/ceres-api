@@ -17,6 +17,7 @@ describe('HistoryService', () => {
     find: jest.Mock<Promise<History[]>, [unknown?]>;
     findAndCount: jest.Mock<Promise<[History[], number]>, [unknown?]>;
     count: jest.Mock<Promise<number>, [unknown?]>;
+    save: jest.Mock<Promise<History>, [unknown?]>;
   };
 
   beforeEach(async () => {
@@ -38,6 +39,9 @@ describe('HistoryService', () => {
         .fn<Promise<[History[], number]>, [unknown?]>()
         .mockResolvedValue([[], 0]),
       count: jest.fn<Promise<number>, [unknown?]>().mockResolvedValue(0),
+      save: jest
+        .fn<Promise<History>, [unknown?]>()
+        .mockResolvedValue({} as History),
     };
     contactRepo = {
       findOne: jest
@@ -176,6 +180,16 @@ describe('HistoryService', () => {
       { number: '3491123456', message: 'Hola desde dashboard' },
       { headers: { 'Content-Type': 'application/json' } },
     );
+    expect(historyRepo.save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ref: 'human_message',
+        keyword: 'human_message_sent',
+        answer: 'Hola desde dashboard',
+        phone: '3491123456',
+        conversation_id: 'cid-1',
+        contactId: 12,
+      }),
+    );
   });
 
   it('sendHumanMessage transforma error upstream en BadGateway', async () => {
@@ -217,6 +231,15 @@ describe('HistoryService', () => {
       { number: '3491999888', intent: 'add' },
       { headers: { 'Content-Type': 'application/json' } },
     );
+    expect(historyRepo.save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ref: 'human_handoff_take',
+        keyword: 'human_handoff_take',
+        answer: 'Conversación tomada por humano',
+        conversation_id: 'cid-20',
+        contactId: 20,
+      }),
+    );
   });
 
   it('humanHandoff release llama blacklist remove', async () => {
@@ -241,6 +264,15 @@ describe('HistoryService', () => {
       'https://api.ceres.gob.ar/v1/blacklist',
       { number: '3491777666', intent: 'remove' },
       { headers: { 'Content-Type': 'application/json' } },
+    );
+    expect(historyRepo.save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ref: 'human_handoff_release',
+        keyword: 'human_handoff_release',
+        answer: 'Conversación devuelta al bot',
+        conversation_id: null,
+        contactId: 21,
+      }),
     );
   });
 });

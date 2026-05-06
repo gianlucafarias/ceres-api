@@ -192,6 +192,20 @@ export class HistoryService {
         { headers: { 'Content-Type': 'application/json' } },
       );
 
+      await this.persistHumanHistoryEntry({
+        contactId: contact.id,
+        phone: number,
+        conversationId: dto.conversationId ?? null,
+        ref: 'human_message',
+        keyword: 'human_message_sent',
+        answer: message,
+        options: {
+          source: 'dashboard',
+          actor: 'human',
+          event: 'human_message_sent',
+        },
+      });
+
       this.logger.log(
         JSON.stringify({
           event: 'human_message_sent',
@@ -255,6 +269,26 @@ export class HistoryService {
         { headers: { 'Content-Type': 'application/json' } },
       );
 
+      const handoffMessage =
+        dto.action === 'take'
+          ? 'Conversación tomada por humano'
+          : 'Conversación devuelta al bot';
+
+      await this.persistHumanHistoryEntry({
+        contactId: contact.id,
+        phone: number,
+        conversationId: dto.conversationId ?? null,
+        ref: `human_handoff_${dto.action}`,
+        keyword: `human_handoff_${dto.action}`,
+        answer: handoffMessage,
+        options: {
+          source: 'dashboard',
+          actor: 'system',
+          event: 'human_handoff_updated',
+          action: dto.action,
+        },
+      });
+
       this.logger.log(
         JSON.stringify({
           event: 'human_handoff_updated',
@@ -309,5 +343,40 @@ export class HistoryService {
     }
 
     return response.status;
+  }
+
+  private async persistHumanHistoryEntry(params: {
+    contactId: number;
+    phone: string;
+    conversationId: string | null;
+    ref: string;
+    keyword: string;
+    answer: string;
+    options: Record<string, unknown>;
+  }): Promise<void> {
+    try {
+      await this.historyRepo.save({
+        ref: params.ref,
+        keyword: params.keyword,
+        answer: params.answer,
+        refSerialize: '{}',
+        phone: params.phone,
+        options: params.options,
+        conversation_id: params.conversationId,
+        contactId: params.contactId,
+        updatedIn: null,
+      });
+    } catch (error) {
+      this.logger.error(
+        JSON.stringify({
+          event: 'history_persist_failed',
+          ref: params.ref,
+          keyword: params.keyword,
+          contactId: params.contactId,
+          conversationId: params.conversationId,
+          error: error instanceof Error ? error.message : String(error),
+        }),
+      );
+    }
   }
 }
