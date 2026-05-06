@@ -262,10 +262,14 @@ export class HistoryService {
     try {
       await this.http.post<
         { status?: string; number?: string; intent?: string },
-        { number: string; intent: 'add' | 'remove' }
+        {
+          number: string;
+          intent: 'add' | 'remove';
+          conversationId?: string | null;
+        }
       >(
         url,
-        { number, intent },
+        { number, intent, conversationId: dto.conversationId ?? null },
         { headers: { 'Content-Type': 'application/json' } },
       );
 

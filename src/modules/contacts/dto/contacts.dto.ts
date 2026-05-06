@@ -52,3 +52,12 @@ export class ConversationsRangeQueryDto {
   @Max(100)
   limit?: number = 20;
 }
+
+export class LastInteractionsQueryDto {
+  @IsOptional()
+  @IsNumber()
+  @IsInt()
+  @Min(1)
+  @Max(500)
+  limit?: number = 50;
+}
