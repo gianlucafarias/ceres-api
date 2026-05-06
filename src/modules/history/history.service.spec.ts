@@ -228,7 +228,7 @@ describe('HistoryService', () => {
 
     expect(http.post).toHaveBeenCalledWith(
       'https://api.ceres.gob.ar/v1/blacklist',
-      { number: '3491999888', intent: 'add' },
+      { number: '3491999888', intent: 'add', conversationId: 'cid-20' },
       { headers: { 'Content-Type': 'application/json' } },
     );
     expect(historyRepo.save).toHaveBeenCalledWith(
@@ -262,7 +262,7 @@ describe('HistoryService', () => {
 
     expect(http.post).toHaveBeenCalledWith(
       'https://api.ceres.gob.ar/v1/blacklist',
-      { number: '3491777666', intent: 'remove' },
+      { number: '3491777666', intent: 'remove', conversationId: null },
       { headers: { 'Content-Type': 'application/json' } },
     );
     expect(historyRepo.save).toHaveBeenCalledWith(
