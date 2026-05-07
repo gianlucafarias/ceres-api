@@ -6,6 +6,7 @@ import { Pharmacy } from '../../entities/pharmacy.entity';
 import { ActivityLogService } from '../../shared/activity-log/activity-log.service';
 
 const DEFAULT_CALENDAR_TIME_ZONE = 'America/Argentina/Buenos_Aires';
+const DEFAULT_DUTY_CHANGE_HOUR = 8;
 
 type DutyCalendarPreview = {
   today: { date: string; schedule: DutySchedule | null };
@@ -20,6 +21,9 @@ export class FarmaciasService {
   private readonly calendarTimeZone =
     process.env.FARMACIAS_CALENDAR_TIME_ZONE?.trim() ||
     DEFAULT_CALENDAR_TIME_ZONE;
+  private readonly dutyChangeHour = this.resolveDutyChangeHour(
+    process.env.FARMACIAS_DUTY_CHANGE_HOUR,
+  );
 
   constructor(
     @InjectRepository(Pharmacy)
@@ -50,7 +54,7 @@ export class FarmaciasService {
   }
 
   async getDutyToday() {
-    const today = this.getCurrentCalendarDateISO();
+    const today = this.getCurrentDutyDateISO();
     const row = await this.getDutyByDate(today);
 
     if (row) {
@@ -143,7 +147,7 @@ export class FarmaciasService {
   }
 
   async getCalendar() {
-    const todayISO = this.getCurrentCalendarDateISO();
+    const todayISO = this.getCurrentDutyDateISO();
     const tomorrowISO = this.addDaysToISODate(todayISO, 1);
     const dayAfterTomorrowISO = this.addDaysToISODate(todayISO, 2);
 
@@ -169,6 +173,21 @@ export class FarmaciasService {
 
   getCurrentCalendarDateISO() {
     return this.toISODateOnlyInTimeZone(new Date(), this.calendarTimeZone);
+  }
+
+  getCurrentDutyDateISO() {
+    const now = new Date();
+    const hour = this.getHourInTimeZone(now, this.calendarTimeZone);
+    const baseDateISO = this.toISODateOnlyInTimeZone(
+      now,
+      this.calendarTimeZone,
+    );
+
+    if (hour < this.dutyChangeHour) {
+      return this.addDaysToISODate(baseDateISO, -1);
+    }
+
+    return baseDateISO;
   }
 
   private invalidateBootstrapEtag() {
@@ -231,6 +250,27 @@ export class FarmaciasService {
     }
 
     return date.toISOString().slice(0, 10);
+  }
+
+  private getHourInTimeZone(date: Date, timeZone: string) {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone,
+      hour: '2-digit',
+      hourCycle: 'h23',
+    }).formatToParts(date);
+
+    const hourPart = parts.find((part) => part.type === 'hour')?.value;
+    const hour = Number.parseInt(hourPart ?? '', 10);
+    if (Number.isFinite(hour)) return hour;
+    return date.getUTCHours();
+  }
+
+  private resolveDutyChangeHour(rawHour?: string) {
+    const parsed = Number.parseInt(rawHour?.trim() ?? '', 10);
+    if (Number.isInteger(parsed) && parsed >= 0 && parsed <= 23) {
+      return parsed;
+    }
+    return DEFAULT_DUTY_CHANGE_HOUR;
   }
 
   private getYearFromISODate(date: string) {

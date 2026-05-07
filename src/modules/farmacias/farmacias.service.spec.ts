@@ -32,6 +32,13 @@ describe('FarmaciasService', () => {
     logActivity: jest.MockedFunction<(params: unknown) => Promise<void>>;
   };
 
+  const getWhereDateFromFindOneCall = (callIndex: number) => {
+    const options = dutyRepo.findOne.mock.calls[callIndex]?.[0] as
+      | { where?: { date?: string } }
+      | undefined;
+    return options?.where?.date;
+  };
+
   type QueryBuilderMock = {
     leftJoinAndSelect: jest.MockedFunction<
       (
@@ -233,9 +240,9 @@ describe('FarmaciasService', () => {
     }
   });
 
-  it('getCalendar usa la fecha de Argentina para hoy/manana/pasado', async () => {
+  it('getCalendar usa fecha operativa de turno con corte a las 08:00', async () => {
     jest.useFakeTimers();
-    jest.setSystemTime(new Date('2026-02-10T01:30:00.000Z'));
+    jest.setSystemTime(new Date('2026-02-10T10:30:00.000Z'));
     dutyRepo.findOne.mockResolvedValue(null);
 
     try {
@@ -246,6 +253,32 @@ describe('FarmaciasService', () => {
       );
 
       expect(queriedDates).toEqual(['2026-02-09', '2026-02-10', '2026-02-11']);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('getDutyToday devuelve turno del dia anterior si se consulta antes de las 08:00', async () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-02-10T08:30:00.000Z'));
+    dutyRepo.findOne.mockResolvedValue(null);
+
+    try {
+      await service.getDutyToday();
+      expect(getWhereDateFromFindOneCall(0)).toBe('2026-02-09');
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('getDutyToday devuelve turno del dia actual desde las 08:00', async () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-02-10T11:30:00.000Z'));
+    dutyRepo.findOne.mockResolvedValue(null);
+
+    try {
+      await service.getDutyToday();
+      expect(getWhereDateFromFindOneCall(0)).toBe('2026-02-10');
     } finally {
       jest.useRealTimers();
     }
