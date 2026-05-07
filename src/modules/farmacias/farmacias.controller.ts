@@ -177,7 +177,7 @@ export class FarmaciasController {
     @Query() query: DutyByPharmacyQueryDto,
   ) {
     const code = params.code.trim().toUpperCase();
-    const from = query.from || this.service.getCurrentCalendarDateISO();
+    const from = query.from || this.service.getCurrentDutyDateISO();
     const limit = query.limit ?? 20;
 
     const rows = await this.service.getDutyByPharmacy(code, from, limit);
