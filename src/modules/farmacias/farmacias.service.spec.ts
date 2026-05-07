@@ -32,6 +32,13 @@ describe('FarmaciasService', () => {
     logActivity: jest.MockedFunction<(params: unknown) => Promise<void>>;
   };
 
+  const getWhereDateFromFindOneCall = (callIndex: number) => {
+    const options = dutyRepo.findOne.mock.calls[callIndex]?.[0] as
+      | { where?: { date?: string } }
+      | undefined;
+    return options?.where?.date;
+  };
+
   type QueryBuilderMock = {
     leftJoinAndSelect: jest.MockedFunction<
       (
@@ -258,11 +265,7 @@ describe('FarmaciasService', () => {
 
     try {
       await service.getDutyToday();
-      expect(dutyRepo.findOne).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: expect.objectContaining({ date: '2026-02-09' }),
-        }),
-      );
+      expect(getWhereDateFromFindOneCall(0)).toBe('2026-02-09');
     } finally {
       jest.useRealTimers();
     }
@@ -275,11 +278,7 @@ describe('FarmaciasService', () => {
 
     try {
       await service.getDutyToday();
-      expect(dutyRepo.findOne).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: expect.objectContaining({ date: '2026-02-10' }),
-        }),
-      );
+      expect(getWhereDateFromFindOneCall(0)).toBe('2026-02-10');
     } finally {
       jest.useRealTimers();
     }

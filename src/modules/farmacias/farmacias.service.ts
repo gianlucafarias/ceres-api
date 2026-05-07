@@ -178,7 +178,10 @@ export class FarmaciasService {
   getCurrentDutyDateISO() {
     const now = new Date();
     const hour = this.getHourInTimeZone(now, this.calendarTimeZone);
-    const baseDateISO = this.toISODateOnlyInTimeZone(now, this.calendarTimeZone);
+    const baseDateISO = this.toISODateOnlyInTimeZone(
+      now,
+      this.calendarTimeZone,
+    );
 
     if (hour < this.dutyChangeHour) {
       return this.addDaysToISODate(baseDateISO, -1);
